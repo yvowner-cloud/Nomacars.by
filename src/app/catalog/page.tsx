@@ -4,7 +4,7 @@ import { activeLots } from "@/lib/lots";
 
 export const metadata: Metadata = {
   title: "Каталог лотов Copart и IAAI",
-  description: "Еженедельная ИИ-подборка проходных автомобилей 3–5 лет с аукционов США с минимальными повреждениями.",
+  description: "Еженедельная подборка Nomacars: проходные автомобилей 3–5 лет с аукционов США с минимальными повреждениями.",
 };
 
 export default async function CatalogPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -15,7 +15,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
     <section className="sec">
       <div className="wrap">
         <div className="sec-h">
-          <div><div className="eyebrow">Подборка ИИ · обновляется еженедельно</div><h1 style={{ fontSize: "clamp(24px,3.4vw,34px)" }}>Каталог лотов Copart и IAAI</h1></div>
+          <div><div className="eyebrow">Подборка Nomacars · обновляется еженедельно</div><h1 style={{ fontSize: "clamp(24px,3.4vw,34px)" }}>Каталог лотов Copart и IAAI</h1></div>
         </div>
         <CatalogView key={key} lots={activeLots()} initial={initial} />
       </div>

@@ -103,7 +103,7 @@ export function LotTabs({ ai, specs }: { ai: React.ReactNode; specs: React.React
   return (
     <div>
       <div className="tabs" role="tablist">
-        <button role="tab" aria-selected={t === "ai"} onClick={() => setT("ai")}>Разбор ИИ</button>
+        <button role="tab" aria-selected={t === "ai"} onClick={() => setT("ai")}>Разбор Nomacars</button>
         <button role="tab" aria-selected={t === "specs"} onClick={() => setT("specs")}>Характеристики</button>
       </div>
       <div className="panel" style={{ borderTop: 0, borderRadius: "0 0 4px 4px" }}>{t === "ai" ? ai : specs}</div>
