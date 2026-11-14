@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nomacars — авто из США под ключ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap">
+<style>
+/* Layout: аукционная площадка — тёмная шапка, плотная сетка лотов, панель фильтров слева; кабинеты — вкладки + таблицы */
+/* Стиль по образцу NPA: чёрная верхняя полоса, серое меню, тёмно-красный акцент, Oswald + Arial. Светлая тема — единственная, осознанно. */
+:root{ color-scheme:light;
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface2:#F4F4F4; --ink:#1B1B1B; --muted:#666666; --line:#D6D6D6;
+  --accent:#A8191E; --accent-ink:#FFFFFF; --accent-soft:#F7E4E5;
+  --head:#000000; --head-ink:#FFFFFF; --head-muted:#8D8D8D;
+  --top:#F0B400; --top-ink:#231900;
+  --good:#217A37; --good-soft:#E3F2E7; --warn:#94590A; --warn-soft:#FBF1DC; --bad:#C0392B; --bad-soft:#FBE6E3;
+  --yard1:#E1E4E8; --yard2:#CDD2D8; --tire:#1B1F26; --rim:#A3ACB8; --glass:#26313F;
+  --red:#A8191E; --red-hi:#C41F25; --red-dark:#861317; --black:#000000; --nav:#4A4A4A; --nav-dark:#3C3C3C;
+  --mega-head:#565656; --panel:#EBEBEB; --row:#F4F4F4; --band:#E3E3E3; --band-ink:#5E5E5E;
+  --f-display:"Oswald","Arial Narrow",sans-serif; --f-head:"Oswald","Arial Narrow",sans-serif;
+  --f-body:Arial,"Helvetica Neue",Helvetica,sans-serif;
+  --f-mono:"Roboto Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:3px;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--head)}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;text-transform:uppercase;line-height:1.12;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,4.4vw,44px)} h2{font-size:clamp(20px,2.6vw,26px)} h3{font-size:18px}
+a{color:var(--accent)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.02em}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.eyebrow{font-family:var(--f-head);font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--red)}
+
+/* demo bar */
+.demo{background:var(--accent-soft);border-bottom:1px solid var(--line);font-size:13px}
+.demo .wrap{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding-block:7px}
+.demo b{font-weight:700}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--surface);overflow:hidden}
+.seg button{border:0;background:none;padding:4px 12px;cursor:pointer;font-weight:600;font-size:13px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;border:1px solid transparent;padding:10px 16px;font-weight:700;cursor:pointer;text-decoration:none;font-size:14px;line-height:1.2}
+.btn-p{background:var(--accent);color:var(--accent-ink)}
+.btn-p:hover{filter:brightness(1.08)}
+.btn-g{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.btn-g:hover{border-color:var(--muted)}
+.btn-top{background:var(--top);color:var(--top-ink)}
+.btn-s{padding:6px 11px;font-size:13px}
+.btn-block{width:100%}
+.head .btn-g{background:transparent;color:var(--head-ink);border-color:#2A3545}
+
+/* sections */
+main{min-height:60vh}
+.sec{padding-block:34px}
+.sec-h{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+
+/* grid / cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent)}
+.ph{position:relative;aspect-ratio:16/10;background:var(--yard1);max-width:100%}
+.ph svg{display:block;width:100%;height:100%}
+.ph .badges{position:absolute;left:8px;top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.ph .lotno{position:absolute;right:8px;bottom:8px;background:rgba(10,14,20,.72);color:#fff;border-radius:5px;padding:2px 6px}
+.fav{position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(10,14,20,.6);color:#fff;cursor:pointer;display:grid;place-items:center;font-size:16px}
+.fav[aria-pressed="true"]{background:var(--bad);}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:5px;letter-spacing:.02em;white-space:nowrap}
+.b-top{background:var(--top);color:var(--top-ink)}
+.b-sold{background:var(--good);color:#fff}
+.b-end{background:#59636F;color:#fff}
+.b-new{background:var(--accent);color:var(--accent-ink)}
+.cbody{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1}
+.ctitle{font-weight:800;font-size:15.5px;line-height:1.25}
+.specs{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:13px;color:var(--muted)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;padding:3px 8px;border-radius:999px}
+.c-light{background:var(--good-soft);color:var(--good)}
+.c-mid{background:var(--warn-soft);color:var(--warn)}
+.cfoot{margin-top:auto;display:flex;justify-content:space-between;align-items:end;gap:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.price-l{font-size:11.5px;color:var(--muted);font-weight:600}
+.price{font-family:var(--f-display);font-weight:700;font-size:18px}
+.lock{display:flex;flex-direction:column;gap:2px}
+.blur{filter:blur(6px);user-select:none;font-family:var(--f-display);font-weight:700;font-size:18px}
+.lock-cta{font-size:12.5px;font-weight:700;color:var(--accent);background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.when{font-size:12.5px;text-align:right;color:var(--muted)}
+.when b{display:block;color:var(--ink);font-size:13px}
+
+/* lot page */
+.lot{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start}
+.lot>*{min-width:0}
+.gal-main{border-radius:var(--r);overflow:hidden;border:1px solid var(--line)}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.thumbs button{padding:0;border:2px solid transparent;border-radius:8px;overflow:hidden;cursor:pointer;background:none}
+.thumbs button[aria-pressed="true"]{border-color:var(--accent)}
+.thumbs span{display:block;font-size:11px;padding:3px;color:var(--muted);background:var(--surface)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;font-size:14px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;font-weight:600;text-align:right}
+.box{padding:18px;display:grid;gap:14px}
+.calc-lines{display:grid;gap:0}
+.cl{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cl small{display:block;color:var(--muted);font-size:12px}
+.cl .v{font-weight:700;white-space:nowrap}
+.cl.total{border-bottom:0;padding-top:12px;align-items:baseline}
+.cl.total .v{font-family:var(--f-display);font-size:22px}
+.note{font-size:12.5px;color:var(--muted)}
+.ai{padding:18px;display:grid;gap:14px}
+.ai-h{display:flex;align-items:center;gap:10px}
+.ai-dot{width:28px;height:28px;border-radius:7px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:800;font-size:12px;font-family:var(--f-mono)}
+.ai ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.lot{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;counter-reset:s}
+.step{padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.step::before{counter-increment:s;content:counter(s);font-family:var(--f-mono);font-size:12px;color:var(--accent);font-weight:700}
+.step b{display:block;margin:4px 0 3px}
+.step span{font-size:13px;color:var(--muted)}
+@media (max-width:980px){.steps{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.steps{grid-template-columns:1fr 1fr}}
+
+details.faq{border-bottom:1px solid var(--line);padding:12px 0}
+details.faq summary{cursor:pointer;font-weight:700}
+details.faq p{margin:8px 0 0;color:var(--muted);max-width:70ch}
+
+/* cabinet */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto;margin-bottom:18px}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.track{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:14px 0 6px}
+.track div{height:6px;border-radius:3px;background:var(--line)}
+.track div.done{background:var(--good)} .track div.cur{background:var(--accent)}
+.track-l{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);gap:8px;flex-wrap:wrap}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface2);font-weight:700}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right}
+.pos{color:var(--good);font-weight:700} .neg{color:var(--bad);font-weight:700}
+.sw{position:relative;width:40px;height:22px;display:inline-block}
+.sw input{opacity:0;width:100%;height:100%;margin:0;position:absolute;cursor:pointer;z-index:1}
+.sw i{position:absolute;inset:0;background:var(--line);border-radius:999px;transition:.15s}
+.sw i::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}
+.sw input:checked+i{background:var(--good)} .sw input:checked+i::after{left:21px}
+.sw input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.kpi{padding:14px 16px}
+.kpi b{display:block;font-family:var(--f-display);font-size:24px}
+.kpi span{font-size:13px;color:var(--muted)}
+@media (max-width:760px){.kpis{grid-template-columns:1fr 1fr}}
+.log{font-family:var(--f-mono);font-size:12.5px;background:var(--head);color:#C9D3E0;border-radius:var(--r);padding:14px;display:grid;gap:3px;max-height:260px;overflow:auto}
+.log .ok{color:#6FD39A}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.form-grid label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.stat{display:inline-flex;font-size:12px;font-weight:800;padding:3px 8px;border-radius:5px;background:var(--accent-soft);color:var(--accent)}
+.stat.paid{background:var(--good-soft);color:var(--good)} .stat.wait{background:var(--warn-soft);color:var(--warn)} .stat.ref{background:var(--bad-soft);color:var(--bad)}
+.lead{padding:16px;display:grid;gap:10px}
+.lead-h{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.mini{width:84px;flex:none;border-radius:6px;overflow:hidden;aspect-ratio:16/10}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.row>*{min-width:0}
+
+/* modal + toast */
+.modal-bg{position:fixed;inset:0;background:rgba(5,8,12,.6);z-index:80;display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border-radius:14px;width:min(430px,100%);padding:22px;display:grid;gap:14px;border:1px solid var(--line)}
+.modal label{display:grid;gap:5px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.x{justify-self:end;border:0;background:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1;margin:-8px -6px -10px 0}
+.hint{font-size:12.5px;background:var(--warn-soft);color:var(--warn);padding:7px 10px;border-radius:7px;font-weight:600}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--head);color:#fff;padding:11px 18px;border-radius:9px;z-index:90;font-weight:600;font-size:14px;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:calc(100% - 32px)}
+
+.empty{padding:34px 20px;text-align:center;color:var(--muted);display:grid;gap:10px;justify-items:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.chev { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.chev li, .chev a { position: relative; }
+.chev li { padding-left: 16px; }
+.chev li.plain { padding-left: 0; }
+.chev li.plain::before { display: none; }
+.chev li::before { content: ""; position: absolute; left: 0; top: .42em; width: 6px; height: 6px; border-top: 2.5px solid var(--red-hi); border-right: 2.5px solid var(--red-hi); transform: rotate(45deg); }
+
+/* ---------- шапка ---------- */
+.top { background: var(--black); }
+.top .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; min-height: 80px; flex-wrap: wrap; padding-block: 8px; }
+.top-links { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; font-family: var(--f-head); text-transform: uppercase; font-size: 14px; color: #8d8d8d; }
+.top-links a, .top-links span { color: #8d8d8d; text-decoration: none; }
+.top-links a:hover { color: #fff; }
+.cty { display: inline-flex; border: 1px solid #3a3a3a; }
+.cty button { background: none; border: 0; padding: 2px 9px; color: #8d8d8d; cursor: pointer; font-family: var(--f-head); font-size: 14px; }
+.cty button[aria-pressed="true"] { background: var(--red); color: #fff; }
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+.logo-small { font-family: var(--f-head); font-weight: 700; color: #fff; font-size: 13px; line-height: 1; text-transform: uppercase; text-align: right; }
+.logo-big { font-family: var(--f-head); font-weight: 700; color: var(--red-hi); font-size: 42px; line-height: .9; letter-spacing: -.01em; }
+.nav { background: var(--nav); position: sticky; top: 0; z-index: 40; }
+.nav-in { display: flex; align-items: stretch; overflow-x: auto; scrollbar-width: none; }
+.nav-in a, .nav-in button { color: #fff; text-decoration: none; background: none; border: 0; cursor: pointer; font-family: var(--f-head); text-transform: uppercase; font-size: 19px; padding: 0 14px; height: 62px; display: flex; align-items: center; white-space: nowrap; }
+.nav-in a:hover, .nav-in button:hover, .nav-in [aria-current="page"], .nav-in [aria-expanded="true"] { background: var(--red); }
+.nav-home svg { width: 21px; height: 21px; fill: #fff; }
+.mega { position: absolute; left: 0; right: 0; top: 100%; border-top: 7px solid var(--red); background: var(--panel); box-shadow: 0 10px 22px rgba(0,0,0,.25); }
+.mega-cols { display: grid; grid-template-columns: repeat(4, 1fr); }
+.mega-col { border-right: 1px solid #b9b9b9; }
+.mega-col:last-child { border-right: 0; }
+.mega-col h3 { background: var(--mega-head); color: #fff; padding: 12px 18px; font-size: 21px; }
+.mega-col .chev { padding: 14px 18px 18px; gap: 8px; }
+.mega-col a { color: #333; text-decoration: none; font-family: var(--f-head); font-size: 15px; }
+.mega-col a:hover { color: var(--red); }
+.mega-col hr { border: 0; border-top: 1px solid #9a9a9a; margin: 6px 0; }
+.reg-badge { display: grid; place-items: center; width: 86px; height: 86px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #e0353b, var(--red) 60%, var(--red-dark)); color: #fff; font-family: var(--f-head); text-transform: uppercase; text-align: center; font-size: 14px; line-height: 1.05; border: 0; cursor: pointer; margin: 0 0 6px 4px; box-shadow: 0 3px 6px rgba(0,0,0,.3); }
+@media (max-width: 860px) { .mega-cols { grid-template-columns: 1fr 1fr; } .mega-col:nth-child(2) { border-right: 0; } }
+@media (max-width: 520px) { .mega-cols { grid-template-columns: 1fr; } .mega-col { border-right: 0; } .logo-big { font-size: 34px; } .nav-in a, .nav-in button { font-size: 17px; height: 52px; padding: 0 11px; } }
+
+.slider { position: relative; height: 430px; overflow: hidden; background: #2b2f35; }
+.slide { position: absolute; inset: 0; opacity: 0; transition: opacity .6s; }
+.slide.on { opacity: 1; }
+.slide-yard { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); align-content: end; gap: 0 10px; padding: 0 10px 30px; background: linear-gradient(#9fb4c7 0, #c7d2dc 45%, #b9bfc6 45.2%, #9ea5ad 100%); }
+.slide-yard svg { width: 100%; height: auto; display: block; }
+.slide-box { position: absolute; left: max(16px, calc(50% - 560px + 110px)); top: 50%; transform: translateY(-50%); background: rgba(150, 18, 22, .93); color: #fff; padding: 22px 26px; max-width: min(430px, calc(100% - 32px)); }
+.slide-box h1 { font-size: clamp(32px, 5vw, 54px); line-height: 1.02; }
+.slide-box p { margin: 10px 0 0; color: #f6d5d6; font-size: 14.5px; }
+.dots { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center; gap: 6px; }
+.dots button { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid #fff; background: transparent; padding: 0; cursor: pointer; }
+.dots button[aria-pressed="true"] { background: #fff; }
+@media (max-width: 700px) { .slider { height: 360px; } .slide-yard { grid-template-columns: repeat(2, 1fr); } .slide-yard > :nth-child(n+3) { display: none; } .slide-box { top: 18px; transform: none; } }
+.tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px 60px; padding-block: 16px 30px; }
+.tile { text-align: center; text-decoration: none; color: inherit; display: grid; gap: 8px; }
+.tile > b { font-family: var(--f-head); font-weight: 400; font-size: 20px; color: #444; }
+.tile-card { border-radius: 4px; padding: 12px 10px 0; display: grid; gap: 6px; color: #fff; }
+.tile-card u { font-weight: 700; font-size: 15.5px; }
+.tile-card svg { display: block; width: 100%; height: auto; }
+.tile:hover .tile-card { filter: brightness(1.08); }
+@media (max-width: 900px) { .tiles { grid-template-columns: 1fr 1fr; gap: 20px; } }
+.cal { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0; border: 1px solid var(--line); }
+.cal a { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; align-items: center; text-decoration: none; color: inherit; padding: 12px 14px; background: var(--row); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.cal a:hover { background: #fff; }
+.cal .d { grid-row: span 2; text-align: center; font-family: var(--f-head); line-height: 1; color: var(--red); }
+.cal .d b { display: block; font-size: 30px; font-weight: 500; }
+.cal .d span { font-size: 13px; text-transform: uppercase; }
+.cal strong { font-family: var(--f-head); text-transform: uppercase; font-weight: 500; font-size: 17px; }
+.band { background: var(--band); }
+.band .wrap { padding-block: 44px; }
+.band h2 { font-size: clamp(34px, 6vw, 72px); color: var(--band-ink); font-weight: 400; line-height: 1.08; }
+.band p { color: var(--band-ink); margin: 14px 0 0; font-size: 16px; max-width: 70ch; }
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; counter-reset: s; border: 1px solid var(--line); }
+.step { padding: 14px; border-right: 1px solid var(--line); background: var(--row); }
+.step:last-child { border-right: 0; }
+.step::before { counter-increment: s; content: counter(s); display: inline-grid; place-items: center; width: 28px; height: 28px; background: var(--red); color: #fff; font-family: var(--f-head); font-size: 15px; }
+.step b { display: block; margin: 8px 0 2px; font-family: var(--f-head); text-transform: uppercase; font-weight: 500; font-size: 16px; }
+.step span { font-size: 13px; color: var(--muted); }
+@media (max-width: 980px) { .steps { grid-template-columns: repeat(3, 1fr); } .step:nth-child(3) { border-right: 0; } .step:nth-child(-n+3) { border-bottom: 1px solid var(--line); } }
+@media (max-width: 520px) { .steps { grid-template-columns: 1fr 1fr; } .step { border-right: 1px solid var(--line) !important; border-bottom: 1px solid var(--line); } .step:nth-child(2n) { border-right: 0 !important; } }
+details.faq { border-bottom: 1px solid var(--line); padding: 11px 0; }
+details.faq summary { cursor: pointer; font-weight: 700; }
+details.faq p { margin: 8px 0 0; color: var(--muted); max-width: 70ch; }
+
+/* ---------- каталог (как «Global Search») ---------- */
+.cat { display: grid; grid-template-columns: 285px 1fr; gap: 10px; align-items: start; }
+.cat > * { min-width: 0; }
+.gs { background: var(--panel); padding: 12px 6px 14px; }
+.gs-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 2px 10px; }
+.gs-h h2 { font-size: 21px; color: #333; white-space: nowrap; }
+.gs-row { display: grid; grid-template-columns: 52px 1fr; gap: 6px; align-items: center; margin-bottom: 7px; font-size: 12px; color: #444; }
+.gs-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.field { width: 100%; border: 1px solid #c4c4c4; background: #fff; border-radius: 2px; padding: 8px 10px; font-size: 13.5px; min-width: 0; }
+.gs-chk { display: flex; align-items: center; gap: 0; margin: 0 0 8px 58px; cursor: pointer; font-size: 12px; color: #666; }
+.gs-chk input { appearance: none; width: 27px; height: 27px; margin: 0; background: var(--red); display: grid; place-items: center; cursor: pointer; border-radius: 2px 0 0 2px; }
+.gs-chk input::after { content: ""; width: 7px; height: 12px; border-right: 2.5px solid transparent; border-bottom: 2.5px solid transparent; transform: rotate(45deg) translate(-1px, -1px); }
+.gs-chk input:checked::after { border-color: #fff; }
+.gs-chk input:not(:checked) { background: #fff; border: 1px solid #c4c4c4; }
+.gs-chk span { background: #fff; border: 1px solid #d0d0d0; border-left: 0; padding: 5px 8px; line-height: 15px; }
+.gs-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0 0 58px; }
+.res-top { display: grid; gap: 10px; margin-bottom: 8px; }
+.pager { display: flex; justify-content: center; flex-wrap: wrap; }
+.pager button { min-width: 32px; height: 32px; border: 1px solid #ddd; background: #fff; color: var(--red); cursor: pointer; margin-left: -1px; font-size: 13px; padding: 0 9px; }
+.pager button:first-child { border-radius: 4px 0 0 4px; } .pager button:last-child { border-radius: 0 4px 4px 0; }
+.pager button[aria-current="page"] { background: var(--red); color: #fff; border-color: var(--red); }
+.pager button:disabled { color: #aaa; cursor: default; }
+.res-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px; color: #444; }
+.res-bar .row { display: flex; align-items: center; gap: 6px; }
+.res-bar select { border: 1px solid #999; padding: 1px 2px; font-size: 12px; background: #fff; }
+.view-sw button { border: 1px solid #bbb; background: #fff; padding: 3px 9px; cursor: pointer; font-size: 12px; }
+.view-sw button[aria-pressed="true"] { background: var(--nav); color: #fff; border-color: var(--nav); }
+.rows { border-top: 1px solid #4a4a4a; }
+.lrow { display: grid; grid-template-columns: 110px 1fr auto; gap: 16px; padding: 16px 0 18px; background: var(--row); border-bottom: 1px solid #4a4a4a; color: inherit; text-decoration: none; align-items: start; }
+.lrow:hover { background: #fff; }
+.lrow .thumb { width: 110px; aspect-ratio: 16 / 11; display: block; }
+.lrow .thumb svg { width: 100%; height: 100%; display: block; }
+.lrow-t { font-weight: 700; text-transform: uppercase; font-size: 12.5px; }
+.lrow-m { font-size: 12px; color: #555; display: flex; flex-wrap: wrap; gap: 2px 20px; margin-top: 2px; }
+.lrow-m b { color: #222; }
+.lrow-r { text-align: right; padding-right: 12px; display: grid; gap: 4px; justify-items: end; }
+.fl-toggle { display: none; }
+@media (max-width: 880px) { .cat { grid-template-columns: 1fr; } .gs.closed { display: none; } .fl-toggle { display: inline-flex; } }
+@media (max-width: 560px) { .lrow { grid-template-columns: 96px 1fr; } .lrow .thumb { width: 96px; } .lrow-r { grid-column: 1 / -1; justify-items: start; text-align: left; padding: 0 12px; display: flex; justify-content: space-between; } }
+.empty { padding: 34px 20px; text-align: center; color: var(--muted); display: grid; gap: 10px; justify-items: center; }
+.to-top { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: 38px; height: 38px; background: var(--black); border: 2px solid var(--red-hi); color: var(--red-hi); font-size: 20px; cursor: pointer; z-index: 30; display: grid; place-items: center; }
+
+/* ---------- подвал ---------- */
+footer { background: var(--black); color: #ddd; margin-top: 30px; }
+.foot { display: grid; grid-template-columns: 1.4fr .8fr 1.1fr .9fr; gap: 30px; padding-block: 30px 34px; }
+.foot h3 { color: #fff; font-size: 18px; margin-bottom: 14px; }
+.foot p { font-size: 12.5px; margin: 0; line-height: 1.4; }
+.foot .chev a, .foot .chev span { color: #fff; text-decoration: none; font-family: var(--f-head); font-size: 15px; }
+.foot .chev a:hover { color: var(--red-hi); }
+.legal { background: #111; }
+.legal .wrap { display: flex; justify-content: space-between; align-items: stretch; gap: 16px; flex-wrap: wrap; }
+.legal-t { padding-block: 16px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #ccc; line-height: 1.5; }
+.legal-t a { color: #ccc; text-decoration: none; }
+.soc { display: flex; }
+.soc a { width: 70px; display: grid; place-items: center; background: #2a2a2a; border-left: 1px solid #111; color: #999; text-decoration: none; font-weight: 700; font-size: 13px; min-height: 56px; }
+.soc a:hover { color: #fff; background: #333; }
+@media (max-width: 900px) { .foot { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .foot { grid-template-columns: 1fr; } }
+
+/* поверх старых стилей демо */
+.btn{border-radius:3px;font-family:var(--f-body);text-transform:uppercase;font-size:13px;letter-spacing:.02em}
+.btn-top{background:var(--red);color:#fff}.btn-top:hover{background:var(--red-hi)}
+.btn-p:hover{filter:none;background:var(--red-hi)}
+.sec-h>a:not(.btn){color:var(--red);font-weight:700;text-decoration:none;text-transform:uppercase;font-size:13px}
+.card{border-radius:0;background:var(--row)}.card:hover{border-color:#8a8a8a;background:#fff}
+.ctitle{text-transform:uppercase;font-size:13.5px;font-weight:700}
+.price{font-family:var(--f-head);font-weight:500;font-size:21px}
+.panel{border-radius:0}.tabs button[aria-selected="true"]{border-bottom-color:var(--red)}
+.lrow-r .fav{right:0;top:0}
+.lrow .chip{font-size:11.5px}
+.demo{background:#FFF4D6;border-bottom:1px solid #E8D59B}
+.demo .seg button[aria-pressed="true"]{background:var(--red);color:#fff}
+.seg button[aria-pressed="true"]{background:var(--nav);color:#fff}
+.sw input:checked+i{background:var(--red)}
+.ai-dot{background:var(--red);color:#fff;font-family:var(--f-head)}
+.step{border-radius:0;background:var(--row)}.step::before{color:#fff;background:var(--red);display:inline-grid;place-items:center;width:26px;height:26px;font-size:14px}
+.when b{font-family:var(--f-head);font-weight:500;font-size:15px}
+
+html,body{margin:0}[hidden]{display:none!important}img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="demo"><div class="wrap">
+  <b>Демо-версия сайта Nomacars.</b>
+  <span>Смотреть как:</span>
+  <span class="seg" id="roleSeg">
+    <button data-act="role" data-v="guest">Гость</button>
+    <button data-act="role" data-v="client">Клиент</button>
+    <button data-act="role" data-v="owner">Владелец</button>
+  </span>
+  <button class="btn btn-g btn-s" data-act="reset">Сбросить демо</button>
+</div></div>
+
+<div class="top"><div class="wrap">
+  <div class="top-links">
+    <span class="cty" id="ctySeg" role="group" aria-label="Страна доставки"><button data-act="country" data-v="by">Беларусь</button><button data-act="country" data-v="ru">Россия</button></span>
+    <a href="#home-how">Доставка</a><a href="#calc">Растаможка</a><span class="num" id="topPhone"></span>
+  </div>
+  <a class="logo" href="#home" aria-label="На главную"><span class="logo-small">Авто<br>с аукционов<br>США</span><span class="logo-big" id="brandName">NOMACARS</span></a>
+</div></div>
+<nav class="nav" id="nav" aria-label="Основное меню">
+  <div class="wrap nav-in">
+    <a href="#home" class="nav-home" aria-label="Главная" data-r="home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z"/></svg></a>
+    <span id="authNav" style="display:contents"></span>
+    <button data-act="mega" id="megaBtn" aria-expanded="false" aria-haspopup="true">Купить</button>
+    <a href="#catalog" data-r="catalog">Поиск</a><a href="#calc" data-r="calc">Калькулятор</a><a href="#sold" data-r="sold">Цены выкупа</a><a href="#home-how">Как купить</a><a href="#contacts">Контакты</a>
+  </div>
+  <div id="mega"></div>
+</nav>
+
+<main id="view"></main>
+
+<footer id="contacts">
+  <div class="wrap foot">
+    <div><h3>О компании</h3><p id="fAbout"></p></div>
+    <div><h3>Разделы</h3><ul class="chev"><li><a href="#home">Главная</a></li><li><a href="#catalog">Каталог</a></li><li><a href="#catalog" data-act="preset" data-k="top" data-v="1">Топ недели</a></li><li><a href="#sold">Цены выкупа</a></li><li><a href="#calc">Калькулятор</a></li><li><a href="#home-how">Как купить</a></li><li><a href="#cabinet">Личный кабинет</a></li></ul></div>
+    <div><h3>Ближайшие торги</h3><ul class="chev" id="fUp"></ul></div>
+    <div><h3>Контакты</h3><ul class="chev" id="fContacts"></ul></div>
+  </div>
+  <div class="legal"><div class="wrap"><div class="legal-t" id="fLegal"></div>
+    <div class="soc" aria-label="Мы в соцсетях"><a href="#contacts">TG</a><a href="#contacts">IG</a><a href="#contacts">YT</a><a href="#contacts">WA</a></div></div></div>
+</footer>
+<button class="to-top" id="toTop" data-act="toTop" aria-label="Наверх" hidden>▲</button>
+
+<div id="modalRoot"></div>
+
+<script>
+/* ============ ДАННЫЕ ============ */
+const STATES={NJ:["Нью-Джерси","Ньюарк"],GA:["Джорджия","Саванна"],TX:["Техас","Хьюстон"],FL:["Флорида","Джексонвилл"],CA:["Калифорния","Лос-Анджелес"],IL:["Иллинойс","Ньюарк (ж/д)"]};
+const ZONE={
+ front:{plain:"Удар пришёлся в передний бампер и фару. По фото радиатор и лонжероны целые, подушки безопасности не сработали. Это кузовной ремонт без силовой части.",
+        risks:["Могут быть скрытые повреждения кронштейнов и датчиков за бампером","Оригинальная фара заметно дороже аналога"]},
+ rear:{plain:"Деформированы задний бампер и крышка багажника. Задние лонжероны и пол багажника по фото не затронуты: типичный удар в пробке.",
+        risks:["Проверить парктроники и камеру заднего вида","Возможна замена фонаря"]},
+ side:{plain:"Вмятины и царапины на боковых панелях. Стойки и пороги целые, двери открываются. Нужны рихтовка и покраска.",
+        risks:["Окрас двух и более элементов немного снижает цену при перепродаже"]},
+ hail:{plain:"Следы града на капоте и крыше. Стёкла целые, конструкция кузова не пострадала. Убирается беспокрасочным удалением вмятин.",
+        risks:["Крышу с большим количеством вмятин иногда выгоднее красить"]}
+};
+// id, марка, модель, комплектация, год, месяц выпуска, кузов, топливо, см3, л.с., миль, повреждение, зона, уровень, ставка $, аукцион, штат, балл ИИ, ремонт $, рынок РБ $, рынок РФ $, смещение торгов (дней от сегодня), цвет, топ
+const RAW=[
+ [1,"Toyota","RAV4","XLE",2022,6,"suv","Бензин",2487,203,38200,"Передний бампер, фара","front","light",14800,"Copart","NJ",94,[900,1400],31500,36500,3,"#B8BEC6",1],
+ [2,"Hyundai","Tucson","SEL",2023,3,"suv","Бензин",2497,187,21400,"Задний бампер, дверь багажника","rear","light",12600,"IAAI","GA",91,[800,1300],27900,31800,4,"#2E3E57",0],
+ [3,"Kia","Sportage","LX",2023,5,"suv","Бензин",2497,187,18900,"Левое крыло, дверь","side","light",13900,"Copart","TX",89,[700,1100],28400,32500,5,"#7A2E2A",0],
+ [4,"Honda","CR-V","EX",2022,8,"suv","Бензин",1498,190,41000,"Передняя часть","front","mid",13200,"Copart","FL",87,[1400,2200],29800,34200,6,"#E8E9EB",0],
+ [5,"Toyota","Camry","SE",2023,2,"sedan","Бензин",2487,203,29800,"Задний бампер","rear","light",12400,"IAAI","CA",92,[600,1000],29200,33900,3,"#1C1F24",1],
+ [6,"Volkswagen","Tiguan","SE",2022,7,"suv","Бензин",1984,184,36500,"Правая сторона","side","mid",10900,"Copart","NJ",84,[1300,2000],25600,29700,7,"#5B6470",0],
+ [7,"Mazda","CX-5","Touring",2023,4,"suv","Бензин",2488,187,24100,"Передний бампер","front","light",13500,"IAAI","IL",90,[700,1200],29900,33600,5,"#9E1B22",1],
+ [8,"Nissan","Rogue","SV",2022,9,"suv","Бензин",1497,201,33700,"Град: капот и крыша","hail","light",9800,"Copart","TX",82,[600,1100],23800,27400,8,"#3D5A80",0],
+ [9,"Chevrolet","Equinox","LT",2023,1,"suv","Бензин",1490,175,27300,"Задняя часть","rear","mid",9200,"Copart","GA",80,[1200,1900],22400,25900,9,"#D9DCE0",0],
+ [10,"BMW","X3","xDrive30i",2022,5,"suv","Бензин",1998,248,34900,"Передняя часть","front","mid",18700,"IAAI","FL",86,[2200,3400],43500,52000,6,"#14243F",0],
+ [11,"Audi","Q5","Premium",2022,10,"suv","Бензин",1984,261,30200,"Левая сторона","side","mid",19500,"Copart","CA",83,[1900,2900],44200,53400,10,"#8D9299",0],
+ [12,"Mercedes-Benz","GLC","300 4MATIC",2022,6,"suv","Бензин",1991,255,28600,"Задний бампер","rear","light",22400,"IAAI","NJ",85,[900,1500],49800,58900,4,"#F2F2F0",1],
+ [13,"Hyundai","Elantra","SEL",2023,6,"sedan","Бензин",1999,147,19800,"Передний бампер","front","light",8900,"Copart","FL",93,[500,900],19900,22600,2,"#4A6B8A",1],
+ [14,"Kia","K5","LXS",2023,3,"sedan","Бензин",1598,180,22500,"Правое крыло","side","light",11300,"IAAI","TX",88,[600,1000],25300,29100,5,"#B1B6BC",0],
+ [15,"Tesla","Model 3","RWD",2023,1,"sedan","Электро",0,283,26700,"Задняя часть","rear","mid",16900,"Copart","CA",87,[1500,2400],30500,35800,7,"#C8102E",0],
+ [16,"Toyota","Corolla","LE",2023,7,"sedan","Бензин",1798,139,17600,"Задняя дверь","side","light",9600,"Copart","IL",91,[500,800],21400,23800,3,"#EDEDED",1],
+ [17,"Toyota","RAV4 Hybrid","XLE",2022,9,"suv","Гибрид",2487,219,32400,"Переднее крыло","front","light",17250,"Copart","NJ",92,[700,1200],35400,40100,-8,"#6E7D8C",0],
+ [18,"Hyundai","Santa Fe","SEL",2022,8,"suv","Бензин",2497,191,35100,"Задний бампер","rear","light",14100,"IAAI","GA",88,[700,1100],31600,36300,-6,"#2B2F36",0],
+ [19,"Honda","Accord","Sport",2023,4,"sedan","Бензин",1498,192,23900,"Левая сторона","side","light",13400,"Copart","TX",89,[800,1300],28700,32900,-4,"#9AA1A9",0],
+ [20,"Mazda","3","Select",2023,2,"sedan","Бензин",2488,191,20800,"Передний бампер","front","light",0,"IAAI","FL",86,[600,1000],20800,24100,-2,"#7B1E26",0],
+ [21,"Subaru","Forester","Premium",2023,5,"suv","Бензин",2498,180,24600,"Задний бампер","rear","light",12900,"Copart","IL",90,[600,1000],28100,31900,6,"#3F5E4A",0],
+ [22,"Kia","Sorento","LX",2022,11,"suv","Бензин",2497,191,31800,"Правая дверь","side","light",13700,"IAAI","TX",88,[800,1300],30900,35400,8,"#1E2B3D",0],
+ [23,"Toyota","Highlander","XLE",2022,8,"suv","Бензин",2387,265,36900,"Передний бампер","front","light",21900,"Copart","GA",87,[900,1500],45600,53800,9,"#D3D6DA",0]
+];
+const SOLD={17:"sold",18:"sold",19:"sold",20:"ended"};
+const RESERVE=[21,22,23];
+const LOTS=RAW.map(r=>{const [id,make,model,trim,year,month,body,fuel,cc,hp,mi,damage,zone,level,price,auction,state,score,repair,mBy,mRu,off,color,top]=r;
+ return {id,make,model,trim,year,month,body,fuel,cc,hp,mi,damage,zone,level,price,auction,state,score,repair,market:{by:mBy,ru:mRu},off,color,top:!!top,
+  status:SOLD[id]||"active",lotNo:(auction==="Copart"?"7":"4")+String(1000000+id*73919).slice(1,8),
+  vin:vinFor(make,year,id)}});
+function vinFor(make,year,id){const p={Toyota:"2T3",Hyundai:"KM8",Kia:"5XY",Honda:"7FA",Volkswagen:"3VV",Mazda:"JM3",Nissan:"5N1",Chevrolet:"3GN",BMW:"5UX",Audi:"WA1",["Mercedes-Benz"]:"W1N",Tesla:"5YJ",Subaru:"JF2"}[make]||"1XX";
+ const y={2022:"N",2023:"P"}[year];return p+"W1RFV"+(id%9)+y+"•••"+String(4000+id*137).slice(-3);}
+const STAGES=["Новая заявка","В работе","Торги","Куплена","В порту США","В море","В порту назначения","На таможне","Готова к выдаче","Выдана","Отказ"];
+const TRACK=["Заявка","Торги","Куплена","В порту США","В море","В порту назначения","На таможне","Готова к выдаче","Выдана"];
+
+const DEFAULT_T={
+ service:700, ocean:1350, landBy:650, landRu:1300, brokerBy:400, brokerRu:650,
+ inland:{NJ:300,GA:400,TX:450,FL:400,CA:650,IL:450},
+ fees:[[3000,450],[6000,650],[10000,850],[15000,1000],[20000,1150],[999999,1350]],
+ cc:[[1000,1.5],[1500,1.7],[1800,2.5],[2300,2.7],[3000,3.0],[99999,3.6]],
+ utilBy:1100, utilRuLow:5200, utilRuHigh:750000, evRuPct:15,
+ rub:92, byn:3.25, eur:1.08, deliveryDays:75
+};
+const DEFAULT_SET={brand:"Nomacars",phone:"+375 (29) 000-00-00",tg:"@nomacars",city:"Минск, ул. Примерная, 1",perWeek:300,ageMin:3,ageMax:5,model:"(лучшая модель шлюза с анализом фото)",api:"https://api.aiai.by/v1",
+ excl:{"Утопленник (flood)":true,"Пожар (fire)":true,"Не на ходу (non-run)":true,"Проблемы с документами":true,"Биохазард":true,"На запчасти":true}};
+
+function seedLeads(){return [
+ {id:101,lotId:17,name:"Алексей Ковалёв",phone:"+375 29 111-22-33",country:"by",stage:5,mine:true,created:-10,comment:"Беру, если пробег подтвердится",maxBid:17500,
+  invoices:[{id:1,title:"Оплата лота и аукционного сбора",amount:18250,paid:true},{id:2,title:"Доставка по США и морской фрахт",amount:1650,paid:true},{id:3,title:"Таможенные платежи и оформление",amount:5400,paid:false},{id:4,title:"Услуги компании",amount:700,paid:false}],
+  docs:[{n:"Договор оказания услуг.pdf",s:"Заявка"},{n:"Инвойс аукциона Copart.pdf",s:"Куплена"},{n:"Фото из порта Ньюарк (12 шт.)",s:"В порту США"},{n:"Коносамент (Bill of Lading).pdf",s:"В море"}],notes:"Клиент просил прислать фото салона после выгрузки."},
+ {id:102,lotId:5,name:"Ирина Семенюк",phone:"+375 33 456-78-90",country:"by",stage:0,mine:false,created:0,comment:"Можно ли посмотреть отчёт Carfax?",maxBid:13000,invoices:[],docs:[],notes:""},
+ {id:103,lotId:13,name:"Дмитрий Петров",phone:"+7 916 222-33-44",country:"ru",stage:2,mine:false,created:-2,comment:"",maxBid:9500,invoices:[],docs:[{n:"Договор оказания услуг.pdf",s:"Заявка"}],notes:"Ставка согласована до $9 500."},
+ {id:104,lotId:null,name:"Сергей Мельник",phone:"+375 44 765-43-21",country:"by",stage:1,mine:false,created:-1,comment:"Подбор: кроссовер до $28 000 под ключ, не старше 2022",maxBid:null,invoices:[],docs:[],notes:""}
+];}
+
+/* ============ СОСТОЯНИЕ ============ */
+const KEY="nomacars-html-demo-v1";
+let S=load();
+function fresh(){return {role:"guest",country:"by",fav:[],hidden:[],added:[],leads:seedLeads(),T:JSON.parse(JSON.stringify(DEFAULT_T)),set:JSON.parse(JSON.stringify(DEFAULT_SET)),user:null,lastRun:null}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.T&&s.leads)return s}catch(e){}return fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const EMPTY_F={q:"",lotNo:"",make:"",model:"",auction:"",body:"",fuel:"",kmMin:"",kmMax:"",sMin:"",sMax:"",yMin:"",yMax:"",max:"",top:false,light:false,fav:false,premium:false,green:false};
+let UI={adminTab:"sum",cabTab:"cars",gal:0,filtersOpen:false,openLead:null,f:{...EMPTY_F},sort:"rec",per:20,page:1,view:"list",mega:false,slide:0,hoverSlider:false};
+
+/* ============ УТИЛИТЫ ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fm=n=>Math.round(n).toLocaleString("ru-RU");
+const usd=n=>"$ "+fm(n);
+const DAY=864e5;
+const saleDate=l=>new Date(Date.now()+l.off*DAY);
+const dshort=d=>d.toLocaleDateString("ru-RU",{day:"numeric",month:"short"});
+const km=mi=>fm(mi*1.609/100)*100;
+const kmStr=mi=>fm(Math.round(mi*1.609/100)*100)+" км";
+const lot=id=>LOTS.find(l=>l.id===+id);
+const name=l=>`${l.year} ${l.make} ${l.model}`;
+const authed=()=>S.role!=="guest";
+function visibleLots(){return LOTS.filter(l=>(!RESERVE.includes(l.id)||S.added.includes(l.id))&&!S.hidden.includes(l.id))}
+function graceUntil(l){const d=new Date(l.year+5,l.month-1,1);return d.toLocaleDateString("ru-RU",{month:"2-digit",year:"numeric"})}
+function ageAtCustoms(l){const prod=new Date(l.year,l.month-1,1);const c=new Date(Date.now()+(l.off+S.T.deliveryDays)*DAY);return (c-prod)/(365.25*DAY)}
+function toast(t){const el=document.createElement("div");el.className="toast";el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),2600)}
+
+/* ============ КАЛЬКУЛЯТОР ============ */
+function calc(i,country){
+ const T=S.T, price=+i.price||0;
+ const fee=(T.fees.find(f=>price<=f[0])||T.fees[T.fees.length-1])[1];
+ const inland=T.inland[i.state]??450;
+ const land=country==="by"?T.landBy:T.landRu;
+ const value=price+fee+inland+T.ocean;
+ let duty,dutyNote;
+ if(i.fuel==="Электро"){ if(country==="by"){duty=0;dutyNote="электромобиль: пошлина 0 (демо-ставка)"}
+   else{const d=value*T.evRuPct/100;duty=d+(value+d)*0.2;dutyNote=`${T.evRuPct}% + НДС 20% (демо-ставка)`} }
+ else{const r=(T.cc.find(c=>(+i.cc)<=c[0])||T.cc[T.cc.length-1])[1];duty=r*(+i.cc)*T.eur;dutyNote=`€${r} × ${fm(i.cc)} см³, авто 3–5 лет`}
+ let util,utilNote;
+ if(country==="by"){util=T.utilBy/T.byn;utilNote=`${fm(T.utilBy)} BYN`}
+ else{const hi=(+i.hp)>160;const rub=hi?T.utilRuHigh:T.utilRuLow;util=rub/T.rub;utilNote=`${fm(rub)} ₽, ${hi?"мощность больше 160 л.с.":"до 160 л.с."}`}
+ const broker=country==="by"?T.brokerBy:T.brokerRu;
+ const st=STATES[i.state]||["США","порт"];
+ const lines=[
+  ["Ставка на аукционе",price,i.auction||"Copart / IAAI"],
+  ["Сбор аукциона",fee,"по шкале от цены лота"],
+  ["Доставка по США",inland,`${st[0]} → порт ${st[1]}`],
+  ["Морской фрахт",T.ocean,"контейнер до Клайпеды"],
+  [country==="by"?"Клайпеда → Минск":"Клайпеда → Москва",land,"автовоз"],
+  ["Таможенная пошлина",duty,dutyNote],
+  ["Утилизационный сбор",util,utilNote],
+  ["Брокер, СВХ, оформление",broker,country==="by"?"таможня РБ":"таможня РФ"],
+  ["Услуги компании",T.service,"фиксированно, без процентов"]
+ ];
+ const total=lines.reduce((s,l)=>s+l[1],0);
+ return {lines,total,local:country==="by"?total*T.byn:total*T.rub,cur:country==="by"?"BYN":"₽",days:country==="by"?"55–70 дней":"65–85 дней"};
+}
+const totalFor=(l,c)=>calc({...l,price:l.price||l.market.by*0.4},c||S.country).total;
+
+/* ============ КАРТИНКИ ============ */
+function carSvg(l,view=0){
+ const suv=l.body==="suv";
+ const body=suv?"M28 132 L32 100 Q36 90 60 88 L92 86 L118 58 Q124 52 140 52 L228 52 Q240 52 250 64 L272 88 Q292 92 296 106 L296 134 Q296 142 288 142 L36 142 Q28 142 28 132 Z"
+  :"M30 130 L40 106 Q60 98 95 95 L125 72 Q140 64 170 64 L205 64 Q225 66 245 92 L280 100 Q295 104 296 118 L296 132 Q296 140 288 140 L40 140 Q30 140 30 130 Z";
+ const win=suv?"M124 62 L170 60 L170 88 L102 88 Z M178 60 L226 60 Q236 60 244 72 L256 88 L178 88 Z":"M132 77 L168 71 L170 94 L112 96 Z M177 71 L204 71 Q218 73 234 93 L178 94 Z";
+ const wy=suv?142:140;
+ const dx={front:282,rear:42,side:160,hail:180}[l.zone], dy={front:118,rear:116,side:116,hail:suv?58:70}[l.zone];
+ const dmg=l.zone==="hail"?[0,1,2,3,4,5,6].map(k=>`<circle cx="${dx-36+k*12}" cy="${dy+(k%2)*5}" r="2.4" fill="var(--bad)" opacity=".8"/>`).join("")
+  :`<path d="M${dx-14} ${dy-12} l8 7 l-6 5 l10 4 l-8 6 l9 5" stroke="var(--bad)" stroke-width="2.6" fill="none" stroke-linecap="round"/><circle cx="${dx}" cy="${dy}" r="17" fill="var(--bad)" opacity=".16"/>`;
+ let tf="";
+ if(view===1)tf=`transform="translate(324 0) scale(-1 1)"`;
+ if(view===2)tf=`transform="translate(${-dx*1.7+162} ${-dy*1.7+100}) scale(1.7)"`;
+ const sky=view===3?"var(--yard2)":"var(--yard1)";
+ return `<svg viewBox="0 0 324 200" role="img" aria-label="${esc(name(l))}"><rect width="324" height="200" fill="${sky}"/>
+ <rect y="150" width="324" height="50" fill="var(--yard2)"/><line x1="0" y1="168" x2="324" y2="168" stroke="var(--yard1)" stroke-width="2" stroke-dasharray="14 10"/>
+ <g ${tf}><ellipse cx="164" cy="${wy+4}" rx="140" ry="9" fill="#000" opacity=".18"/>
+ <path d="${body}" fill="${l.color}" stroke="#000" stroke-opacity=".25"/>
+ <path d="${win}" fill="var(--glass)" opacity=".92"/>
+ <rect x="${suv?280:282}" y="${suv?100:108}" width="12" height="6" rx="2" fill="#FFF3C4"/><rect x="30" y="${suv?104:110}" width="9" height="6" rx="2" fill="#E0463A"/>
+ ${[84,244].map(x=>`<circle cx="${x}" cy="${wy}" r="21" fill="var(--tire)"/><circle cx="${x}" cy="${wy}" r="10" fill="var(--rim)"/>`).join("")}
+ ${dmg}</g></svg>`;
+}
+
+/* ============ ИИ-ТЕКСТЫ ============ */
+function aiFor(l){
+ const z=ZONE[l.zone];
+ const why=[l.level==="light"?"Лёгкое повреждение, силовые элементы не затронуты":"Повреждение среднее, но ремонт предсказуемый",
+   ["Toyota","Hyundai","Kia","Honda","Mazda"].includes(l.make)?"Популярная модель: запчасти и сервис есть в РБ и РФ":"Хорошая комплектация за свои деньги",
+   `Проходной возраст: льготная пошлина до ${graceUntil(l)}`];
+ if(l.mi<25000)why.push("Небольшой пробег для своего года");
+ if(l.fuel==="Гибрид")why.push("Гибрид: расход 6–7 л в городе");
+ const risks=[...z.risks];
+ if(l.fuel==="Электро")risks.push("Нужно проверить состояние батареи по отчёту");
+ if(l.hp>160)risks.push("Для РФ: мощность больше 160 л.с., утильсбор выше");
+ const desc=`${l.make} ${l.model} ${l.trim} ${l.year} года, ${kmStr(l.mi)} пробега. Повреждение: ${l.damage.toLowerCase()}. По фото машина заводится и едет, подушки на месте. После ремонта за $${fm(l.repair[0])}–${fm(l.repair[1])} её можно эксплуатировать без ограничений.`;
+ return {desc,plain:z.plain,why,risks};
+}
+
+/* ============ КОМПОНЕНТЫ ============ */
+function priceBlock(l,small){
+ if(l.status==="sold"){return authed()?`<div><div class="price-l">Продан за</div><div class="price num">${usd(l.price)}</div></div>`
+   :`<div class="lock"><div class="price-l">Продан за</div><span class="blur">$ 00 000</span><button class="lock-cta" data-act="login">Войти, чтобы увидеть</button></div>`}
+ if(l.status==="ended")return `<div><div class="price-l">Цена выкупа</div><div class="muted" style="font-weight:700">не раскрыта</div></div>`;
+ if(!authed())return `<div class="lock"><div class="price-l">Под ключ в ${S.country==="by"?"РБ":"РФ"}</div><span class="blur">$ 00 000</span><button class="lock-cta" data-act="login">Войти и увидеть цену</button></div>`;
+ return `<div><div class="price-l">Под ключ в ${S.country==="by"?"РБ":"РФ"}</div><div class="price num">${usd(totalFor(l))}</div></div>`;
+}
+function card(l){
+ const d=saleDate(l), isFav=S.fav.includes(l.id);
+ const badge=l.status==="sold"?`<span class="badge b-sold">Продан</span>`:l.status==="ended"?`<span class="badge b-end">Торги завершены</span>`:(l.top?`<span class="badge b-top">Топ недели</span>`:"")+(S.added.includes(l.id)?`<span class="badge b-new">Новый</span>`:"");
+ return `<a class="card" href="#lot-${l.id}">
+  <div class="ph">${carSvg(l)}<div class="badges">${badge}</div>
+   <button class="fav" data-act="fav" data-id="${l.id}" aria-pressed="${isFav}" aria-label="В избранное">♥</button>
+   <span class="lotno mono">${l.auction} · ${l.lotNo}</span></div>
+  <div class="cbody">
+   <div class="ctitle">${esc(name(l))} ${esc(l.trim)}</div>
+   <div class="specs"><span>${kmStr(l.mi)}</span><span>${l.cc?(l.cc/1000).toFixed(1)+" л":"электро"} · ${l.hp} л.с.</span><span>${l.fuel}</span></div>
+   <div><span class="chip ${l.level==="light"?"c-light":"c-mid"}">${l.level==="light"?"Лёгкие":"Средние"}: ${esc(l.damage)}</span></div>
+   <div class="cfoot">${priceBlock(l)}<div class="when">${l.status==="active"?`Торги<b>${dshort(d)}</b>`:`Торги прошли<b>${dshort(d)}</b>`}</div></div>
+  </div></a>`;
+}
+
+/* ============ СТРАНИЦЫ ============ */
+function plural(n){return n%10===1&&n%100!==11?"лот":[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?"лота":"лотов"}
+function upcoming(){const m=new Map();for(const l of visibleLots().filter(l=>l.status==="active")){const d=saleDate(l),k=d.toDateString()+l.auction,c=m.get(k);if(c)c.count++;else m.set(k,{date:d,auction:l.auction,count:1})}return [...m.values()].sort((a,b)=>a.date-b.date)}
+const dm=d=>d.toLocaleDateString("ru-RU",{day:"2-digit",month:"2-digit"});
+const SLIDES=[["Авто из США под ключ в Беларусь и Россию","Проходные машины 3–5 лет с аукционов Copart и IAAI."],["Лучшие лоты недели отбирает Nomacars","Без утопленников, пожаров и проблем с документами."],["Честный расчёт до последнего доллара","Пошлина, утильсбор, доставка и наши услуги отдельными строками."]];
+
+function pHome(){
+ const vis=visibleLots(), act=vis.filter(l=>l.status==="active");
+ const top=act.filter(l=>l.top).sort((a,b)=>b.score-a.score);
+ const sold=vis.filter(l=>l.status!=="active");
+ const pool=[...top,...act.filter(l=>!l.top)];
+ const tiles=[
+  {t:"Кроссоверы",bg:"#000000",id:7,k:"body",v:"suv",n:act.filter(l=>l.body==="suv").length},
+  {t:"Седаны",bg:"#6d6d6d",id:5,k:"body",v:"sedan",n:act.filter(l=>l.body==="sedan").length},
+  {t:"Премиум",bg:"#2f6aa8",id:12,k:"premium",v:"1",n:act.filter(l=>["BMW","Audi","Mercedes-Benz"].includes(l.make)).length},
+  {t:"Гибриды и электро",bg:"#9e9e9e",id:15,k:"green",v:"1",n:act.filter(l=>l.fuel!=="Бензин").length}];
+ return `
+ <section class="slider" id="slider">
+  ${SLIDES.map((s,k)=>`<div class="slide${k===UI.slide?" on":""}" aria-hidden="${k!==UI.slide}"><div class="slide-yard">${pool.slice(k*4,k*4+4).map(l=>carSvg(l,k%2)).join("")}</div>
+   <div class="slide-box">${k===0?`<h1>${s[0]}</h1>`:`<h2 style="font-size:clamp(32px,5vw,54px);line-height:1.02">${s[0]}</h2>`}<p>${s[1]}</p></div></div>`).join("")}
+  <div class="dots">${SLIDES.map((s,k)=>`<button data-act="slide" data-i="${k}" aria-pressed="${k===UI.slide}" aria-label="Слайд ${k+1}"></button>`).join("")}</div>
+ </section>
+ <div class="wrap"><div class="tiles">${tiles.map(t=>`<a class="tile" href="#catalog" data-act="preset" data-k="${t.k}" data-v="${t.v}"><b>${t.t}</b><div class="tile-card" style="background:${t.bg}"><u>Смотреть лоты · ${t.n}</u>${carSvg(lot(t.id))}</div></a>`).join("")}</div></div>
+ <section class="band"><div class="wrap"><h2>Проходные авто из США по честной цене</h2>
+  <p>Каждую неделю Nomacars просматривает тысячи лотов и оставляет ${S.set.perWeek} лучших. Вы выбираете машину, мы торгуемся, везём морем через Клайпеду, растаможиваем и выдаём с документами. Наши услуги стоят $${fm(S.T.service)}, фиксированно.</p></div></section>
+ <section class="sec"><div class="wrap">
+  <div class="sec-h"><h2>Ближайшие торги</h2><a href="#catalog" data-act="preset" data-k="sort" data-v="date">Все лоты ›</a></div>
+  <div class="cal">${upcoming().slice(0,8).map(c=>`<a href="#catalog" data-act="preset" data-k="auction" data-v="${c.auction}"><span class="d"><b>${c.date.getDate()}</b><span>${c.date.toLocaleDateString("ru-RU",{month:"short"})}</span></span><strong>${c.auction}</strong><span class="note">${c.count} ${plural(c.count)} из подборки</span></a>`).join("")}</div>
+ </div></section>
+ <section class="sec" style="padding-top:0"><div class="wrap">
+  <div class="sec-h"><h2>Топ недели</h2><a href="#catalog" data-act="preset" data-k="top" data-v="1">Смотреть все ›</a></div>
+  <div class="grid">${top.slice(0,8).map(card).join("")}</div>
+ </div></section>
+ <section class="sec" id="home-how" style="padding-top:0"><div class="wrap">
+  <div class="sec-h"><h2>Как купить автомобиль</h2></div>
+  <div class="steps">
+   <div class="step"><b>Выбор лота</b><span>Из подборки или по вашему запросу</span></div>
+   <div class="step"><b>Торги</b><span>Согласуем максимальную ставку и торгуемся за вас</span></div>
+   <div class="step"><b>Оплата</b><span>Счета в кабинете, оплата переводом</span></div>
+   <div class="step"><b>Доставка по США</b><span>С площадки аукциона в порт</span></div>
+   <div class="step"><b>Море</b><span>Контейнер до Клайпеды, 30–40 дней</span></div>
+   <div class="step"><b>Таможня и выдача</b><span>Растаможка, документы, ключи</span></div>
+  </div>
+  <p class="note" style="margin-top:12px">Каждый этап отображается в личном кабинете, туда же загружаются фото и документы.</p>
+ </div></section>
+ <section class="sec" style="padding-top:0"><div class="wrap">
+  <div class="sec-h"><h2>Реальные цены выкупа</h2><a href="#sold">Все прошедшие торги ›</a></div>
+  <div class="grid">${sold.map(card).join("")}</div>
+ </div></section>
+ <section class="sec" style="padding-top:0"><div class="wrap two">
+  <div class="panel"><div class="panel-h">Индивидуальный подбор</div><div class="box">
+   <p class="muted" style="margin:0">Не нашли нужную машину? Опишите бюджет и пожелания, менеджер подберёт лоты под вас.</p>
+   <label class="muted" style="display:grid;gap:5px;font-size:12.5px;font-weight:700">Бюджет под ключ, $<input class="field" id="pickBudget" type="number" value="25000"></label>
+   <label class="muted" style="display:grid;gap:5px;font-size:12.5px;font-weight:700">Пожелания<textarea class="field" id="pickWish" rows="2">Кроссовер, бензин, автомат, без серьёзных повреждений</textarea></label>
+   <button class="btn btn-p" data-act="pick">Отправить запрос на подбор</button></div></div>
+  <div><div class="sec-h"><h2>Вопросы и ответы</h2></div>
+   <details class="faq"><summary>Почему только машины 3–5 лет?</summary><p>Для автомобилей этого возраста действует льготная ставка пошлины. Возраст проверяем на дату растаможки, а не на день торгов.</p></details>
+   <details class="faq"><summary>Почему цены видны только после входа?</summary><p>Итог зависит от страны и актуальных тарифов. После входа по номеру телефона вы видите цену под ключ по каждому лоту.</p></details>
+   <details class="faq"><summary>Как вы отбираете лоты?</summary><p>Система Nomacars отсекает утопленников, пожары, машины не на ходу и с проблемными документами, затем оценивает фото повреждений и стоимость ремонта.</p></details>
+   <details class="faq"><summary>Нужна ли предоплата?</summary><p>Нет. Счёт за лот выставляется после выигрыша торгов.</p></details>
+  </div>
+ </div></section>`;
+}
+
+function pCatalog(sold){
+ if(sold)return `<section class="sec"><div class="wrap">
+  <div class="sec-h"><div><div class="eyebrow">Архив подборки</div><h1 style="font-size:clamp(24px,3.4vw,34px)">Прошедшие торги и цены выкупа</h1></div></div>
+  <div id="results" class="grid"></div></div></section>`;
+ return `<section class="sec"><div class="wrap">
+  <div class="sec-h"><div><div class="eyebrow">Подборка Nomacars · обновляется еженедельно</div><h1 style="font-size:clamp(24px,3.4vw,34px)">Каталог лотов Copart и IAAI</h1></div></div>
+  <div class="cat">
+   <div><button class="btn btn-g btn-block fl-toggle" style="margin-bottom:8px" data-act="filters">${UI.filtersOpen?"Скрыть поиск":"Глобальный поиск и фильтры"}</button>
+    <form class="gs ${UI.filtersOpen?"":"closed"}" id="gs" onsubmit="return false" aria-label="Глобальный поиск">${gsHtml()}</form></div>
+   <div><div class="res-top" id="resTop"></div><div id="results"></div><div id="pagerBottom" style="margin-top:14px"></div>
+    <p class="note" style="margin-top:12px">Пробег пересчитан из миль в километры и округлён. Цены под ключ ориентировочные.</p></div>
+  </div></div></section>`;
+}
+function gsHtml(){
+ const f=UI.f, act=visibleLots().filter(l=>l.status==="active");
+ const makes=[...new Set(act.map(l=>l.make))].sort(), models=[...new Set(act.filter(l=>!f.make||l.make===f.make).map(l=>l.model))].sort();
+ const opt=(arr,cur)=>arr.map(x=>`<option ${x===cur?"selected":""}>${esc(x)}</option>`).join("");
+ const row=(label,el)=>`<div class="gs-row"><span>${label}</span>${el}</div>`;
+ const inp=(k,ph)=>`<input class="field num" id="gs-${k}" data-f="${k}" inputmode="numeric" placeholder="${ph}" value="${esc(f[k])}">`;
+ const chk=(k,label)=>`<label class="gs-chk"><input type="checkbox" data-f="${k}" ${f[k]?"checked":""}><span>${label}</span></label>`;
+ return `<div class="gs-h"><h2>Глобальный поиск</h2><button type="button" class="btn btn-p btn-s" data-act="gsReset">Сброс</button></div>
+  ${row("Поиск",`<input class="field" id="gs-q" data-f="q" placeholder="Год, марка, модель или VIN" value="${esc(f.q)}">`)}
+  ${row("Лот №",`<input class="field" id="gs-lotNo" data-f="lotNo" placeholder="- Все -" inputmode="numeric" value="${esc(f.lotNo)}">`)}
+  ${row("Марка",`<select class="field" id="gs-make" data-f="make"><option value="">- Все -</option>${opt(makes,f.make)}</select>`)}
+  ${row("Модель",`<select class="field" id="gs-model" data-f="model"><option value="">- Все -</option>${opt(models,f.model)}</select>`)}
+  ${row("Аукцион",`<select class="field" id="gs-auction" data-f="auction"><option value="">- Все -</option>${opt(["Copart","IAAI"],f.auction)}</select>`)}
+  ${row("Кузов",`<select class="field" id="gs-body" data-f="body"><option value="">- Все -</option><option value="suv" ${f.body==="suv"?"selected":""}>Кроссовер / SUV</option><option value="sedan" ${f.body==="sedan"?"selected":""}>Седан</option></select>`)}
+  ${row("Топливо",`<select class="field" id="gs-fuel" data-f="fuel"><option value="">- Все -</option>${opt(["Бензин","Гибрид","Электро"],f.fuel)}</select>`)}
+  ${row("Пробег",`<div class="gs-pair">${inp("kmMin","От, км")}${inp("kmMax","До, км")}</div>`)}
+  ${row("Оценка",`<div class="gs-pair">${inp("sMin","От")}${inp("sMax","До")}</div>`)}
+  ${row("Год",`<div class="gs-pair">${inp("yMin","От")}${inp("yMax","До")}</div>`)}
+  ${row("Бюджет",authed()?inp("max","Под ключ до, $"):`<button type="button" class="lock-cta" data-act="login">Войдите для фильтра по цене</button>`)}
+  ${chk("top","Только «Топ недели»")}${chk("light","Только лёгкие повреждения")}${chk("premium","Только премиум")}${chk("green","Гибриды и электро")}${chk("fav",`Избранное (${S.fav.length})`)}
+  <div class="gs-btns"><button class="btn btn-p" type="button" data-act="gsApply">Показать</button><button class="btn btn-p" type="button" data-act="gsReset">Сброс</button></div>`;
+}
+function filtered(){
+ const f=UI.f, q=f.q.trim().toLowerCase(), n=v=>v===""?null:Number(v);
+ let list=visibleLots().filter(l=>l.status==="active").filter(l=>{const k=Math.round(l.mi*1.609/100)*100;
+  return (!q||`${l.year} ${l.make} ${l.model} ${l.trim} ${l.vin}`.toLowerCase().includes(q))&&(!f.lotNo||l.lotNo.includes(f.lotNo.trim()))&&
+   (!f.make||l.make===f.make)&&(!f.model||l.model===f.model)&&(!f.auction||l.auction===f.auction)&&(!f.body||l.body===f.body)&&(!f.fuel||l.fuel===f.fuel)&&
+   (n(f.kmMin)===null||k>=n(f.kmMin))&&(n(f.kmMax)===null||k<=n(f.kmMax))&&(n(f.sMin)===null||l.score>=n(f.sMin))&&(n(f.sMax)===null||l.score<=n(f.sMax))&&
+   (n(f.yMin)===null||l.year>=n(f.yMin))&&(n(f.yMax)===null||l.year<=n(f.yMax))&&(!f.top||l.top)&&(!f.light||l.level==="light")&&
+   (!f.premium||["BMW","Audi","Mercedes-Benz"].includes(l.make))&&(!f.green||l.fuel!=="Бензин")&&(!f.fav||S.fav.includes(l.id))&&(!f.max||!authed()||totalFor(l)<=+f.max)});
+ const s={rec:(a,b)=>(b.top-a.top)||b.score-a.score,date:(a,b)=>a.off-b.off,price:(a,b)=>totalFor(a)-totalFor(b),year:(a,b)=>(b.year*12+b.month)-(a.year*12+a.month),miles:(a,b)=>a.mi-b.mi}[UI.sort];
+ return list.sort(s);
+}
+function pagerHtml(page,pages){
+ const nums=Array.from({length:pages},(_,i)=>i+1).filter(n=>Math.abs(n-page)<=2||n===1||n===pages);
+ return `<nav class="pager" aria-label="Страницы"><button data-act="page" data-p="1" ${page===1?"disabled":""} aria-label="Первая">«</button><button data-act="page" data-p="${page-1}" ${page===1?"disabled":""} aria-label="Предыдущая">‹</button>
+  ${nums.map(n=>`<button data-act="page" data-p="${n}" ${n===page?'aria-current="page"':""}>${n}</button>`).join("")}
+  <button data-act="page" data-p="${page+1}" ${page===pages?"disabled":""} aria-label="Следующая">›</button><button data-act="page" data-p="${pages}" ${page===pages?"disabled":""} aria-label="Последняя">»</button></nav>`;
+}
+function lrow(l){
+ const st=STATES[l.state];
+ return `<a class="lrow" href="#lot-${l.id}"><span class="thumb">${carSvg(l)}</span>
+  <div style="min-width:0"><div class="lrow-t">${esc(name(l))} ${esc(l.trim)} ${l.top?`<span class="badge b-top">Топ недели</span>`:""}</div>
+   <div class="lrow-m"><span>Пробег: <b class="num">${kmStr(l.mi)}</b></span><span>Оценка Nomacars: <b>${l.score}</b></span><span>Двигатель: <b>${l.cc?(l.cc/1000).toFixed(1)+" л · ":"электро · "}${l.hp} л.с.</b></span></div>
+   <div class="lrow-m"><span>Повреждение: <b style="color:${l.level==="light"?"var(--good)":"var(--warn)"}">${esc(l.damage)}</b></span></div>
+   <div class="lrow-m"><span>Лот №: <b class="num">${l.lotNo}</b></span><span><b>${l.auction}</b></span><span><b>${st[0]}</b></span></div></div>
+  <div class="lrow-r">${priceBlock(l)}<div class="when">Торги<b>${dshort(saleDate(l))}</b></div>
+   <span style="position:relative;width:32px;height:32px;display:block"><button class="fav" data-act="fav" data-id="${l.id}" aria-pressed="${S.fav.includes(l.id)}" aria-label="В избранное">♥</button></span></div></a>`;
+}
+function drawResults(sold){
+ const r=$("#results");if(!r)return;
+ if(sold){r.innerHTML=visibleLots().filter(l=>l.status!=="active").map(card).join("");return}
+ const list=filtered(), pages=Math.max(1,Math.ceil(list.length/UI.per));
+ if(UI.page>pages)UI.page=pages;
+ const shown=list.slice((UI.page-1)*UI.per,UI.page*UI.per), from=list.length?(UI.page-1)*UI.per+1:0;
+ $("#resTop").innerHTML=`${pagerHtml(UI.page,pages)}<div class="res-bar"><span class="num">Показано ${from}–${Math.min(UI.page*UI.per,list.length)} из ${list.length}</span>
+  <div class="row" style="flex-wrap:wrap"><label class="row">Сортировка <select id="gs-sort" data-ui="sort">${[["rec","Рекомендуемые"],["date","Ближайшие торги"],["price","Цена под ключ"],["year","Год: новее"],["miles","Пробег: меньше"]].map(([v,t])=>`<option value="${v}" ${UI.sort===v?"selected":""}>${t}</option>`).join("")}</select></label>
+  <label class="row">На странице <select id="gs-per" data-ui="per">${[10,20,50].map(v=>`<option ${UI.per===v?"selected":""}>${v}</option>`).join("")}</select></label>
+  <span class="view-sw" role="group" aria-label="Вид"><button data-act="view" data-v="list" aria-pressed="${UI.view==="list"}">Список</button><button data-act="view" data-v="grid" aria-pressed="${UI.view==="grid"}">Плитка</button></span></div></div>`;
+ r.className=UI.view==="grid"?"grid":"rows";
+ r.innerHTML=shown.length?(UI.view==="grid"?shown.map(card).join(""):shown.map(lrow).join("")):`<div class="panel empty" style="grid-column:1/-1"><b>Под эти условия лотов нет</b><span>Попробуйте расширить диапазон пробега или года, либо выбрать другую марку.</span><button class="btn btn-p btn-s" data-act="gsReset">Сбросить поиск</button></div>`;
+ $("#pagerBottom").innerHTML=pages>1?pagerHtml(UI.page,pages):"";
+}
+function megaHtml(){
+ const li=(attrs,t)=>`<li><a href="#catalog" ${attrs}>${t}</a></li>`;
+ return `<div class="mega"><div class="wrap mega-cols">
+  <div class="mega-col"><h3>Ближайшие торги</h3><ul class="chev">${upcoming().slice(0,5).map(u=>li(`data-act="preset" data-k="auction" data-v="${u.auction}"`,`${u.auction}: торги ${dm(u.date)} · ${u.count} шт.`)).join("")}
+   <li class="plain"><hr></li>${li('data-act="preset" data-k="sort" data-v="date"',"Календарь торгов")}</ul></div>
+  <div class="mega-col"><h3>Каталог</h3><ul class="chev">${li('data-act="preset" data-k="top" data-v="1"',"Топ недели")}${li('data-act="preset" data-k="all" data-v="1"',"Все лоты подборки")}${li('data-act="preset" data-k="body" data-v="suv"',"Кроссоверы и SUV")}${li('data-act="preset" data-k="body" data-v="sedan"',"Седаны")}${li('data-act="preset" data-k="premium" data-v="1"',"Премиум")}${li('data-act="preset" data-k="green" data-v="1"',"Гибриды и электро")}</ul></div>
+  <div class="mega-col"><h3>Аукционы</h3><ul class="chev">${li('data-act="preset" data-k="auction" data-v="Copart"',"Лоты Copart")}${li('data-act="preset" data-k="auction" data-v="IAAI"',"Лоты IAAI")}<li><a href="#sold">Прошедшие торги</a></li><li><a href="#calc">Калькулятор под ключ</a></li></ul></div>
+  <div class="mega-col"><h3>С чего начать</h3><ul class="chev">${authed()?"":`<li class="plain"><button class="reg-badge" data-act="login">Регистра&shy;ция</button></li>`}<li><a href="#home-how">Как купить</a></li><li><a href="#cabinet">Личный кабинет</a></li><li><a href="#contacts">Связаться с нами</a></li></ul></div>
+ </div></div>`;
+}
+function setMega(v){if(v&&!UI.mega)UI.megaAt=Date.now();UI.mega=v;const b=$("#megaBtn");if(b)b.setAttribute("aria-expanded",v);$("#mega").innerHTML=v?megaHtml():""}
+
+function pLot(id){
+ const l=lot(id);
+ if(!l||(!visibleLots().includes(l)&&S.role!=="owner"))return `<section class="sec"><div class="wrap"><div class="panel empty"><b>Лот снят с публикации</b><span>Возможно, торги отменены. Посмотрите другие машины из подборки.</span><a class="btn btn-p" href="#catalog">Открыть каталог</a></div></div></section>`;
+ const ai=aiFor(l), c=calc({...l,price:l.price||l.market.by*0.4},S.country), d=saleDate(l), days=Math.ceil((d-Date.now())/DAY);
+ const views=["Слева","Справа","Повреждение","Общий план"];
+ const similar=visibleLots().filter(x=>x.id!==l.id&&x.status==="active"&&(x.body===l.body)).sort((a,b)=>b.score-a.score).slice(0,4);
+ const st=STATES[l.state];
+ const isFav=S.fav.includes(l.id);
+ return `<section class="sec"><div class="wrap">
+ <div class="row" style="margin-bottom:14px;font-size:13.5px"><a href="#catalog">← Каталог</a><span class="muted">/ ${esc(l.make)} / ${esc(l.model)}</span></div>
+ <div class="lot">
+  <div style="display:grid;gap:16px">
+   <div><div class="gal-main ph" id="galMain">${carSvg(l,UI.gal)}<div class="badges">${l.top&&l.status==="active"?`<span class="badge b-top">Топ недели</span>`:""}${l.status==="sold"?`<span class="badge b-sold">Продан</span>`:""}${l.status==="ended"?`<span class="badge b-end">Торги завершены</span>`:""}</div><span class="lotno mono">${views[UI.gal]} · фото ${UI.gal+1}/4</span></div>
+    <div class="thumbs">${views.map((v,i)=>`<button data-act="gal" data-i="${i}" aria-pressed="${UI.gal===i}">${carSvg(l,i)}<span>${v}</span></button>`).join("")}</div></div>
+   <div class="panel ai">
+    <div class="ai-h"><span class="ai-dot">N</span><div><h3>Разбор Nomacars</h3><div class="note">Анализ фото и описания аукциона</div></div><span class="chip ${l.level==="light"?"c-light":"c-mid"}" style="margin-left:auto">Оценка Nomacars ${l.score}/100</span></div>
+    <p style="margin:0">${esc(ai.desc)}</p>
+    <div><h3 style="margin-bottom:4px">Повреждения простыми словами</h3><p style="margin:0" class="muted">${esc(ai.plain)}</p>
+     <p style="margin:6px 0 0;font-weight:700">Ремонт: примерно $${fm(l.repair[0])}–${fm(l.repair[1])}</p></div>
+    <div class="two"><div><h3 style="margin-bottom:6px;color:var(--good)">Почему стоит взять</h3><ul>${ai.why.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+     <div><h3 style="margin-bottom:6px;color:var(--warn)">Риски</h3><ul>${ai.risks.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>
+   </div>
+   <div class="panel box"><h3>Характеристики</h3>
+    <dl class="kv" style="margin:0">
+     <dt>VIN</dt><dd class="mono">${l.vin}</dd><dt>Лот</dt><dd class="mono">${l.auction} · ${l.lotNo}</dd>
+     <dt>Выпуск</dt><dd>${String(l.month).padStart(2,"0")}.${l.year}</dd><dt>Пробег</dt><dd class="num">${fm(l.mi)} mi · ${kmStr(l.mi)}</dd>
+     <dt>Двигатель</dt><dd>${l.cc?fm(l.cc)+" см³ · ":""}${l.hp} л.с. · ${l.fuel}</dd><dt>Кузов</dt><dd>${l.body==="suv"?"Кроссовер / SUV":"Седан"}</dd>
+     <dt>Площадка</dt><dd>${st[0]}, порт ${st[1]}</dd><dt>Повреждение</dt><dd>${esc(l.damage)}</dd>
+     <dt>Льготная пошлина</dt><dd>до ${graceUntil(l)}</dd><dt>Возраст на таможне</dt><dd>${ageAtCustoms(l).toFixed(1).replace(".",",")} года</dd>
+    </dl></div>
+  </div>
+  <div style="display:grid;gap:16px;position:sticky;top:80px">
+   <div class="panel box">
+    <div><div class="eyebrow">${l.auction} · ${l.status==="active"?`торги ${d.toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}${days>0?`, через ${days} дн.`:""}`:"торги прошли"}</div>
+     <h1 style="font-size:clamp(22px,2.6vw,28px);margin-top:6px">${esc(name(l))} ${esc(l.trim)}</h1></div>
+    ${l.status!=="active"?`<div>${priceBlock(l)}</div>`:""}
+    ${l.status==="active"?(authed()?`
+     <div class="row" style="justify-content:space-between"><b>Расчёт под ключ</b><span class="seg"><button data-act="country" data-v="by" aria-pressed="${S.country==="by"}">Беларусь</button><button data-act="country" data-v="ru" aria-pressed="${S.country==="ru"}">Россия</button></span></div>
+     <div class="calc-lines">${c.lines.map(x=>`<div class="cl"><div>${x[0]}<small>${esc(x[2])}</small></div><div class="v num">${usd(x[1])}</div></div>`).join("")}
+      <div class="cl total"><div><b>Итого под ключ</b><small>≈ ${fm(c.local)} ${c.cur} · срок ${c.days}</small></div><div class="v num">${usd(c.total)}</div></div></div>
+     <p class="note" style="margin:0">Ставка взята по текущей цене лота. Расчёт ориентировочный, точную сумму фиксирует менеджер.</p>`
+     :`<div class="panel" style="background:var(--surface2);padding:16px;display:grid;gap:10px"><span class="blur" style="font-size:26px">$ 00 000</span><b>Цена под ключ и подробный расчёт</b><span class="note">Войдите по номеру телефона, это бесплатно и займёт минуту.</span><button class="btn btn-p" data-act="login">Войти и увидеть цену</button></div>`):""}
+    ${l.status==="active"?`<div style="display:grid;gap:8px"><button class="btn btn-top btn-block" data-act="want" data-id="${l.id}">Хочу эту машину</button>
+     <button class="btn btn-g btn-block" data-act="fav" data-id="${l.id}" aria-pressed="${isFav}">${isFav?"В избранном ♥":"Добавить в избранное"}</button></div>`
+     :`<a class="btn btn-p" href="#catalog">Смотреть актуальные лоты</a>`}
+   </div>
+  </div>
+ </div>
+ ${similar.length?`<div class="sec" style="padding-bottom:0"><div class="sec-h"><h2>Похожие лоты</h2></div><div class="grid">${similar.map(card).join("")}</div></div>`:""}
+ </div></section>`;
+}
+
+function pCalc(){
+ return `<section class="sec"><div class="wrap">
+  <div class="sec-h"><div><div class="eyebrow">Для любого лота Copart или IAAI</div><h1 style="font-size:clamp(24px,3.4vw,34px)">Калькулятор под ключ</h1></div></div>
+  <div class="lot">
+   <div class="panel box">
+    <div class="row" style="justify-content:space-between"><h3>Параметры автомобиля</h3><span class="seg"><button data-act="country" data-v="by" aria-pressed="${S.country==="by"}">Беларусь</button><button data-act="country" data-v="ru" aria-pressed="${S.country==="ru"}">Россия</button></span></div>
+    <div class="form-grid" id="calcForm">
+     <label>Ставка на аукционе, $<input class="field" id="c-price" type="number" value="14000" step="100"></label>
+     <label>Аукцион<select class="field" id="c-auction"><option>Copart</option><option>IAAI</option></select></label>
+     <label>Площадка (штат)<select class="field" id="c-state">${Object.entries(STATES).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("")}</select></label>
+     <label>Топливо<select class="field" id="c-fuel"><option>Бензин</option><option>Дизель</option><option>Гибрид</option><option>Электро</option></select></label>
+     <label>Объём двигателя, см³<input class="field" id="c-cc" type="number" value="2487" step="1"></label>
+     <label>Мощность, л.с.<input class="field" id="c-hp" type="number" value="203"></label>
+     <label>Месяц и год выпуска<input class="field" id="c-date" type="month" value="2022-06"></label>
+    </div>
+    <div id="c-age" class="note"></div>
+   </div>
+   <div class="panel box" id="calcOut"></div>
+  </div>
+ </div></section>`;
+}
+function drawCalc(){
+ const o=$("#calcOut");if(!o)return;
+ const g=id=>$("#"+id).value;
+ const i={price:g("c-price"),auction:g("c-auction"),state:g("c-state"),fuel:g("c-fuel"),cc:g("c-cc"),hp:g("c-hp")};
+ const [y,m]=(g("c-date")||"2022-06").split("-").map(Number);
+ const age=(Date.now()+S.T.deliveryDays*DAY-new Date(y,m-1,1))/(365.25*DAY);
+ const ageEl=$("#c-age");
+ ageEl.innerHTML=age<3?`<span class="neg">Возраст на дату растаможки ${age.toFixed(1)} г. Меньше 3 лет: льготная ставка не применяется, расчёт уточнит менеджер.</span>`
+  :age>5?`<span class="neg">Возраст на дату растаможки ${age.toFixed(1)} г. Старше 5 лет: пошлина будет выше, расчёт уточнит менеджер.</span>`
+  :`<span class="pos">Проходной автомобиль: ${age.toFixed(1)} г. на дату растаможки (через ~${S.T.deliveryDays} дней).</span>`;
+ if(!authed()){o.innerHTML=`<h3>Итог под ключ</h3><span class="blur" style="font-size:30px">$ 00 000</span><p class="note" style="margin:0">Подробная разбивка с пошлиной, утильсбором и доставкой доступна после входа по телефону.</p><button class="btn btn-p" data-act="login">Войти и рассчитать</button>`;return}
+ const c=calc(i,S.country);
+ o.innerHTML=`<h3>Расчёт для ${S.country==="by"?"Беларуси":"России"}</h3><div class="calc-lines">${c.lines.map(x=>`<div class="cl"><div>${x[0]}<small>${esc(x[2])}</small></div><div class="v num">${usd(x[1])}</div></div>`).join("")}
+  <div class="cl total"><div><b>Итого под ключ</b><small>≈ ${fm(c.local)} ${c.cur} · срок ${c.days}</small></div><div class="v num">${usd(c.total)}</div></div></div>
+  <button class="btn btn-top" data-act="exact">Получить точный расчёт</button><p class="note" style="margin:0">Курс: 1 $ = ${S.T.byn} BYN / ${S.T.rub} ₽, 1 € = ${S.T.eur} $. Ставки демонстрационные.</p>`;
+}
+
+/* ---------- кабинет клиента ---------- */
+function pCabinet(){
+ if(S.role==="guest")return `<section class="sec"><div class="wrap"><div class="panel empty"><b>Личный кабинет</b><span>Войдите по номеру телефона, чтобы видеть свои заявки, счета и документы.</span><button class="btn btn-p" data-act="login">Войти</button></div></div></section>`;
+ const mine=S.leads.filter(x=>x.mine);
+ const tabs=[["cars","Мои машины"],["inv","Счета"],["docs","Документы"],["fav","Избранное"],["prof","Профиль"]];
+ let body="";
+ if(UI.cabTab==="cars")body=mine.length?mine.map(leadClient).join(""):`<div class="panel empty"><b>Заявок пока нет</b><span>Выберите машину в каталоге и нажмите «Хочу эту машину».</span><a class="btn btn-p" href="#catalog">Открыть каталог</a></div>`;
+ if(UI.cabTab==="inv"){const inv=mine.flatMap(x=>x.invoices.map(i=>({...i,lead:x})));const all=inv.reduce((s,i)=>s+i.amount,0),pd=inv.filter(i=>i.paid).reduce((s,i)=>s+i.amount,0);
+  body=inv.length?`<div class="kpis" style="grid-template-columns:repeat(3,1fr)"><div class="panel kpi"><b class="num">${usd(all)}</b><span>Всего по счетам</span></div><div class="panel kpi"><b class="num pos">${usd(pd)}</b><span>Оплачено</span></div><div class="panel kpi"><b class="num">${usd(all-pd)}</b><span>Осталось оплатить</span></div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>Счёт</th><th>Автомобиль</th><th class="r">Сумма</th><th>Статус</th><th></th></tr></thead><tbody>${inv.map(i=>`<tr><td>${esc(i.title)}</td><td>${i.lead.lotId?esc(name(lot(i.lead.lotId))):"Подбор"}</td><td class="r num">${usd(i.amount)}</td><td><span class="stat ${i.paid?"paid":"wait"}">${i.paid?"Оплачено":"Ожидает оплаты"}</span></td><td><button class="btn btn-g btn-s" data-act="pdf">PDF с реквизитами</button></td></tr>`).join("")}</tbody></table></div>
+  <p class="note">Оплата переводом по реквизитам из счёта. Статус «Оплачено» менеджер отмечает после поступления денег.</p>`
+  :`<div class="panel empty"><b>Счетов пока нет</b><span>Счёт появится здесь после выигрыша торгов.</span></div>`}
+ if(UI.cabTab==="docs"){const docs=mine.flatMap(x=>x.docs.map(d=>({...d,lead:x})));
+  body=docs.length?`<div class="tbl-wrap"><table><thead><tr><th>Документ</th><th>Этап</th><th>Автомобиль</th><th></th></tr></thead><tbody>${docs.map(d=>`<tr><td>${esc(d.n)}</td><td>${esc(d.s)}</td><td>${d.lead.lotId?esc(name(lot(d.lead.lotId))):"Подбор"}</td><td><button class="btn btn-g btn-s" data-act="pdf">Скачать</button></td></tr>`).join("")}</tbody></table></div>`
+  :`<div class="panel empty"><b>Документов пока нет</b><span>Договор и документы по машине появятся по мере прохождения этапов.</span></div>`}
+ if(UI.cabTab==="fav"){const f=S.fav.map(lot).filter(Boolean);body=f.length?`<div class="grid">${f.map(card).join("")}</div>`:`<div class="panel empty"><b>В избранном пусто</b><span>Нажмите ♥ на карточке лота, чтобы сохранить его.</span><a class="btn btn-p" href="#catalog">Открыть каталог</a></div>`}
+ if(UI.cabTab==="prof"){const u=S.user||{};body=`<div class="panel box" style="max-width:520px"><div class="form-grid"><label>Имя<input class="field" id="p-name" value="${esc(u.name||"")}"></label><label>Телефон<input class="field" value="${esc(u.phone||"")}" disabled></label>
+  <label>Страна<select class="field" id="p-cty"><option value="by" ${S.country==="by"?"selected":""}>Беларусь</option><option value="ru" ${S.country==="ru"?"selected":""}>Россия</option></select></label></div><button class="btn btn-p" data-act="saveProf" style="justify-self:start">Сохранить</button></div>`}
+ return `<section class="sec"><div class="wrap">
+  <div class="sec-h"><div><div class="eyebrow">Личный кабинет</div><h1 style="font-size:clamp(24px,3.4vw,34px)">${esc((S.user&&S.user.name)||"Клиент")}</h1></div>${S.role==="owner"?`<a class="btn btn-g" href="#admin">Перейти в кабинет владельца</a>`:""}</div>
+  <div class="tabs" role="tablist">${tabs.map(([k,v])=>`<button role="tab" data-act="cabTab" data-v="${k}" aria-selected="${UI.cabTab===k}">${v}</button>`).join("")}</div>
+  <div style="display:grid;gap:14px">${body}</div></div></section>`;
+}
+function stepOf(ld){return ld.stage<=1?0:ld.stage-1}
+function leadClient(ld){
+ const l=ld.lotId&&lot(ld.lotId), ref=ld.stage===10, s=stepOf(ld);
+ return `<div class="panel lead">
+  <div class="lead-h"><div class="row">${l?`<div class="mini">${carSvg(l)}</div>`:""}<div><b>${l?esc(name(l)+" "+l.trim):"Индивидуальный подбор"}</b><div class="note">${l?`${l.auction} · ${l.lotNo} · `:""}заявка от ${dshort(new Date(Date.now()+ld.created*DAY))}</div></div></div>
+   <span class="stat ${ref?"ref":""}">${STAGES[ld.stage]}</span></div>
+  ${ref?`<p class="note" style="margin:0">Заявка закрыта. Менеджер может предложить похожие лоты.</p>`:`
+  <div class="track">${TRACK.map((t,i)=>`<div class="${i<s?"done":i===s?"cur":""}" title="${t}"></div>`).join("")}</div>
+  <div class="track-l"><span>Сейчас: <b style="color:var(--ink)">${TRACK[s]}</b></span><span>Дальше: ${TRACK[s+1]||"готово"}</span></div>`}
+  ${ld.comment?`<div class="note">Ваш комментарий: ${esc(ld.comment)}</div>`:""}
+ </div>`;
+}
+
+/* ---------- кабинет владельца ---------- */
+function pAdmin(){
+ if(S.role!=="owner")return `<section class="sec"><div class="wrap"><div class="panel empty"><b>Кабинет владельца</b><span>Доступен только сотрудникам компании.</span><button class="btn btn-p" data-act="loginOwner">Войти как сотрудник</button></div></div></section>`;
+ const tabs=[["sum","Сводка"],["leads","Заявки"],["lots","Лоты и ИИ-подборка"],["tar","Тарифы и калькулятор"],["set","Настройки"]];
+ const body={sum:aSum,leads:aLeads,lots:aLots,tar:aTar,set:aSet}[UI.adminTab]();
+ return `<section class="sec"><div class="wrap">
+  <div class="sec-h"><div><div class="eyebrow">Кабинет владельца</div><h1 style="font-size:clamp(24px,3.4vw,34px)">${esc(S.set.brand)}: управление</h1></div><span class="note">Доступ: владелец. Менеджеров можно добавить в настройках.</span></div>
+  <div class="tabs" role="tablist">${tabs.map(([k,v])=>`<button role="tab" data-act="aTab" data-v="${k}" aria-selected="${UI.adminTab===k}">${v}${k==="leads"&&S.leads.filter(x=>x.stage===0).length?` <span class="badge b-new">${S.leads.filter(x=>x.stage===0).length}</span>`:""}</button>`).join("")}</div>
+  <div style="display:grid;gap:16px">${body}</div></div></section>`;
+}
+function aSum(){
+ const v=visibleLots().filter(l=>l.status==="active"), nw=S.leads.filter(x=>x.stage===0).length, way=S.leads.filter(x=>x.stage>=3&&x.stage<=8).length;
+ const unpaid=S.leads.flatMap(x=>x.invoices).filter(i=>!i.paid).reduce((s,i)=>s+i.amount,0);
+ return `<div class="kpis"><div class="panel kpi"><b>${nw}</b><span>Новых заявок</span></div><div class="panel kpi"><b>${way}</b><span>Машин в пути</span></div><div class="panel kpi"><b class="num">${usd(unpaid)}</b><span>Ожидает оплаты</span></div><div class="panel kpi"><b>${v.length}</b><span>Лотов на сайте</span></div></div>
+ <div class="two"><div class="panel box"><h3>Последние заявки</h3>${S.leads.slice().sort((a,b)=>b.created-a.created).slice(0,5).map(x=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:8px"><div><b>${esc(x.name)}</b><div class="note">${x.lotId?esc(name(lot(x.lotId))):"Подбор"} · ${x.country==="by"?"РБ":"РФ"}</div></div><span class="stat ${x.stage===10?"ref":""}">${STAGES[x.stage]}</span></div>`).join("")}<button class="btn btn-g btn-s" data-act="aTab" data-v="leads" style="justify-self:start">Все заявки</button></div>
+ <div class="panel box"><h3>ИИ-подборка</h3><p class="muted" style="margin:0">${S.lastRun?`Последний запуск: ${new Date(S.lastRun).toLocaleString("ru-RU")}.`:"Автозапуск каждый понедельник в 06:00."} Публикуется до ${S.set.perWeek} лотов в неделю.</p>
+  <div class="log">${runLines(false).map(x=>`<div>${x}</div>`).join("")}</div><button class="btn btn-p" data-act="aTab" data-v="lots" style="justify-self:start">Управлять лотами</button></div></div>`;
+}
+function aLeads(){
+ const ls=S.leads.slice().sort((a,b)=>(a.stage===0?-1:0)-(b.stage===0?-1:0)||b.created-a.created);
+ return ls.map(ld=>{const l=ld.lotId&&lot(ld.lotId), open=UI.openLead===ld.id;
+  return `<div class="panel lead">
+   <div class="lead-h"><div class="row">${l?`<div class="mini">${carSvg(l)}</div>`:""}<div><b>${esc(ld.name)}</b> <span class="muted">· ${esc(ld.phone)} · ${ld.country==="by"?"РБ":"РФ"}</span>
+    <div class="note">${l?`${esc(name(l)+" "+l.trim)} · ${l.lotNo}`:"Индивидуальный подбор"}${ld.maxBid?` · макс. ставка ${usd(ld.maxBid)}`:""}</div></div></div>
+    <div class="row"><select class="field" style="width:auto" data-stage="${ld.id}">${STAGES.map((s,i)=>`<option value="${i}" ${i===ld.stage?"selected":""}>${s}</option>`).join("")}</select>
+    <button class="btn btn-g btn-s" data-act="openLead" data-id="${ld.id}">${open?"Свернуть":"Подробнее"}</button></div></div>
+   ${ld.comment?`<div class="note">Комментарий клиента: ${esc(ld.comment)}</div>`:""}
+   ${open?`<div class="two">
+     <div style="display:grid;gap:8px"><h3>Счета</h3>${ld.invoices.length?ld.invoices.map(i=>`<div class="row" style="justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:6px"><span>${esc(i.title)}</span><span class="row"><b class="num">${usd(i.amount)}</b>${i.paid?`<span class="stat paid">Оплачено</span>`:`<button class="btn btn-g btn-s" data-act="paid" data-l="${ld.id}" data-i="${i.id}">Отметить оплату</button>`}</span></div>`).join(""):`<span class="note">Счетов нет.</span>`}
+      <div class="row"><input class="field" id="inv-t-${ld.id}" placeholder="Назначение счёта" style="flex:2;min-width:140px"><input class="field" id="inv-a-${ld.id}" type="number" placeholder="Сумма, $" style="flex:1;min-width:90px"><button class="btn btn-p btn-s" data-act="addInv" data-l="${ld.id}">Выставить</button></div>
+      ${l&&!ld.invoices.length?`<button class="btn btn-g btn-s" data-act="autoInv" data-l="${ld.id}" style="justify-self:start">Создать счета из расчёта</button>`:""}</div>
+     <div style="display:grid;gap:8px"><h3>Документы</h3>${ld.docs.length?ld.docs.map(d=>`<div class="note">📄 ${esc(d.n)} · ${esc(d.s)}</div>`).join(""):`<span class="note">Документов нет.</span>`}
+      <label class="btn btn-g btn-s" style="justify-self:start">Загрузить документ<input type="file" hidden data-upload="${ld.id}"></label>
+      <h3 style="margin-top:6px">Заметки (клиент не видит)</h3><textarea class="field" rows="2" data-notes="${ld.id}">${esc(ld.notes)}</textarea></div>
+   </div>`:""}
+  </div>`}).join("");
+}
+function aLots(){
+ const pool=LOTS.filter(l=>!RESERVE.includes(l.id)||S.added.includes(l.id));
+ const T=S.T;
+ return `<div class="panel box"><div class="row" style="justify-content:space-between"><div><h3>ИИ-подборка</h3><div class="note">Еженедельно: получить лоты → отсеять по правилам → оценить фото → опубликовать до ${S.set.perWeek} лучших.</div></div>
+   <button class="btn btn-p" data-act="run" id="runBtn">Запустить подборку сейчас</button></div>
+   <div class="log" id="runLog">${runLines(false).map(x=>`<div>${x}</div>`).join("")}</div></div>
+ <div class="tbl-wrap"><table><thead><tr><th>На сайте</th><th>Лот</th><th>Статус</th><th class="r">Оценка</th><th class="r">Ремонт</th><th class="r">Под ключ РБ</th><th class="r">Рынок av.by</th><th class="r">Выгода РБ</th><th class="r">Под ключ РФ</th><th class="r">Рынок auto.ru</th><th class="r">Выгода РФ</th></tr></thead><tbody>
+ ${pool.map(l=>{const by=totalFor(l,"by"),ru=totalFor(l,"ru"),sb=l.market.by-by,sr=l.market.ru-ru;
+  return `<tr><td><label class="sw"><input type="checkbox" data-vis="${l.id}" ${S.hidden.includes(l.id)?"":"checked"} aria-label="Показывать на сайте"><i></i></label></td>
+  <td><a href="#lot-${l.id}"><b>${esc(name(l))}</b></a><div class="note mono">${l.lotNo}</div></td>
+  <td>${l.status==="sold"?`<span class="stat paid">Продан ${usd(l.price)}</span>`:l.status==="ended"?`<span class="stat">Торги завершены</span>`:`<span class="stat wait">Торги ${dshort(saleDate(l))}</span>`}</td>
+  <td class="r num">${l.score}</td><td class="r num">$${fm(l.repair[0])}–${fm(l.repair[1])}</td>
+  <td class="r num">${usd(by)}</td><td class="r num">${usd(l.market.by)}</td><td class="r num ${sb>0?"pos":"neg"}">${sb>0?"+":""}${fm(sb)}</td>
+  <td class="r num">${usd(ru)}</td><td class="r num">${usd(l.market.ru)}</td><td class="r num ${sr>0?"pos":"neg"}">${sr>0?"+":""}${fm(sr)}</td></tr>`}).join("")}
+ </tbody></table></div>
+ <p class="note" style="margin:0">Сравнение с рынком видно только вам, на сайте его нет. Выключенный тумблер мгновенно снимает лот с сайта.</p>
+ <div class="panel box"><h3>Правила отбора</h3>
+  <div class="form-grid"><label>Лотов в неделю<input class="field" type="number" data-set="perWeek" value="${S.set.perWeek}"></label><label>Возраст от, лет<input class="field" type="number" data-set="ageMin" value="${S.set.ageMin}"></label><label>Возраст до, лет<input class="field" type="number" data-set="ageMax" value="${S.set.ageMax}"></label><label>Срок до растаможки, дней<input class="field" type="number" data-tar="deliveryDays" value="${T.deliveryDays}"></label></div>
+  <div><div class="eyebrow" style="margin-bottom:8px">Всегда исключать</div><div class="row">${Object.entries(S.set.excl).map(([k,v])=>`<label class="row" style="gap:6px;font-size:13.5px;font-weight:600"><span class="sw"><input type="checkbox" data-excl="${esc(k)}" ${v?"checked":""}><i></i></span>${esc(k)}</label>`).join("")}</div></div>
+  <div class="form-grid"><label>ИИ-шлюз (base URL)<input class="field mono" data-set="api" value="${esc(S.set.api)}"></label><label>Модель<input class="field" data-set="model" value="${esc(S.set.model)}"></label></div>
+ </div>`;
+}
+function runLines(full){
+ const pub=visibleLots().filter(l=>l.status==="active").length;
+ const base=["$ подборка · неделя "+weekNo(),"→ получено из API аукционов: 2 184 лота","→ возраст 3–5 лет на дату растаможки: 1 106","→ исключено flood/fire/non-run/документы: 421 → осталось 685","→ анализ фото и описаний ИИ: 685 лотов","→ сравнение с рынком: av.by — 652, auto.ru/drom.ru — 641"];
+ return [...base,`<span class="ok">✓ опубликовано на сайте: ${pub} (демо-выборка из ${S.set.perWeek})</span>`];
+}
+function weekNo(){const d=new Date();const o=new Date(d.getFullYear(),0,1);return Math.ceil(((d-o)/DAY+o.getDay()+1)/7)}
+function aTar(){
+ const T=S.T, inp=(k,v,st)=>`<input class="field num" type="number" step="${st||1}" data-tar="${k}" value="${v}">`;
+ return `<p class="hint" style="margin:0">Все ставки в демо условные. Перед запуском сверьте их с действующими тарифами таможни РБ и РФ.</p>
+ <div class="panel box"><h3>Курсы и услуги</h3><div class="form-grid">
+  <label>1 $ в BYN${inp("byn",T.byn,0.01)}</label><label>1 $ в ₽${inp("rub",T.rub,0.1)}</label><label>1 € в $${inp("eur",T.eur,0.01)}</label><label>Услуги компании, $${inp("service",T.service)}</label></div>
+  <p class="note" style="margin:0">Курсы обновляются ежедневно с ЦБ РФ и НБРБ. Ручное значение действует до следующего обновления.</p></div>
+ <div class="panel box"><h3>Логистика</h3><div class="form-grid">
+  ${Object.entries(STATES).map(([k,v])=>`<label>${v[0]} → ${v[1]}, $${inp("inland."+k,T.inland[k])}</label>`).join("")}
+  <label>Морской фрахт до Клайпеды, $${inp("ocean",T.ocean)}</label><label>Клайпеда → Минск, $${inp("landBy",T.landBy)}</label><label>Клайпеда → Москва, $${inp("landRu",T.landRu)}</label>
+  <label>Брокер/СВХ РБ, $${inp("brokerBy",T.brokerBy)}</label><label>Брокер/СВХ РФ, $${inp("brokerRu",T.brokerRu)}</label></div></div>
+ <div class="two">
+  <div class="panel box"><h3>Пошлина для авто 3–5 лет, €/см³</h3><div class="tbl-wrap"><table><thead><tr><th>Объём до, см³</th><th class="r">Ставка</th></tr></thead><tbody>
+   ${T.cc.map((c,i)=>`<tr><td>${c[0]>9999?"свыше 3000":fm(c[0])}</td><td class="r"><input class="field num" style="width:90px" type="number" step="0.1" data-cc="${i}" value="${c[1]}"></td></tr>`).join("")}</tbody></table></div></div>
+  <div class="panel box"><h3>Сбор аукциона, $</h3><div class="tbl-wrap"><table><thead><tr><th>Цена лота до, $</th><th class="r">Сбор</th></tr></thead><tbody>
+   ${T.fees.map((f,i)=>`<tr><td>${f[0]>99999?"выше":fm(f[0])}</td><td class="r"><input class="field num" style="width:90px" type="number" data-fee="${i}" value="${f[1]}"></td></tr>`).join("")}</tbody></table></div></div>
+ </div>
+ <div class="panel box"><h3>Утилизационный сбор и электромобили</h3><div class="form-grid">
+  <label>Утильсбор РБ, BYN${inp("utilBy",T.utilBy)}</label><label>Утильсбор РФ до 160 л.с., ₽${inp("utilRuLow",T.utilRuLow)}</label><label>Утильсбор РФ свыше 160 л.с., ₽${inp("utilRuHigh",T.utilRuHigh)}</label><label>Электро РФ, пошлина %${inp("evRuPct",T.evRuPct)}</label></div>
+  <p class="note" style="margin:0">Изменения применяются сразу ко всем карточкам и калькулятору. Редактировать тарифы может только владелец.</p></div>`;
+}
+function aSet(){
+ const s=S.set;
+ return `<div class="panel box"><h3>Данные компании</h3><div class="form-grid">
+  <label>Название<input class="field" data-set="brand" value="${esc(s.brand)}"></label><label>Телефон<input class="field" data-set="phone" value="${esc(s.phone)}"></label>
+  <label>Telegram<input class="field" data-set="tg" value="${esc(s.tg)}"></label><label>Адрес офиса<input class="field" data-set="city" value="${esc(s.city)}"></label></div></div>
+ <div class="panel box"><h3>Уведомления</h3><p class="muted" style="margin:0">Новые заявки приходят в кабинет и в Telegram-бот компании.</p><div class="form-grid"><label>Токен бота<input class="field" value="•••••••• (хранится на сервере)" disabled></label><label>Чат для заявок<input class="field" value="${esc(s.tg)}" disabled></label></div></div>
+ <div class="panel box"><h3>Сотрудники</h3><div class="tbl-wrap"><table><thead><tr><th>Имя</th><th>Роль</th><th>Права</th></tr></thead><tbody><tr><td>${esc(s.brand)}, владелец</td><td>Владелец</td><td>Всё, включая тарифы</td></tr></tbody></table></div>
+  <button class="btn btn-g btn-s" data-act="addMgr" style="justify-self:start">Добавить менеджера</button><p class="note" style="margin:0">Менеджер работает с заявками, счетами и документами, но не меняет тарифы.</p></div>`;
+}
+
+/* ============ МОДАЛКИ ============ */
+let after=null;
+function modal(html){$("#modalRoot").innerHTML=`<div class="modal-bg" data-act="mclose-bg"><div class="modal" role="dialog" aria-modal="true"><button class="x" data-act="mclose" aria-label="Закрыть">×</button>${html}</div></div>`;const f=$("#modalRoot input,#modalRoot textarea");if(f)f.focus()}
+function closeModal(){$("#modalRoot").innerHTML=""}
+function loginModal(owner){
+ modal(`<h2 style="font-size:20px">${owner?"Вход для сотрудников":"Вход по номеру телефона"}</h2>
+  <p class="muted" style="margin:0">${owner?"Код придёт в SMS на номер владельца.":"После входа станут видны цены под ключ, избранное и личный кабинет."}</p>
+  <div id="lstep1" style="display:grid;gap:12px">
+   ${owner?"":`<label>Имя<input class="field" id="l-name" value="Алексей Ковалёв"></label>`}
+   <label>Телефон<input class="field" id="l-phone" inputmode="tel" value="+375 29 111-22-33"></label>
+   ${owner?"":`<label>Страна доставки<select class="field" id="l-cty"><option value="by">Беларусь</option><option value="ru" ${S.country==="ru"?"selected":""}>Россия</option></select></label>
+   <label class="row" style="font-weight:500;color:var(--muted);gap:8px;flex-wrap:nowrap"><input type="checkbox" id="l-agree" checked> Согласен на обработку персональных данных</label>`}
+   <button class="btn btn-p" data-act="sendCode">Получить код по SMS</button></div>
+  <div id="lstep2" hidden style="display:grid;gap:12px">
+   <label>Код из SMS<input class="field mono" id="l-code" inputmode="numeric" maxlength="4" placeholder="••••"></label>
+   <div class="hint">Демо: введите код 1234</div><div id="l-err" class="neg" style="font-size:13px"></div>
+   <button class="btn btn-p" data-act="${owner?"checkCodeOwner":"checkCode"}">Войти</button></div>`);
+}
+function wantModal(id){
+ const l=lot(id);
+ modal(`<h2 style="font-size:20px">Заявка на ${esc(name(l))}</h2>
+  <p class="muted" style="margin:0">Менеджер свяжется с вами, проверит лот и согласует ставку. Предоплата не нужна.</p>
+  <label>Максимальная ставка, $ (необязательно)<input class="field" id="w-bid" type="number" value="${l.price+1500}"></label>
+  <label>Комментарий<textarea class="field" id="w-com" rows="2" placeholder="Например: интересует отчёт Carfax"></textarea></label>
+  <button class="btn btn-top" data-act="sendWant" data-id="${id}">Отправить заявку</button>`);
+}
+function needAuth(fn){if(authed())return fn();after=fn;loginModal(false)}
+
+/* ============ РОУТЕР И РЕНДЕР ============ */
+function route(){const h=(location.hash||"#home").slice(1);return h.startsWith("home")?"home":h}
+function route(){const h=(location.hash||"#home").slice(1);return (h.startsWith("home")||h==="contacts"||h==="")?"home":h}
+function render(){
+ const r=route(), v=$("#view");
+ setMega(false);
+ const navKey={catalog:"catalog",sold:"sold",calc:"calc",home:"home",cabinet:"cabinet",admin:"admin"}[r];
+ document.querySelectorAll("#roleSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.role));
+ document.querySelectorAll("#ctySeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===S.country));
+ $("#authNav").innerHTML=S.role==="guest"?`<button data-act="login">Вход</button><button data-act="login">Регистрация</button>`
+  :S.role==="owner"?`<a href="#admin" data-r="admin">Кабинет владельца</a>`:`<a href="#cabinet" data-r="cabinet">Кабинет</a>`;
+ document.querySelectorAll("#nav [data-r]").forEach(a=>a.dataset.r===navKey?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
+ $("#brandName").textContent=S.set.brand.toUpperCase();
+ $("#topPhone").textContent=S.set.phone;
+ $("#fAbout").textContent=`${S.set.brand} пригоняет автомобили с аукционов Copart и IAAI в Беларусь и Россию. Каждую неделю мы отбираем проходные машины 3–5 лет с минимальными повреждениями, торгуемся, доставляем морем через Клайпеду, растаможиваем и выдаём автомобиль с документами. Каждый этап виден клиенту в личном кабинете.`;
+ $("#fUp").innerHTML=upcoming().slice(0,8).map(u=>`<li><a href="#catalog" data-act="preset" data-k="auction" data-v="${u.auction}">${u.auction} · торги ${dm(u.date)}</a></li>`).join("");
+ $("#fContacts").innerHTML=`<li><span class="num">${esc(S.set.phone)}</span></li><li><span>Telegram ${esc(S.set.tg)}</span></li><li><span>${esc(S.set.city)}</span></li>`;
+ $("#fLegal").innerHTML=`${esc(S.set.brand)} © ${new Date().getFullYear()}. Все права защищены<br><a href="#home">Политика конфиденциальности</a> | <a href="#home">Согласие на обработку данных</a> | <a href="#calc">Расчёты ориентировочные</a>`;
+ if(r==="home")v.innerHTML=pHome();
+ else if(r==="catalog"){v.innerHTML=pCatalog(false);drawResults(false)}
+ else if(r==="sold"){v.innerHTML=pCatalog(true);drawResults(true)}
+ else if(r==="calc"){v.innerHTML=pCalc();drawCalc()}
+ else if(r==="cabinet")v.innerHTML=pCabinet();
+ else if(r==="admin")v.innerHTML=pAdmin();
+ else if(r.startsWith("lot-"))v.innerHTML=pLot(r.slice(4));
+ else v.innerHTML=pHome();
+}
+window.addEventListener("hashchange",()=>{UI.gal=0;render();const h=location.hash.slice(1);
+ if(h==="home-how"||h==="contacts"){const e=document.getElementById(h);if(e)e.scrollIntoView();}else window.scrollTo(0,0)});
+
+/* ============ СОБЫТИЯ ============ */
+document.addEventListener("click",e=>{
+ const t=e.target.closest("[data-act]");if(!t)return;
+ const a=t.dataset.act;
+ if(a==="fav"||t.tagName==="BUTTON")e.preventDefault();
+ if(a==="mclose-bg"&&e.target!==t)return;
+ ({
+  role(){S.role=t.dataset.v;if(S.role!=="guest"&&!S.user)S.user={name:"Алексей Ковалёв",phone:"+375 29 111-22-33"};save();render();toast(S.role==="guest"?"Вы смотрите сайт как гость":S.role==="client"?"Вы вошли как клиент":"Вы вошли как владелец")},
+  reset(){S=fresh();save();UI.openLead=null;render();toast("Демо сброшено")},
+  country(){S.country=t.dataset.v;save();render()},
+  login(){loginModal(false)},loginOwner(){loginModal(true)},
+  sendCode(){const ag=$("#l-agree");if(ag&&!ag.checked){toast("Нужно согласие на обработку данных");return}$("#lstep1").hidden=true;$("#lstep2").hidden=false;$("#l-code").focus()},
+  checkCode(){if($("#l-code").value!=="1234"){$("#l-err").textContent="Неверный код. Проверьте SMS и попробуйте ещё раз.";return}
+   S.user={name:$("#l-name").value||"Клиент",phone:$("#l-phone").value};S.country=$("#l-cty").value;S.role="client";save();closeModal();render();toast("Готово, цены открыты");if(after){const f=after;after=null;f()}},
+  checkCodeOwner(){if($("#l-code").value!=="1234"){$("#l-err").textContent="Неверный код.";return}S.role="owner";if(!S.user)S.user={name:"Владелец",phone:""};save();closeModal();location.hash="#admin";render()},
+  mclose(){closeModal();after=null},"mclose-bg"(){closeModal();after=null},
+  fav(){const id=+t.dataset.id;needAuth(()=>{const i=S.fav.indexOf(id);i>=0?S.fav.splice(i,1):S.fav.push(id);save();render();toast(i>=0?"Убрано из избранного":"Добавлено в избранное")})},
+  gal(){UI.gal=+t.dataset.i;render()},
+  want(){const id=+t.dataset.id;needAuth(()=>{const ex=S.leads.find(x=>x.mine&&x.lotId===id&&x.stage!==10);if(ex){toast("Заявка на этот лот уже есть, она в кабинете");location.hash="#cabinet";return}wantModal(id)})},
+  sendWant(){const id=+t.dataset.id;S.leads.push({id:Date.now(),lotId:id,name:S.user.name,phone:S.user.phone,country:S.country,stage:0,mine:true,created:0,comment:$("#w-com").value,maxBid:+$("#w-bid").value||null,invoices:[],docs:[],notes:""});save();
+   modal(`<h2 style="font-size:20px">Заявка принята</h2><p style="margin:0">Менеджер свяжется с вами в течение 30 минут в рабочее время. Статус заявки виден в личном кабинете.</p><div class="note">В демо заявка уже появилась в кабинете владельца, и ему ушло уведомление в Telegram.</div><a class="btn btn-p" href="#cabinet" data-act="mclose">Открыть кабинет</a>`)},
+  pick(){needAuth(()=>{S.leads.push({id:Date.now(),lotId:null,name:S.user.name,phone:S.user.phone,country:S.country,stage:0,mine:true,created:0,comment:`Подбор: бюджет $${$("#pickBudget")?.value||"—"}. ${$("#pickWish")?.value||""}`,maxBid:null,invoices:[],docs:[],notes:""});save();toast("Запрос на подбор отправлен")})},
+  exact(){needAuth(()=>{S.leads.push({id:Date.now(),lotId:null,name:S.user.name,phone:S.user.phone,country:S.country,stage:0,mine:true,created:0,comment:`Точный расчёт: ставка $${$("#c-price").value}, ${$("#c-cc").value} см³, ${$("#c-hp").value} л.с., ${$("#c-fuel").value}`,maxBid:null,invoices:[],docs:[],notes:""});save();toast("Запрос отправлен, менеджер пришлёт точный расчёт")})},
+  filters(){UI.filtersOpen=!UI.filtersOpen;$("#filters").classList.toggle("open",UI.filtersOpen)},
+  freset(){UI.f={make:"",body:"",fuel:"",year:"",max:"",sort:UI.f.sort};$("#filters").innerHTML=filtersHtml();drawResults(false)},
+  cabTab(){UI.cabTab=t.dataset.v;render()},aTab(){UI.adminTab=t.dataset.v;render()},
+  openLead(){const id=+t.dataset.id;UI.openLead=UI.openLead===id?null:id;render()},
+  paid(){const ld=S.leads.find(x=>x.id===+t.dataset.l);ld.invoices.find(i=>i.id===+t.dataset.i).paid=true;save();render();toast("Оплата отмечена, клиент видит её в кабинете")},
+  addInv(){const id=t.dataset.l, ti=$("#inv-t-"+id).value.trim(), am=+$("#inv-a-"+id).value;if(!ti||!am){toast("Укажите назначение и сумму счёта");return}
+   const ld=S.leads.find(x=>x.id===+id);ld.invoices.push({id:Date.now(),title:ti,amount:am,paid:false});save();render();toast("Счёт выставлен и появился у клиента")},
+  autoInv(){const ld=S.leads.find(x=>x.id===+t.dataset.l), l=lot(ld.lotId), c=calc(l,ld.country), L=c.lines;
+   ld.invoices=[{id:1,title:"Оплата лота и аукционного сбора",amount:L[0][1]+L[1][1],paid:false},{id:2,title:"Доставка по США, фрахт, доставка до места",amount:L[2][1]+L[3][1]+L[4][1],paid:false},{id:3,title:"Таможенные платежи и оформление",amount:L[5][1]+L[6][1]+L[7][1],paid:false},{id:4,title:"Услуги компании",amount:L[8][1],paid:false}];
+   save();render();toast("Созданы 4 счёта по расчёту")},
+  pdf(){toast("В рабочей версии здесь скачивается PDF")},
+  saveProf(){S.user.name=$("#p-name").value;S.country=$("#p-cty").value;save();render();toast("Профиль сохранён")},
+  addMgr(){toast("В рабочей версии: телефон менеджера → приглашение по SMS")},
+  run(){const btn=$("#runBtn"),log=$("#runLog");btn.disabled=true;btn.textContent="Идёт подборка…";log.innerHTML="";
+   const fresh=RESERVE.filter(id=>!S.added.includes(id));
+   const lines=["$ подборка · неделя "+weekNo()+" · ручной запуск","→ запрос к API аукционов…","→ получено: 2 207 лотов","→ возраст 3–5 лет на дату растаможки: 1 118","→ исключено flood/fire/non-run/документы: 433 → осталось 685","→ ИИ анализирует фото повреждений (шлюз "+S.set.api+")…","→ сравнение с av.by и auto.ru/drom.ru…",
+    `<span class="ok">✓ новых лотов в подборке: ${fresh.length}${fresh.length?" ("+fresh.map(id=>lot(id).make+" "+lot(id).model).join(", ")+")":", подборка актуальна"}</span>`];
+   lines.forEach((x,i)=>setTimeout(()=>{log.insertAdjacentHTML("beforeend",`<div>${x}</div>`);log.scrollTop=log.scrollHeight;
+    if(i===lines.length-1){S.added.push(...fresh);S.lastRun=Date.now();save();setTimeout(()=>{render();toast(fresh.length?`Опубликовано новых лотов: ${fresh.length}`:"Новых лотов нет")},700)}},450*(i+1)));},
+  mega(){if(UI.mega&&Date.now()-(UI.megaAt||0)<600)return;setMega(!UI.mega)},
+  slide(){showSlide(+t.dataset.i)},
+  preset(){const k=t.dataset.k,val=t.dataset.v;UI.f={...EMPTY_F};UI.page=1;UI.sort="rec";
+   if(k==="sort")UI.sort=val;else if(k==="top"||k==="premium"||k==="green")UI.f[k]=true;else if(k!=="all")UI.f[k]=val;
+   setMega(false);if(location.hash==="#catalog"){render();window.scrollTo(0,0)}},
+  filters(){UI.filtersOpen=!UI.filtersOpen;const g=$("#gs");if(g)g.classList.toggle("closed",!UI.filtersOpen);t.textContent=UI.filtersOpen?"Скрыть поиск":"Глобальный поиск и фильтры"},
+  gsApply(){UI.filtersOpen=false;render();window.scrollTo(0,0)},
+  gsReset(){UI.f={...EMPTY_F};UI.page=1;const g=$("#gs");if(g)g.innerHTML=gsHtml();drawResults(false)},
+  page(){UI.page=+t.dataset.p;drawResults(false);const rt=$("#resTop");if(rt)rt.scrollIntoView({block:"start"})},
+  view(){UI.view=t.dataset.v;drawResults(false)},
+  toTop(){window.scrollTo({top:0,behavior:"smooth"})}
+ })[a]?.();
+});
+document.addEventListener("input",e=>{
+ const t=e.target;
+ if(t.closest("#calcForm"))drawCalc();
+ if(t.id==="f-max"){UI.f.max=t.value;drawResults(false)}
+});
+document.addEventListener("change",e=>{
+ const t=e.target, d=t.dataset;
+ if(t.id&&t.id.startsWith("f-")){const k=t.id.slice(2);UI.f[k]=t.value;drawResults(false);return}
+ if(t.closest("#calcForm")){drawCalc();return}
+ if(d.vis){const id=+d.vis,i=S.hidden.indexOf(id);t.checked?(i>=0&&S.hidden.splice(i,1)):S.hidden.push(id);save();toast(t.checked?"Лот снова на сайте":"Лот снят с сайта");return}
+ if(d.stage){const ld=S.leads.find(x=>x.id===+d.stage);ld.stage=+t.value;save();toast(`Статус: «${STAGES[ld.stage]}». Клиент видит его в кабинете`);render();return}
+ if(d.notes){S.leads.find(x=>x.id===+d.notes).notes=t.value;save();toast("Заметка сохранена");return}
+ if(d.upload&&t.files[0]){const ld=S.leads.find(x=>x.id===+d.upload);ld.docs.push({n:t.files[0].name,s:STAGES[ld.stage]});save();render();toast("Документ загружен, клиент получил уведомление");return}
+ if(d.excl!==undefined){S.set.excl[d.excl]=t.checked;save();return}
+ if(d.set){S.set[d.set]=t.type==="number"?+t.value:t.value;save();render();toast("Сохранено");return}
+ if(d.tar){const v=+t.value;if(d.tar.startsWith("inland."))S.T.inland[d.tar.slice(7)]=v;else S.T[d.tar]=v;save();toast("Тариф сохранён, расчёты обновлены");return}
+ if(d.cc!==undefined){S.T.cc[+d.cc][1]=+t.value;save();toast("Ставка пошлины сохранена");return}
+ if(d.fee!==undefined){S.T.fees[+d.fee][1]=+t.value;save();toast("Сбор аукциона сохранён");return}
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#modalRoot").innerHTML){closeModal();after=null}});
+/* ============ ДОПОЛНЕНИЯ: каталог, мега-меню, слайдер ============ */
+document.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.f&&t.type!=="checkbox"&&t.tagName==="INPUT"){UI.f[t.dataset.f]=t.value;UI.page=1;drawResults(false)}});
+document.addEventListener("change",e=>{const t=e.target,d=t.dataset||{};
+ if(d.f){UI.f[d.f]=t.type==="checkbox"?t.checked:t.value;if(d.f==="make"){UI.f.model="";const g=$("#gs");if(g)g.innerHTML=gsHtml()}UI.page=1;drawResults(false)}
+ if(d.ui){UI[d.ui]=d.ui==="per"?+t.value:t.value;UI.page=1;drawResults(false)}});
+document.addEventListener("click",e=>{if(UI.mega&&!e.target.closest("#nav"))setMega(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&UI.mega)setMega(false)});
+$("#megaBtn").addEventListener("mouseenter",()=>{if(window.matchMedia("(hover:hover)").matches&&!UI.mega)setMega(true)});
+$("#nav").addEventListener("mouseleave",()=>{if(window.matchMedia("(hover:hover)").matches&&UI.mega)setMega(false)});
+document.querySelectorAll("#nav .nav-in > a").forEach(a=>a.addEventListener("mouseenter",()=>{if(UI.mega)setMega(false)}));
+function showSlide(i){UI.slide=i;document.querySelectorAll("#slider .slide").forEach((s,k)=>{s.classList.toggle("on",k===i);s.setAttribute("aria-hidden",k!==i)});document.querySelectorAll("#slider .dots button").forEach((b,k)=>b.setAttribute("aria-pressed",k===i))}
+setInterval(()=>{const sl=$("#slider");if(!sl||UI.hoverSlider||window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;showSlide((UI.slide+1)%SLIDES.length)},6000);
+document.addEventListener("mouseover",e=>{UI.hoverSlider=!!e.target.closest("#slider")});
+window.addEventListener("scroll",()=>{$("#toTop").hidden=window.scrollY<600},{passive:true});
+render();
+</script>
+
+</body>
+</html>
