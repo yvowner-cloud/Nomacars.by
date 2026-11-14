@@ -1,0 +1,80 @@
+name: Deploy to server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Package standalone build
+        run: |
+          mkdir -p dist
+          cp -r .next/standalone/. dist/
+          mkdir -p dist/.next
+          cp -r .next/static dist/.next/static
+          cp -r public dist/public
+
+      - name: Check deploy secrets
+        id: secrets
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          if [ -z "$HOST" ]; then
+            echo "::warning::Секреты DEPLOY_* не заданы — сборка проверена, но на сервер не выкладывается. См. deploy/README.md"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload to server and restart
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          PORT: ${{ secrets.DEPLOY_PORT }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          PORT="${PORT:-22}"
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          SSH="ssh -i ~/.ssh/deploy -p $PORT -o StrictHostKeyChecking=yes"
+          REL="/srv/nomacars/releases/$(date +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
+          rsync -az --delete -e "$SSH" dist/ "deploy@$HOST:$REL/"
+          $SSH "deploy@$HOST" bash -s <<EOF
+          set -euo pipefail
+          ln -sfn "$REL" /srv/nomacars/current.new && mv -Tf /srv/nomacars/current.new /srv/nomacars/current
+          sudo /usr/bin/systemctl restart nomacars
+          sleep 4
+          sudo /usr/bin/systemctl is-active nomacars
+          curl -fsS -o /dev/null -w "Сайт отвечает: HTTP %{http_code}\n" http://127.0.0.1:3000/
+          # хранить 5 последних версий для отката
+          ls -1dt /srv/nomacars/releases/* | tail -n +6 | xargs -r rm -rf
+          EOF
