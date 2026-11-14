@@ -51,7 +51,7 @@ export default async function LotPage({ params }: P) {
             <div className="eyebrow">{l.auction} · лот {l.lotNo} · {st.name}</div>
             <h1 style={{ fontSize: "clamp(22px,3vw,32px)", marginTop: 4 }}>{l.year} {l.make} {l.model} {l.trim}</h1>
           </div>
-          <span className="score">Оценка ИИ {l.aiScore}/100</span>
+          <span className="score">Оценка Nomacars {l.aiScore}/100</span>
         </div>
 
         <div className="lot">
