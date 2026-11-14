@@ -1,0 +1,41 @@
+import Link from "next/link";
+import type { Lot } from "@/lib/types";
+import { CarArt } from "./CarArt";
+import { TurnkeyPrice, WatchButton } from "./Price";
+import { CardTimer } from "./Timer";
+import { engineStr, kmStr } from "@/lib/format";
+
+export function LotBadge({ lot }: { lot: Lot }) {
+  if (lot.status === "sold") return <span className="badge b-sold">Продан</span>;
+  if (lot.status === "ended") return <span className="badge b-end">Торги завершены</span>;
+  if (lot.top) return <span className="badge b-top">Топ недели</span>;
+  return null;
+}
+
+export function LotCard({ lot }: { lot: Lot }) {
+  return (
+    <Link className="card" href={`/lot/${lot.slug}`}>
+      <div className="ph">
+        <CarArt lot={lot} />
+        <div className="badges"><LotBadge lot={lot} /></div>
+        <WatchButton id={lot.id} />
+        <span className="lotno mono">{lot.auction} · {lot.lotNo}</span>
+      </div>
+      <div className="cbody">
+        <div className="ctitle">
+          {lot.year} {lot.make} {lot.model}
+          <small>{lot.trim} · {lot.body === "suv" ? "кроссовер" : "седан"}</small>
+        </div>
+        <dl className="specs">
+          <dt>Пробег</dt><dd className="num">{kmStr(lot.miles)}</dd>
+          <dt>Двигатель</dt><dd>{engineStr(lot.cc, lot.hp)}</dd>
+          <dt>Повреждение</dt><dd className={lot.level === "light" ? "dmg-light" : "dmg-mid"} title={lot.damage}>{lot.damage}</dd>
+        </dl>
+        <div className="cfoot">
+          <TurnkeyPrice lot={lot} />
+          <CardTimer offsetDays={lot.saleOffsetDays} active={lot.status === "active"} />
+        </div>
+      </div>
+    </Link>
+  );
+}

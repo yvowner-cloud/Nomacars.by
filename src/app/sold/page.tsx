@@ -1,0 +1,23 @@
+import type { Metadata } from "next";
+import { LotCard } from "@/components/LotCard";
+import { pastLots } from "@/lib/lots";
+
+export const metadata: Metadata = {
+  title: "Прошедшие торги и реальные цены выкупа",
+  description: "За сколько реально выкупаются автомобили на аукционах Copart и IAAI: архив лотов из нашей подборки.",
+};
+
+export default function SoldPage() {
+  const lots = pastLots();
+  return (
+    <section className="sec">
+      <div className="wrap">
+        <div className="sec-h">
+          <div><div className="eyebrow">Архив подборки</div><h1 style={{ fontSize: "clamp(24px,3.4vw,34px)" }}>Прошедшие торги</h1></div>
+          <p className="note" style={{ margin: 0, maxWidth: "52ch" }}>После торгов система записывает реальную цену выкупа. Если аукцион её не раскрыл, лот помечается «Торги завершены».</p>
+        </div>
+        <div className="grid">{lots.map((l) => <LotCard key={l.id} lot={l} />)}</div>
+      </div>
+    </section>
+  );
+}
