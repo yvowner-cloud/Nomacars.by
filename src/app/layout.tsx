@@ -4,6 +4,9 @@ import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { COMPANY } from "@/lib/company";
+import { upcomingAuctions } from "@/lib/lots";
+
+export const dynamic = "force-dynamic"; // демо: даты торгов считаются от «сегодня»
 
 export const metadata: Metadata = {
   metadataBase: new URL(`https://${COMPANY.domain}`),
@@ -12,22 +15,23 @@ export const metadata: Metadata = {
   openGraph: { type: "website", locale: "ru_RU", siteName: COMPANY.brand },
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#c8102e" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#000000" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const upcoming = upcomingAuctions().map((u) => ({ iso: u.date.toISOString(), auction: u.auction, count: u.count }));
   return (
     <html lang="ru">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" />
       </head>
       <body>
         <Providers>
-          <Header />
+          <Header upcoming={upcoming} />
           <main>{children}</main>
-          <Footer />
+          <Footer upcoming={upcoming} />
         </Providers>
       </body>
     </html>

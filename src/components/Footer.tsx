@@ -1,39 +1,70 @@
 import Link from "next/link";
 import { COMPANY } from "@/lib/company";
+import type { Upcoming } from "./Header";
+import { ToTop } from "./ToTop";
 
-export function Footer() {
+const dm = (iso: string) => new Date(iso).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
+
+export function Footer({ upcoming }: { upcoming: Upcoming[] }) {
   return (
     <footer id="contacts">
-      <div className="wrap">
+      <div className="wrap foot">
         <div>
-          <h3>{COMPANY.brand}</h3>
-          <p style={{ margin: 0, maxWidth: "46ch" }}>
-            Пригон автомобилей с аукционов Copart и IAAI в Беларусь и Россию. Подборка проходных лотов 3–5 лет обновляется каждую неделю.
+          <h3>О компании</h3>
+          <p>
+            {COMPANY.brand} пригоняет автомобили с аукционов Copart и IAAI в Беларусь и Россию. Каждую неделю ИИ
+            отбирает проходные машины 3–5 лет с минимальными повреждениями, а мы торгуемся, доставляем морем через
+            Клайпеду, растаможиваем и выдаём автомобиль с документами. Каждый этап виден клиенту в личном кабинете.
           </p>
         </div>
         <div>
-          <h3>Контакты</h3>
-          <nav>
-            <span className="num">{COMPANY.phone}</span>
-            <span>Telegram: {COMPANY.telegram}</span>
-            <span>WhatsApp: {COMPANY.whatsapp}</span>
-            <span>{COMPANY.office}</span>
-            <span>{COMPANY.hours}</span>
-          </nav>
+          <h3>Разделы</h3>
+          <ul className="chev">
+            <li><Link href="/">Главная</Link></li>
+            <li><Link href="/catalog">Каталог</Link></li>
+            <li><Link href="/catalog?top=1">Топ недели</Link></li>
+            <li><Link href="/sold">Цены выкупа</Link></li>
+            <li><Link href="/calc">Калькулятор</Link></li>
+            <li><Link href="/#how">Как купить</Link></li>
+            <li><Link href="/#faq">Вопросы и ответы</Link></li>
+          </ul>
         </div>
         <div>
-          <h3>Разделы</h3>
-          <nav>
-            <Link href="/catalog">Каталог лотов</Link>
-            <Link href="/sold">Реальные цены выкупа</Link>
-            <Link href="/calc">Калькулятор под ключ</Link>
-            <Link href="/#how">Как купить</Link>
-          </nav>
+          <h3>Ближайшие торги</h3>
+          <ul className="chev">
+            {upcoming.slice(0, 8).map((u) => (
+              <li key={u.iso + u.auction}><Link href={`/catalog?auction=${u.auction}`}>{u.auction} · торги {dm(u.iso)}</Link></li>
+            ))}
+          </ul>
+        </div>
+        <div>
+          <h3>Контакты</h3>
+          <ul className="chev">
+            <li><span className="num">{COMPANY.phone}</span></li>
+            <li><span>Telegram {COMPANY.telegram}</span></li>
+            <li><span>WhatsApp {COMPANY.whatsapp}</span></li>
+            <li><span>{COMPANY.office}</span></li>
+          </ul>
+          <p style={{ marginTop: 10, color: "#aaa" }}>{COMPANY.hours}</p>
         </div>
       </div>
       <div className="legal">
-        <div className="wrap">© {COMPANY.brand}, {COMPANY.domain}. Расчёты на сайте ориентировочные, точную сумму фиксирует менеджер. Copart и IAAI — торговые марки их владельцев.</div>
+        <div className="wrap">
+          <div className="legal-t">
+            {COMPANY.brand} © {new Date().getFullYear()}. Все права защищены<br />
+            <Link href="/#faq">Политика конфиденциальности</Link> | <Link href="/#faq">Согласие на обработку данных</Link> | <Link href="/calc">Расчёты ориентировочные</Link>
+          </div>
+          <div className="soc" aria-label="Мы в соцсетях">
+            <span style={{ display: "contents" }}>
+              <a href="#contacts" aria-label="Telegram">TG</a>
+              <a href="#contacts" aria-label="Instagram">IG</a>
+              <a href="#contacts" aria-label="YouTube">YT</a>
+              <a href="#contacts" aria-label="WhatsApp">WA</a>
+            </span>
+          </div>
+        </div>
       </div>
+      <ToTop />
     </footer>
   );
 }

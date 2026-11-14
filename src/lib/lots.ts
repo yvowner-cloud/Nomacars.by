@@ -66,3 +66,15 @@ export const graceUntil = (l: Lot) =>
 
 /** Ставка для расчёта: текущая ставка лота */
 export const bidFor = (l: Lot) => l.price;
+
+/** Ближайшие торги: группировка активных лотов по дню и аукциону. */
+export function upcomingAuctions(now = Date.now()) {
+  const m = new Map<string, { date: Date; auction: string; count: number }>();
+  for (const l of activeLots()) {
+    const d = saleDate(l, now);
+    const key = `${d.toDateString()}-${l.auction}`;
+    const cur = m.get(key);
+    if (cur) cur.count++; else m.set(key, { date: d, auction: l.auction, count: 1 });
+  }
+  return [...m.values()].sort((a, b) => +a.date - +b.date);
+}
