@@ -10,7 +10,7 @@ export interface Upcoming { iso: string; auction: string; count: number }
 
 const dm = (iso: string) => new Date(iso).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
 
-export function Header({ upcoming, newLeads = 0 }: { upcoming: Upcoming[]; newLeads?: number }) {
+export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcoming[]; newLeads?: number; unseen?: number }) {
   const { country, setCountry, user, openLogin, logout } = useApp();
   const path = usePathname();
   const [mega, setMega] = useState(false);
@@ -55,7 +55,9 @@ export function Header({ upcoming, newLeads = 0 }: { upcoming: Upcoming[]; newLe
           </Link>
           {user ? (
             <>
-              {(user.role === "owner" || user.role === "manager") && <Link href="/admin" aria-current={cur("/admin")} onMouseEnter={() => setMega(false)}>Кабинет{newLeads > 0 && <span className="tab-badge" style={{ marginLeft: 6 }} aria-label={`новых заявок: ${newLeads}`}>{newLeads}</span>}</Link>}
+              {user.role === "owner" || user.role === "manager"
+                ? <Link href="/admin" aria-current={cur("/admin")} onMouseEnter={() => setMega(false)}>Кабинет{newLeads > 0 && <span className="tab-badge" style={{ marginLeft: 6 }} aria-label={`новых заявок: ${newLeads}`}>{newLeads}</span>}</Link>
+                : <Link href="/cabinet" aria-current={cur("/cabinet")} onMouseEnter={() => setMega(false)}>Кабинет{unseen > 0 && <span className="tab-badge" style={{ marginLeft: 6 }} aria-label={`обновлений: ${unseen}`}>{unseen}</span>}</Link>}
               <button onClick={logout} title="Выйти">{(user.name || "Аккаунт").split(" ")[0]} · Выйти</button>
             </>
           ) : (

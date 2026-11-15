@@ -108,6 +108,39 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       create index lead_events_lead_idx on lead_events (lead_id, created_at);
     `,
   },
+  {
+    version: 4,
+    name: "счета, документы, отметка просмотра кабинета клиентом",
+    sql: `
+      create table invoices (
+        id         bigserial primary key,
+        lead_id    bigint not null references leads(id) on delete cascade,
+        title      text not null,
+        amount     numeric(12,2) not null check (amount > 0),
+        currency   text not null default 'USD',
+        paid_at    timestamptz,
+        created_at timestamptz not null default now(),
+        created_by bigint references users(id) on delete set null
+      );
+      create index invoices_lead_idx on invoices (lead_id, created_at);
+      create table documents (
+        id         bigserial primary key,
+        lead_id    bigint not null references leads(id) on delete cascade,
+        name       text not null,
+        stored     text not null,
+        mime       text not null,
+        size       int not null,
+        stage      text,
+        created_at timestamptz not null default now(),
+        created_by bigint references users(id) on delete set null
+      );
+      create index documents_lead_idx on documents (lead_id, created_at);
+      create table client_seen (
+        user_id bigint primary key references users(id) on delete cascade,
+        seen_at timestamptz not null default now()
+      );
+    `,
+  },
 ];
 
 export async function migrate(): Promise<void> {

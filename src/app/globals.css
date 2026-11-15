@@ -344,3 +344,49 @@ footer { background: var(--black); color: #ddd; margin-top: 30px; }
   .lead-main { grid-template-columns: 48px 1fr; }
   .lead-what, .lead-date { grid-column: 2; }
 }
+.billing { display: grid; gap: 8px; align-content: start; }
+.inline-form { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.inline-form .field { flex: 1 1 140px; }
+.pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill-ok { background: var(--green-soft); color: var(--green); }
+.pill-wait { background: var(--warn-soft); color: var(--warn); }
+.doclist { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; font-size: 13.5px; }
+.billing-wrap { display: grid; gap: 18px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed #c8c8c8; }
+.inv-actions { white-space: normal; min-width: 210px; line-height: 1.8; }
+
+/* ---------- кабинет клиента ---------- */
+.car-card { padding: 14px 16px; display: grid; gap: 10px; }
+.car-card.is-fresh { border-color: var(--red); box-shadow: inset 4px 0 0 var(--red); }
+.car-head { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+.car-thumb { width: 110px; aspect-ratio: 16 / 10; display: block; }
+.car-thumb svg { width: 100%; height: 100%; display: block; }
+.pill-off { background: #e6e6e6; color: var(--muted); }
+.track { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; }
+.track div { height: 8px; background: #dcdcdc; }
+.track div.done { background: var(--green); }
+.track div.cur { background: var(--red); }
+.track-l { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.track-l b { color: var(--ink); }
+.sum-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.sum-tiles .panel { padding: 12px 14px; display: grid; }
+.sum-tiles span { font-size: 12.5px; color: var(--muted); }
+.sum-tiles b { font-family: var(--f-head); font-size: 24px; font-weight: 500; }
+@media (max-width: 600px) { .car-head { grid-template-columns: 1fr auto; } .car-thumb { display: none; } .sum-tiles { grid-template-columns: 1fr; } }
+
+/* ---------- счёт ---------- */
+.invoice { background: #fff; border: 1px solid var(--line); padding: 28px; display: grid; gap: 18px; }
+.inv-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 3px solid var(--ink); padding-bottom: 14px; }
+.inv-dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 6px 0 0; font-size: 13.5px; }
+.inv-dl dt { color: var(--muted); }
+.inv-dl dd { margin: 0; }
+.inv-table { width: 100%; border-collapse: collapse; }
+.inv-table th { background: var(--ink); }
+.inv-table tfoot td { border-top: 2px solid var(--ink); font-size: 16px; }
+@media print {
+  .top, .nav, footer, .no-print, .to-top, .toast { display: none !important; }
+  body { background: #fff; }
+  .invoice-page { padding: 0; }
+  .invoice { border: 0; padding: 0; }
+  .inv-table th { background: #fff !important; color: #000 !important; border-bottom: 2px solid #000; }
+  a { color: #000; text-decoration: none; }
+}

@@ -9,6 +9,8 @@ import { TariffEditor } from "@/components/admin/TariffEditor";
 import { LeadsBoard, type LeadLotInfo } from "@/components/admin/LeadsBoard";
 import { TelegramPanel } from "@/components/admin/TelegramPanel";
 import { LoginGate } from "@/components/admin/LoginGate";
+import { RequisitesForm } from "@/components/admin/RequisitesForm";
+import { getRequisites } from "@/lib/server/billing";
 
 export const metadata: Metadata = { title: "Кабинет владельца", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -16,13 +18,14 @@ export const dynamic = "force-dynamic";
 const TABS = [
   { key: "leads", label: "Заявки", ready: true },
   { key: "tariffs", label: "Тарифы и курсы", ready: true },
+  { key: "requisites", label: "Реквизиты", ready: true },
   { key: "lots", label: "Лоты и подборка", ready: false, note: "этап 6" },
   { key: "staff", label: "Сотрудники", ready: false, note: "позже" },
 ];
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
-  const tab = sp.tab === "tariffs" ? "tariffs" : "leads";
+  const tab = sp.tab === "tariffs" || sp.tab === "requisites" ? sp.tab : "leads";
   const user = await currentUser();
   const staff = user && (user.role === "owner" || user.role === "manager");
   const newCount = staff ? await newLeadsCount().catch(() => 0) : 0;
@@ -59,6 +62,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 />
                 <TelegramPanel configured={telegramConfigured()} chats={await linkedChats()} readOnly={user.role !== "owner"} />
               </div>
+            ) : tab === "requisites" ? (
+              <RequisitesForm initial={await getRequisites()} readOnly={user.role !== "owner"} />
             ) : (
               <TariffEditor
                 readOnly={user.role !== "owner"}

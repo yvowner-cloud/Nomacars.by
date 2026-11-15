@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { AuthError } from "./auth";
 
 /** Общая обёртка API: защита от запросов с чужих сайтов, понятные ошибки на русском. */
-export function api<T>(handler: (req: Request) => Promise<T>) {
-  return async (req: Request) => {
+export type Ctx = { params: Promise<Record<string, string>> };
+
+export function api<T>(handler: (req: Request, ctx: Ctx) => Promise<T>) {
+  return async (req: Request, ctx: Ctx) => {
     try {
       if (req.method !== "GET") {
         const origin = req.headers.get("origin");
@@ -12,7 +14,8 @@ export function api<T>(handler: (req: Request) => Promise<T>) {
           return NextResponse.json({ error: "Запрос с другого сайта отклонён" }, { status: 403 });
         }
       }
-      const data = await handler(req);
+      const data = await handler(req, ctx);
+      if (data instanceof Response) return data;
       return NextResponse.json(data ?? { ok: true });
     } catch (e) {
       if (e instanceof AuthError) {
@@ -28,4 +31,11 @@ export function api<T>(handler: (req: Request) => Promise<T>) {
 
 export async function body<T = Record<string, unknown>>(req: Request): Promise<T> {
   try { return (await req.json()) as T; } catch { throw new AuthError("Неверный формат запроса"); }
+}
+
+/** Числовой id из параметров маршрута. */
+export async function idParam(ctx: Ctx, name = "id"): Promise<number> {
+  const v = Number((await ctx.params)[name]);
+  if (!Number.isInteger(v) || v <= 0) throw new AuthError("Неверный номер", 404);
+  return v;
 }

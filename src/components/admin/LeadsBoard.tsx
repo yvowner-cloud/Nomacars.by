@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "../Providers";
+import { LeadBilling, type Doc, type Inv } from "./LeadBilling";
 import { KIND_LABEL, LEAD_STATUSES, statusLabel } from "@/lib/lead-status";
 import { money } from "@/lib/format";
 import type { CalcInput, CalcResult } from "@/lib/types";
@@ -111,11 +112,13 @@ export function LeadsBoard({ lots, initialOpen }: { lots: Record<number, LeadLot
 function LeadDetail({ id, lead, lots, onChanged }: { id: number; lead: Lead; lots: Record<number, LeadLotInfo>; onChanged: () => void }) {
   const { toast } = useApp();
   const [events, setEvents] = useState<Ev[] | null>(null);
+  const [invoices, setInvoices] = useState<Inv[]>([]);
+  const [docs, setDocs] = useState<Doc[]>([]);
   const [notes, setNotes] = useState(lead.notes);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/admin/leads/${id}`).then((r) => r.json()).then((j) => { setEvents(j.events || []); setNotes(j.lead?.notes ?? ""); }).catch(() => setEvents([]));
+    fetch(`/api/admin/leads/${id}`).then((r) => r.json()).then((j) => { setEvents(j.events || []); setNotes(j.lead?.notes ?? ""); setInvoices(j.invoices || []); setDocs(j.docs || []); }).catch(() => setEvents([]));
   }, [id, lead.status]);
 
   const lot = lead.lot_id ? lots[lead.lot_id] : null;
@@ -162,7 +165,7 @@ function LeadDetail({ id, lead, lots, onChanged }: { id: number; lead: Lead; lot
               <ul className="events">
                 {events.map((e) => (
                   <li key={e.id}><span className="note">{dt(e.created_at)}</span>{" "}
-                    {e.type === "created" ? "Заявка создана" : e.type === "status" ? <>Статус: {statusLabel(e.from_status || "")} → <b>{statusLabel(e.to_status || "")}</b></> : "Заметка изменена"}
+                    {e.type === "created" ? "Заявка создана" : e.type === "status" ? <>Статус: {statusLabel(e.from_status || "")} → <b>{statusLabel(e.to_status || "")}</b></> : e.type === "note" ? "Заметка изменена" : e.text}
                     {e.who && e.type !== "created" ? <span className="note"> · {e.who}</span> : null}</li>
                 ))}
               </ul>
@@ -170,6 +173,8 @@ function LeadDetail({ id, lead, lots, onChanged }: { id: number; lead: Lead; lot
           </div>
         </div>
       </div>
+      <LeadBilling leadId={id} invoices={invoices} docs={docs} hasCalc={Boolean(lead.calc?.result)}
+        onData={(j) => { setInvoices(j.invoices); setDocs(j.docs); fetch(`/api/admin/leads/${id}`).then((r) => r.json()).then((g) => setEvents(g.events || [])).catch(() => {}); }} />
     </div>
   );
 }

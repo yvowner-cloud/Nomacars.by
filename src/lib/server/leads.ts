@@ -7,6 +7,7 @@ import { notify, tgEscape as e } from "./telegram";
 import { CLOSED, isLeadStatus, KIND_LABEL, statusLabel, type LeadStatus } from "../lead-status";
 import type { CalcInput, CalcResult, Country } from "../types";
 import { money } from "../format";
+import { docsOf, invoicesOf } from "./billing";
 
 export interface LeadRow {
   id: number; user_id: number | null; kind: "lot" | "pick" | "calc"; lot_id: number | null; status: LeadStatus;
@@ -128,7 +129,8 @@ export async function getLead(id: number) {
   const events = await q<LeadEvent>(
     `select e.id::int, e.type, e.from_status, e.to_status, e.text, e.created_at, coalesce(nullif(u.name,''), u.phone) as who
      from lead_events e left join users u on u.id = e.user_id where e.lead_id=$1 order by e.created_at`, [id]);
-  return { lead, events };
+  const [invoices, docs] = await Promise.all([invoicesOf([id]), docsOf([id])]);
+  return { lead, events, invoices, docs };
 }
 
 export async function updateLead(id: number, by: User, patch: { status?: string; notes?: string }) {
