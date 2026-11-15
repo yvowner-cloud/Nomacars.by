@@ -141,6 +141,24 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       );
     `,
   },
+  {
+    version: 5,
+    name: "загруженные подборки лотов",
+    sql: `
+      create table lot_imports (
+        id           bigserial primary key,
+        source       text not null default '',
+        notes        text not null default '',
+        collected_at text,
+        total        int not null,
+        valid        int not null,
+        payload      jsonb not null,
+        checked      jsonb not null,
+        created_by   bigint references users(id) on delete set null,
+        created_at   timestamptz not null default now()
+      );
+    `,
+  },
 ];
 
 export async function migrate(): Promise<void> {
