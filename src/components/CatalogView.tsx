@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { Lot } from "@/lib/types";
+import type { PublicLot } from "@/lib/server/public-lots";
+type Lot = PublicLot;
 import { LotBadge, LotCard } from "./LotCard";
 import { CarArt } from "./CarArt";
 import { TurnkeyPrice, WatchButton } from "./Price";
 import { CardTimer } from "./Timer";
 import { useApp } from "./Providers";
-import { calcTurnkey } from "@/lib/calc";
 import { engineStr, fmt, toKm } from "@/lib/format";
-import { US_STATES } from "@/lib/tariffs";
+import { US_STATES } from "@/lib/geo";
 
 export interface Initial { q?: string; make?: string; body?: string; fuel?: string; auction?: string; top?: string; watch?: string; sort?: string }
 type Sort = "rec" | "date" | "price" | "year" | "miles";
@@ -28,7 +28,7 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
   const [open, setOpen] = useState(false);
   const set = <K extends keyof F>(k: K, v: F[K]) => setF((s) => ({ ...s, [k]: v, ...(k === "make" ? { model: "" } : {}) }));
 
-  const total = (l: Lot) => calcTurnkey(l, country).total;
+  const total = (l: Lot) => l.turnkey?.[country] ?? Number.POSITIVE_INFINITY;
   const makes = useMemo(() => [...new Set(lots.map((l) => l.make))].sort(), [lots]);
   const models = useMemo(() => [...new Set(lots.filter((l) => !f.make || l.make === f.make).map((l) => l.model))].sort(), [lots, f.make]);
 

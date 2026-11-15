@@ -1,7 +1,9 @@
 import type { Lot } from "@/lib/types";
 
-/** Заглушка фото лота. На этапе 6 заменяется реальными фото аукциона из Supabase Storage. */
-export function CarArt({ lot, view = 0 }: { lot: Lot; view?: number }) {
+type ArtLot = Pick<Lot, "body" | "zone" | "color" | "year" | "make" | "model">;
+
+/** Заглушка фото лота. На этапе 6 заменяется реальными фото аукциона с диска сервера. */
+export function CarArt({ lot, view = 0 }: { lot: ArtLot; view?: number }) {
   const suv = lot.body === "suv";
   const body = suv
     ? "M28 132 L32 100 Q36 90 60 88 L92 86 L118 58 Q124 52 140 52 L228 52 Q240 52 250 64 L272 88 Q292 92 296 106 L296 134 Q296 142 288 142 L36 142 Q28 142 28 132 Z"

@@ -4,15 +4,18 @@ import { HeroSlider } from "@/components/HeroSlider";
 import { CarArt } from "@/components/CarArt";
 import { activeLots, pastLots, upcomingAuctions, LOTS } from "@/lib/lots";
 import { COMPANY } from "@/lib/company";
+import { currentUser } from "@/lib/server/auth";
+import { toPublicAll } from "@/lib/server/public-lots";
 
 export const dynamic = "force-dynamic";
 
 const plural = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? "лот" : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "лота" : "лотов");
 
-export default function Home() {
-  const active = activeLots();
+export default async function Home() {
+  const user = await currentUser();
+  const active = toPublicAll(activeLots(), user);
   const top = active.filter((l) => l.top).sort((a, b) => b.aiScore - a.aiScore);
-  const past = pastLots();
+  const past = toPublicAll(pastLots(), user);
   const cal = upcomingAuctions().slice(0, 8);
   const pick = (id: number) => LOTS.find((l) => l.id === id)!;
 

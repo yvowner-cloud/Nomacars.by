@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { CatalogView, type Initial } from "@/components/CatalogView";
 import { activeLots } from "@/lib/lots";
+import { currentUser } from "@/lib/server/auth";
+import { toPublicAll } from "@/lib/server/public-lots";
 
 export const metadata: Metadata = {
   title: "Каталог лотов Copart и IAAI",
@@ -17,7 +19,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <div className="sec-h">
           <div><div className="eyebrow">Подборка Nomacars · обновляется еженедельно</div><h1 style={{ fontSize: "clamp(24px,3.4vw,34px)" }}>Каталог лотов Copart и IAAI</h1></div>
         </div>
-        <CatalogView key={key} lots={activeLots()} initial={initial} />
+        <CatalogView key={key} lots={toPublicAll(activeLots(), await currentUser())} initial={initial} />
       </div>
     </section>
   );

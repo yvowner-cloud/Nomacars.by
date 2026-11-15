@@ -1,18 +1,19 @@
 import Link from "next/link";
 import type { Lot } from "@/lib/types";
+import type { PublicLot } from "@/lib/server/public-lots";
 import { CarArt } from "./CarArt";
 import { TurnkeyPrice, WatchButton } from "./Price";
 import { CardTimer } from "./Timer";
 import { engineStr, kmStr } from "@/lib/format";
 
-export function LotBadge({ lot }: { lot: Lot }) {
+export function LotBadge({ lot }: { lot: Pick<Lot, "status" | "top"> }) {
   if (lot.status === "sold") return <span className="badge b-sold">Продан</span>;
   if (lot.status === "ended") return <span className="badge b-end">Торги завершены</span>;
   if (lot.top) return <span className="badge b-top">Топ недели</span>;
   return null;
 }
 
-export function LotCard({ lot }: { lot: Lot }) {
+export function LotCard({ lot }: { lot: PublicLot }) {
   return (
     <Link className="card" href={`/lot/${lot.slug}`}>
       <div className="ph">

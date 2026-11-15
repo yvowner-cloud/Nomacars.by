@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { Lot } from "@/lib/types";
+import type { PublicLot } from "@/lib/server/public-lots";
 import { CarArt } from "./CarArt";
 
 const SLIDES = [
@@ -11,7 +11,7 @@ const SLIDES = [
 ];
 
 /** Слайдер главной. Заглушки-«площадки» с машинами; на этапе 8 — реальные фото. */
-export function HeroSlider({ lots }: { lots: Lot[] }) {
+export function HeroSlider({ lots }: { lots: PublicLot[] }) {
   const [i, setI] = useState(0);
   const [pause, setPause] = useState(false);
   useEffect(() => {

@@ -1,14 +1,18 @@
 import type { Metadata } from "next";
 import { LotCard } from "@/components/LotCard";
 import { pastLots } from "@/lib/lots";
+import { currentUser } from "@/lib/server/auth";
+import { toPublicAll } from "@/lib/server/public-lots";
 
 export const metadata: Metadata = {
   title: "Прошедшие торги и реальные цены выкупа",
   description: "За сколько реально выкупаются автомобили на аукционах Copart и IAAI: архив лотов из нашей подборки.",
 };
 
-export default function SoldPage() {
-  const lots = pastLots();
+export const dynamic = "force-dynamic";
+
+export default async function SoldPage() {
+  const lots = toPublicAll(pastLots(), await currentUser());
   return (
     <section className="sec">
       <div className="wrap">

@@ -9,6 +9,8 @@ import { ageAtCustoms } from "@/lib/calc";
 import { DEFAULT_TARIFFS } from "@/lib/tariffs";
 import { US_STATES } from "@/lib/tariffs";
 import { engineStr, fmt, kmStr, money } from "@/lib/format";
+import { currentUser } from "@/lib/server/auth";
+import { lotCalc, toPublic, toPublicAll } from "@/lib/server/public-lots";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +30,8 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
 export default async function LotPage({ params }: P) {
   const l = lotBySlug((await params).slug);
   if (!l) notFound();
+  const user = await currentUser();
+  const pub = toPublic(l, user);
   const ai = aiReview(l);
   const st = US_STATES[l.state];
   const age = ageAtCustoms(l.year, l.month, saleDate(l), DEFAULT_TARIFFS.deliveryDays);
@@ -56,7 +60,7 @@ export default async function LotPage({ params }: P) {
 
         <div className="lot">
           <div style={{ display: "grid", gap: 16 }}>
-            <LotGallery lot={l} />
+            <LotGallery lot={pub} />
             <LotTabs
               ai={
                 <div className="box ai">
@@ -88,13 +92,13 @@ export default async function LotPage({ params }: P) {
               }
             />
           </div>
-          <BidBox lot={l} />
+          <BidBox lot={pub} calc={lotCalc(l, user)} />
         </div>
 
         {similar.length > 0 && (
           <div style={{ marginTop: 30 }}>
             <div className="sec-h"><h2>Похожие лоты</h2></div>
-            <div className="grid">{similar.map((x) => <LotCard key={x.id} lot={x} />)}</div>
+            <div className="grid">{toPublicAll(similar, user).map((x) => <LotCard key={x.id} lot={x} />)}</div>
           </div>
         )}
       </div>

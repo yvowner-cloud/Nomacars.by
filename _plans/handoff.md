@@ -54,6 +54,15 @@
 - HTTPS ещё не выпущен — после проверки DNS: `certbot --nginx -d nomacars.by -d www.nomacars.by --redirect --agree-tos --register-unsafely-without-email -n`.
 - Владельцу удобнее через PowerShell `ssh root@87.232.71.75`; многострочные вставки в PowerShell портятся — давать **однострочные** команды.
 
+## Этап 2 (вход по SMS) — сделан 15.11.2026
+- PostgreSQL через `pg`; миграции при старте (`src/instrumentation.ts`, `src/lib/server/migrations.ts`): users, otp_codes, sessions, favorites.
+- Вход: `/api/auth/send-code`, `/api/auth/verify`, `/api/auth/logout`, `/api/me`, `/api/favorites`, `/api/calc`. Код 4 цифры, 5 минут, 5 попыток; лимиты: 1/мин и 5/час на номер, 20/час на IP. Сессия — httpOnly cookie `nc_session` на 90 дней (в БД хранится sha256 токена). Проверка Origin на POST.
+- Роль владельца — по `OWNER_PHONES` в `/srv/nomacars/.env`.
+- SMS: `SMS_PROVIDER=log` (по умолчанию, код в app.log) или `http` (универсальный шаблон URL/тела в `src/lib/server/sms.ts`). **Провайдер не выбран** — владелец оформляет договор (нужно ИП/ООО и имя отправителя).
+- Цены считаются на сервере: в браузер уходит `PublicLot` (`src/lib/server/public-lots.ts`) — без `market`, с `turnkey`/`soldPrice` только для вошедших; калькулятор — через `/api/calc`. Проверено: в `.next/static` нет тарифов и рыночных цен.
+- Next.js обновлён до 15.5.29, React 19.1.5, postcss закреплён через overrides — `npm audit` чисто.
+- Тесты: 18 (калькулятор + коды/телефоны/лимиты).
+
 ## Мины и факты окружения
 - Пуш в GitHub работает (установлен Claude GitHub App на репозиторий).
 - npauctions.com за защитой Incapsula — программно не открывается; стиль делался по скриншотам владельца.

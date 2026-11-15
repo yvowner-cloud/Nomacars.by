@@ -5,6 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { COMPANY } from "@/lib/company";
 import { upcomingAuctions } from "@/lib/lots";
+import { currentUser, favoriteIds } from "@/lib/server/auth";
 
 export const dynamic = "force-dynamic"; // демо: даты торгов считаются от «сегодня»
 
@@ -17,7 +18,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#000000" };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const user = await currentUser();
+  const favorites = user ? await favoriteIds(user.id).catch(() => []) : [];
   const upcoming = upcomingAuctions().map((u) => ({ iso: u.date.toISOString(), auction: u.auction, count: u.count }));
   return (
     <html lang="ru">
@@ -28,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" />
       </head>
       <body>
-        <Providers>
+        <Providers initialUser={user} initialFavorites={favorites}>
           <Header upcoming={upcoming} />
           <main>{children}</main>
           <Footer upcoming={upcoming} />

@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "./Providers";
-import { ageAtCustoms, calcTurnkey } from "@/lib/calc";
-import { DEFAULT_TARIFFS, US_STATES } from "@/lib/tariffs";
+import { ageAtCustoms, DELIVERY_DAYS } from "@/lib/age";
+import { US_STATES } from "@/lib/geo";
 import { fmt, money } from "@/lib/format";
+import type { CalcResult } from "@/lib/types";
 
+/** Калькулятор: ввод — в браузере, расчёт — на сервере (/api/calc) и только для вошедших. */
 export function CalcForm() {
   const { user, country, setCountry, openLogin, toast } = useApp();
   const [price, setPrice] = useState("14000");
@@ -15,11 +17,35 @@ export function CalcForm() {
   const [cc, setCc] = useState("2487");
   const [hp, setHp] = useState("203");
   const [date, setDate] = useState("2022-06");
+  const [res, setRes] = useState<{ result: CalcResult; rates: { byn: number; rub: number; eurUsd: number } } | null>(null);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [y, m] = (date || "2022-06").split("-").map(Number);
-  const age = ageAtCustoms(y, m, new Date(), DEFAULT_TARIFFS.deliveryDays);
-  const c = calcTurnkey({ price: +price, auction, state, fuel, cc: +cc, hp: +hp }, country);
-  const T = DEFAULT_TARIFFS;
+  const age = ageAtCustoms(y, m, new Date(), DELIVERY_DAYS);
+
+  useEffect(() => {
+    if (!user) { setRes(null); return; }
+    const ctrl = new AbortController();
+    const t = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const r = await fetch("/api/calc", {
+          method: "POST", headers: { "Content-Type": "application/json" }, signal: ctrl.signal,
+          body: JSON.stringify({ input: { price, auction, state, fuel, cc, hp }, country }),
+        });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || "Не удалось посчитать");
+        setRes(j); setErr("");
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") setErr((e as Error).message);
+      }
+      setLoading(false);
+    }, 300);
+    return () => { clearTimeout(t); ctrl.abort(); };
+  }, [user, price, auction, state, fuel, cc, hp, country]);
+
+  const c = res?.result;
 
   return (
     <div className="lot">
@@ -30,7 +56,7 @@ export function CalcForm() {
             <button aria-pressed={country === "by"} onClick={() => setCountry("by")}>Беларусь</button>
             <button aria-pressed={country === "ru"} onClick={() => setCountry("ru")}>Россия</button>
           </span>
-          <div className="calc-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 12 }}>
             {([
               ["Ставка на аукционе, $", <input key="p" className="field num" id="c-price" type="number" step={100} value={price} onChange={(e) => setPrice(e.target.value)} />],
               ["Аукцион", <select key="a" className="field" id="c-auction" value={auction} onChange={(e) => setAuction(e.target.value)}><option>Copart</option><option>IAAI</option></select>],
@@ -46,30 +72,34 @@ export function CalcForm() {
           <div className="note" style={{ fontSize: 13.5 }}>
             {age < 3 ? <span style={{ color: "var(--red)" }}>Возраст на дату растаможки {age.toFixed(1)} г. Меньше 3 лет: льготная ставка не применяется, расчёт уточнит менеджер.</span>
               : age > 5 ? <span style={{ color: "var(--red)" }}>Возраст на дату растаможки {age.toFixed(1)} г. Старше 5 лет: пошлина будет выше, расчёт уточнит менеджер.</span>
-              : <span style={{ color: "var(--green)" }}>Проходной автомобиль: {age.toFixed(1)} г. на дату растаможки (через ~{T.deliveryDays} дней).</span>}
+              : <span style={{ color: "var(--green)" }}>Проходной автомобиль: {age.toFixed(1)} г. на дату растаможки (через ~{DELIVERY_DAYS} дней).</span>}
           </div>
         </div>
       </div>
 
       <div className="panel">
         <div className="panel-h">Расчёт для {country === "by" ? "Беларуси" : "России"}</div>
-        <div className="box">
-          {user ? (
+        <div className="box" aria-busy={loading}>
+          {!user ? (
             <>
-              <div>
+              <span className="pval blur" style={{ fontSize: 30 }} aria-hidden="true">$ 00 000</span>
+              <p className="note" style={{ margin: 0 }}>Подробная разбивка с пошлиной, утильсбором и доставкой доступна после входа по номеру телефона.</p>
+              <button className="btn btn-red" onClick={() => openLogin()}>Войти и рассчитать</button>
+            </>
+          ) : err ? (
+            <p className="err" role="alert" style={{ margin: 0 }}>{err}</p>
+          ) : !c ? (
+            <p className="note" style={{ margin: 0 }}>Считаем…</p>
+          ) : (
+            <>
+              <div style={{ opacity: loading ? 0.6 : 1, transition: "opacity .15s" }}>
                 {c.lines.map((x) => (
                   <div className="cl" key={x.label}><div>{x.label}<small>{x.note}</small></div><div className="v num">{money(x.usd)}</div></div>
                 ))}
                 <div className="cl total"><div><b>Итого под ключ</b><small>≈ {fmt(c.local)} {c.currency} · срок {c.days}</small></div><div className="v num">{money(c.total)}</div></div>
               </div>
               <button className="btn btn-red" onClick={() => toast("Запрос отправлен, менеджер пришлёт точный расчёт")}>Получить точный расчёт</button>
-              <p className="note" style={{ margin: 0 }}>Курс: 1 $ = {T.byn} BYN / {T.rub} ₽, 1 € = {T.eurUsd} $. Ставки демонстрационные.</p>
-            </>
-          ) : (
-            <>
-              <span className="pval blur" style={{ fontSize: 30 }} aria-hidden="true">$ 00 000</span>
-              <p className="note" style={{ margin: 0 }}>Подробная разбивка с пошлиной, утильсбором и доставкой доступна после входа по номеру телефона.</p>
-              <button className="btn btn-red" onClick={() => openLogin()}>Войти и рассчитать</button>
+              {res && <p className="note" style={{ margin: 0 }}>Курс: 1 $ = {res.rates.byn} BYN / {res.rates.rub} ₽, 1 € = {res.rates.eurUsd} $. Ставки демонстрационные.</p>}
             </>
           )}
         </div>

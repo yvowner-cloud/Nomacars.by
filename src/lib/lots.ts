@@ -55,7 +55,8 @@ export const LOTS: Lot[] = RAW.map((r) => {
   };
 });
 
-export const DAY = 86_400_000;
+import { DAY } from "./time";
+export { DAY };
 export const saleDate = (l: Lot, now = Date.now()) => new Date(now + l.saleOffsetDays * DAY);
 export const lotBySlug = (slug: string) => LOTS.find((l) => l.slug === slug);
 export const activeLots = () => LOTS.filter((l) => l.status === "active");

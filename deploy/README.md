@@ -24,6 +24,13 @@
    certbot --nginx -d nomacars.by -d www.nomacars.by --redirect --agree-tos --register-unsafely-without-email -n
    ```
 
+## Вход по SMS
+- Пока SMS-сервис не подключён (`SMS_PROVIDER` пустой), код не отправляется, а пишется в журнал:
+  `grep "\[SMS\]" /srv/nomacars/logs/app.log | tail -n 5`
+- Номер владельца (получает права владельца при входе):
+  `echo 'OWNER_PHONES=+375XXXXXXXXX' >> /srv/nomacars/.env && systemctl restart nomacars`
+- Таблицы базы создаются сами при старте сайта (миграции в `src/lib/server/migrations.ts`).
+
 ## Полезное
 - Состояние сайта: `systemctl status nomacars`
 - Журнал сайта: `tail -n 50 /srv/nomacars/logs/app.log`

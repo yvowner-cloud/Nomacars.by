@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DAY } from "@/lib/lots";
+import { DAY } from "@/lib/time";
 
 /** Отсчёт до торгов. Рендерится только в браузере, чтобы не было расхождений с сервером. */
 function useNow(interval = 1000) {

@@ -105,7 +105,9 @@ SITE_URL=https://${DOMAIN}
 DATABASE_URL=postgresql://${APP}:${DB_PASS}@127.0.0.1:5432/${APP}
 SESSION_SECRET=$(openssl rand -hex 32)
 UPLOADS_DIR=${BASE}/uploads
-# Этап 2: SMS-сервис
+# Владельцы сайта (через запятую): эти номера получают права владельца при входе
+OWNER_PHONES=
+# SMS-сервис: пусто или log — код пишется в журнал; http — см. src/lib/server/sms.ts
 SMS_PROVIDER=
 SMS_API_KEY=
 # Этап 4: Telegram-уведомления

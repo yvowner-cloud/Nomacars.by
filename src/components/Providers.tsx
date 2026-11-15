@@ -1,24 +1,23 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import type { Country } from "@/lib/types";
 
 /**
- * Этап 1: демо-вход (код 1234), страна, избранное — в localStorage браузера.
- * Этап 2: заменить на Supabase Auth (вход по SMS) и профиль в БД.
+ * Состояние сайта в браузере. Пользователь и избранное приходят с сервера (сессия в cookie),
+ * вход — по коду из SMS через /api/auth/*. Страна гостя запоминается в браузере.
  */
-interface User { name: string; phone: string }
+export interface SiteUser { id: number; phone: string; name: string; country: Country; role: "client" | "manager" | "owner" }
 interface Ctx {
   country: Country;
   setCountry: (c: Country) => void;
-  user: User | null;
-  login: (u: User, c?: Country) => void;
+  user: SiteUser | null;
   logout: () => void;
   openLogin: (after?: () => void) => void;
   watch: number[];
   toggleWatch: (id: number) => void;
   toast: (t: string) => void;
-  ready: boolean;
 }
 
 const C = createContext<Ctx | null>(null);
@@ -28,71 +27,74 @@ export const useApp = () => {
   return c;
 };
 
-const KEY = "nomacars-demo-v1";
-const read = () => {
-  try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch { return {}; }
-};
-const write = (v: object) => {
-  try { localStorage.setItem(KEY, JSON.stringify(v)); } catch { /* приватный режим */ }
-};
+const KEY = "nomacars-country";
 
-export function Providers({ children }: { children: ReactNode }) {
-  const [country, setCountryS] = useState<Country>("by");
-  const [user, setUser] = useState<User | null>(null);
-  const [watch, setWatch] = useState<number[]>([]);
-  const [ready, setReady] = useState(false);
+async function post<T>(url: string, data: unknown, method = "POST"): Promise<T> {
+  const r = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз.");
+  return j as T;
+}
+
+export function Providers({ children, initialUser, initialFavorites }: { children: ReactNode; initialUser: SiteUser | null; initialFavorites: number[] }) {
+  const router = useRouter();
+  const [user, setUser] = useState<SiteUser | null>(initialUser);
+  const [country, setCountryS] = useState<Country>(initialUser?.country ?? "by");
+  const [watch, setWatch] = useState<number[]>(initialFavorites);
   const [toastText, setToastText] = useState<string | null>(null);
   const [loginOpen, setLoginOpen] = useState<null | { after?: () => void }>(null);
 
+  useEffect(() => { setUser(initialUser); setWatch(initialFavorites); if (initialUser) setCountryS(initialUser.country); }, [initialUser, initialFavorites]);
   useEffect(() => {
-    const s = read();
-    if (s.country === "by" || s.country === "ru") setCountryS(s.country);
-    if (s.user) setUser(s.user);
-    if (Array.isArray(s.watch)) setWatch(s.watch);
-    setReady(true);
-  }, []);
-  useEffect(() => { if (ready) write({ country, user, watch }); }, [country, user, watch, ready]);
+    if (initialUser) return;
+    try { const c = localStorage.getItem(KEY); if (c === "by" || c === "ru") setCountryS(c); } catch { /* приватный режим */ }
+  }, [initialUser]);
   useEffect(() => {
     if (!toastText) return;
-    const t = setTimeout(() => setToastText(null), 2600);
+    const t = setTimeout(() => setToastText(null), 2800);
     return () => clearTimeout(t);
   }, [toastText]);
 
   const toast = useCallback((t: string) => setToastText(t), []);
-  const value: Ctx = {
-    country,
-    setCountry: setCountryS,
-    user,
-    login: (u, c) => { setUser(u); if (c) setCountryS(c); },
-    logout: () => { setUser(null); toast("Вы вышли из аккаунта"); },
-    openLogin: (after) => setLoginOpen({ after }),
-    watch,
-    toggleWatch: (id) => {
-      const doIt = () => setWatch((w) => {
-        const has = w.includes(id);
-        toast(has ? "Убрано из избранного" : "Добавлено в избранное");
-        return has ? w.filter((x) => x !== id) : [...w, id];
-      });
-      if (user) doIt(); else setLoginOpen({ after: doIt });
-    },
-    toast,
-    ready,
+
+  const setCountry = (c: Country) => {
+    setCountryS(c);
+    if (user) post("/api/me", { country: c }, "PATCH").catch(() => {});
+    else try { localStorage.setItem(KEY, c); } catch { /* ignore */ }
+  };
+
+  const toggleWatch = (id: number) => {
+    const doIt = (list: number[]) => {
+      const on = !list.includes(id);
+      setWatch((w) => (on ? [...w, id] : w.filter((x) => x !== id)));
+      toast(on ? "Добавлено в избранное" : "Убрано из избранного");
+      post<{ favorites: number[] }>("/api/favorites", { lotId: id, on })
+        .then((r) => setWatch(r.favorites))
+        .catch((e) => { toast(e.message); setWatch(list); });
+    };
+    if (user) doIt(watch);
+    else setLoginOpen({ after: () => doIt([]) });
+  };
+
+  const logout = () => {
+    post("/api/auth/logout", {}).finally(() => { setUser(null); setWatch([]); toast("Вы вышли из аккаунта"); router.refresh(); });
   };
 
   return (
-    <C.Provider value={value}>
+    <C.Provider value={{ country, setCountry, user, logout, openLogin: (after) => setLoginOpen({ after }), watch, toggleWatch, toast }}>
       {children}
       {loginOpen && (
         <LoginModal
+          country={country}
           onClose={() => setLoginOpen(null)}
-          onDone={(u, c) => {
-            value.login(u, c);
+          onDone={(u, favs) => {
+            setUser(u); setWatch(favs); setCountryS(u.country);
             const after = loginOpen.after;
             setLoginOpen(null);
             toast("Готово, цены открыты");
-            if (after) setTimeout(after, 0);
+            router.refresh();
+            if (after) setTimeout(after, 300);
           }}
-          country={country}
         />
       )}
       {toastText && <div className="toast" role="status">{toastText}</div>}
@@ -100,22 +102,38 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 }
 
-function LoginModal({ onClose, onDone, country }: { onClose: () => void; onDone: (u: User, c: Country) => void; country: Country }) {
+function LoginModal({ onClose, onDone, country }: { onClose: () => void; onDone: (u: SiteUser, favs: number[]) => void; country: Country }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [normPhone, setNormPhone] = useState("");
   const [cty, setCty] = useState<Country>(country);
   const [agree, setAgree] = useState(true);
   const [code, setCode] = useState("");
   const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [logMode, setLogMode] = useState(false);
+  const [wait, setWait] = useState(0);
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", k);
     return () => window.removeEventListener("keydown", k);
   }, [onClose]);
+  useEffect(() => {
+    if (wait <= 0) return;
+    const t = setTimeout(() => setWait((w) => w - 1), 1000);
+    return () => clearTimeout(t);
+  }, [wait]);
 
-  const phoneOk = /^\+?(375|7)\d{9,10}$/.test(phone.replace(/[\s()-]/g, ""));
+  const send = async () => {
+    setErr(""); setBusy(true);
+    try {
+      const r = await post<{ phone: string; delivery: "sms" | "log" }>("/api/auth/send-code", { phone });
+      setNormPhone(r.phone); setLogMode(r.delivery === "log"); setStep(2); setCode(""); setWait(60);
+    } catch (e) { setErr((e as Error).message); }
+    setBusy(false);
+  };
 
   return (
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -127,36 +145,44 @@ function LoginModal({ onClose, onDone, country }: { onClose: () => void; onDone:
         {step === 1 ? (
           <form className="box" onSubmit={(e) => {
             e.preventDefault();
-            if (!phoneOk) return setErr("Введите номер в формате +375 29 123-45-67 или +7 916 123-45-67");
             if (!agree) return setErr("Нужно согласие на обработку персональных данных");
-            setErr(""); setStep(2);
+            send();
           }}>
             <p className="muted" style={{ margin: 0 }}>После входа станут видны цены под ключ, избранное и личный кабинет.</p>
-            <label>Имя<input className="field" id="l-name" value={name} onChange={(e) => setName(e.target.value)} autoFocus required /></label>
-            <label>Телефон<input className="field" id="l-phone" inputMode="tel" placeholder="+375 29 123-45-67" value={phone} onChange={(e) => setPhone(e.target.value)} required /></label>
+            <label>Имя<input className="field" id="l-name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} autoFocus /></label>
+            <label>Телефон<input className="field" id="l-phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="+375 29 123-45-67" value={phone} onChange={(e) => setPhone(e.target.value)} required /></label>
             <label>Страна доставки
               <select className="field" id="l-cty" value={cty} onChange={(e) => setCty(e.target.value as Country)}>
                 <option value="by">Беларусь</option><option value="ru">Россия</option>
               </select>
             </label>
-            <label style={{ display: "flex", gap: 8, fontWeight: 500 }}>
+            <label style={{ display: "flex", gap: 8, fontWeight: 400 }}>
               <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} /> Согласен на обработку персональных данных
             </label>
-            {err && <div className="err">{err}</div>}
-            <button className="btn btn-red" type="submit">Получить код по SMS</button>
+            {err && <div className="err" role="alert">{err}</div>}
+            <button className="btn btn-red" type="submit" disabled={busy}>{busy ? "Отправляем…" : "Получить код по SMS"}</button>
           </form>
         ) : (
-          <form className="box" onSubmit={(e) => {
+          <form className="box" onSubmit={async (e) => {
             e.preventDefault();
-            if (code !== "1234") return setErr("Неверный код. Проверьте SMS и попробуйте ещё раз.");
-            onDone({ name: name.trim() || "Клиент", phone }, cty);
+            setErr(""); setBusy(true);
+            try {
+              const r = await post<{ user: SiteUser; favorites: number[] }>("/api/auth/verify", { phone: normPhone, code, name, country: cty });
+              onDone(r.user, r.favorites);
+            } catch (ex) { setErr((ex as Error).message); }
+            setBusy(false);
           }}>
-            <p className="muted" style={{ margin: 0 }}>Код отправлен на {phone}.</p>
-            <label>Код из SMS<input className="field mono" id="l-code" inputMode="numeric" maxLength={4} value={code} onChange={(e) => setCode(e.target.value)} autoFocus /></label>
-            <div className="hint">Демо-версия: введите код 1234. Настоящие SMS подключаются на этапе 2.</div>
-            {err && <div className="err">{err}</div>}
-            <button className="btn btn-red" type="submit">Войти</button>
-            <button className="lock-cta" type="button" onClick={() => { setStep(1); setCode(""); setErr(""); }}>Изменить номер</button>
+            <p className="muted" style={{ margin: 0 }}>Код отправлен на {normPhone}. Он действует 5 минут.</p>
+            <label>Код из SMS<input className="field mono" id="l-code" inputMode="numeric" autoComplete="one-time-code" maxLength={4} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} autoFocus /></label>
+            {logMode && <div className="hint">SMS-сервис ещё не подключён: код записан в журнал сервера. Это временный режим проверки.</div>}
+            {err && <div className="err" role="alert">{err}</div>}
+            <button className="btn btn-red" type="submit" disabled={busy || code.length !== 4}>{busy ? "Проверяем…" : "Войти"}</button>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+              <button className="lock-cta" type="button" onClick={() => { setStep(1); setErr(""); }}>Изменить номер</button>
+              <button className="lock-cta" type="button" disabled={wait > 0 || busy} onClick={send} style={wait > 0 ? { color: "var(--muted)" } : undefined}>
+                {wait > 0 ? `Отправить снова через ${wait} с` : "Отправить код снова"}
+              </button>
+            </div>
           </form>
         )}
       </div>

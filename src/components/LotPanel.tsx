@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { Lot } from "@/lib/types";
+import type { CalcResult, Country } from "@/lib/types";
+import type { PublicLot } from "@/lib/server/public-lots";
 import { CarArt } from "./CarArt";
 import { useApp } from "./Providers";
 import { WatchButton } from "./Price";
 import { BigCountdown } from "./Timer";
-import { calcTurnkey } from "@/lib/calc";
 import { fmt, money } from "@/lib/format";
 import { LotBadge } from "./LotCard";
 
 const VIEWS = ["Слева", "Справа", "Повреждение", "Общий план"];
 
-export function LotGallery({ lot }: { lot: Lot }) {
+export function LotGallery({ lot }: { lot: PublicLot }) {
   const [v, setV] = useState(0);
   return (
     <div>
@@ -33,9 +33,9 @@ export function LotGallery({ lot }: { lot: Lot }) {
   );
 }
 
-export function BidBox({ lot }: { lot: Lot }) {
+export function BidBox({ lot, calc }: { lot: PublicLot; calc: Record<Country, CalcResult> | null }) {
   const { user, country, setCountry, openLogin, toast } = useApp();
-  const c = calcTurnkey(lot, country);
+  const c = calc?.[country] ?? null;
   const active = lot.status === "active";
 
   const want = () => {
@@ -50,15 +50,16 @@ export function BidBox({ lot }: { lot: Lot }) {
         {active && <BigCountdown offsetDays={lot.saleOffsetDays} />}
         <div>
           <div className="bid-row"><span>{lot.status === "sold" ? "Цена выкупа" : lot.status === "ended" ? "Цена выкупа" : "Текущая ставка"}</span>
-            {lot.status === "ended" ? <span className="muted">не раскрыта</span> : user || lot.status === "active"
-              ? <b className="num">{money(lot.price)}</b>
+            {lot.status === "ended" ? <span className="muted">не раскрыта</span>
+              : active ? <b className="num">{money(lot.bid ?? 0)}</b>
+              : lot.soldPrice !== null ? <b className="num">{money(lot.soldPrice)}</b>
               : <button className="lock-cta" onClick={() => openLogin()}>Войти, чтобы увидеть</button>}
           </div>
           <div className="bid-row"><span>Аукцион · лот</span><span className="mono">{lot.auction} · {lot.lotNo}</span></div>
           {lot.status === "sold" && <div className="bid-row"><span>Статус</span><span style={{ color: "var(--green)", fontWeight: 700 }}>Продан</span></div>}
         </div>
 
-        {active && (user ? (
+        {active && (user && c ? (
           <>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h3>Расчёт под ключ</h3>

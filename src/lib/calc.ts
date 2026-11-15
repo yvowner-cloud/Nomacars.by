@@ -67,12 +67,4 @@ export function calcTurnkey(i: CalcInput, country: Country, T: Tariffs = DEFAULT
   };
 }
 
-/** Возраст авто (лет) на ожидаемую дату растаможки. */
-export function ageAtCustoms(year: number, month: number, saleDate: Date, deliveryDays: number): number {
-  const prod = new Date(year, month - 1, 1).getTime();
-  const customs = saleDate.getTime() + deliveryDays * 86_400_000;
-  return (customs - prod) / (365.25 * 86_400_000);
-}
-
-/** «Проходной» = 3–5 лет на дату растаможки. */
-export const isPassable = (age: number, min = 3, max = 5) => age >= min && age <= max;
+export { ageAtCustoms, isPassable } from "./age";

@@ -1,4 +1,4 @@
-import type { Tariffs, UsState } from "./types";
+import type { Tariffs } from "./types";
 
 /**
  * Стартовые тарифы. ДЕМО-ЗНАЧЕНИЯ — перед запуском сверить с действующими
@@ -38,11 +38,4 @@ export const DEFAULT_TARIFFS: Tariffs = {
   deliveryDays: 75,
 };
 
-export const US_STATES: Record<UsState, { name: string; port: string }> = {
-  NJ: { name: "Нью-Джерси", port: "Ньюарк" },
-  GA: { name: "Джорджия", port: "Саванна" },
-  TX: { name: "Техас", port: "Хьюстон" },
-  FL: { name: "Флорида", port: "Джексонвилл" },
-  CA: { name: "Калифорния", port: "Лос-Анджелес" },
-  IL: { name: "Иллинойс", port: "Ньюарк (ж/д)" },
-};
+export { US_STATES } from "./geo";
