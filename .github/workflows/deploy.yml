@@ -67,7 +67,21 @@ jobs:
           HOST="$(printf '%s' "$HOST" | tr -d '[:space:]')"
           PORT="$(printf '%s' "$PORT" | tr -d '[:space:]')"
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$KEY" | tr -d '\r' > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          # Ключ мог «испачкаться» при копировании из консоли (пробелы в конце строк, переносы) —
+          # собираем его заново: заголовок, тело без пробелов по 70 символов, концовка.
+          python3 - > ~/.ssh/deploy <<'PY'
+          import os, re, textwrap
+          k = os.environ["KEY"]
+          m = re.search(r"-----BEGIN ([A-Z ]+?)-----(.*?)-----END \1-----", k, re.S)
+          if not m:
+              print("BROKEN")
+          else:
+              body = re.sub(r"[^A-Za-z0-9+/=]", "", m.group(2))
+              print(f"-----BEGIN {m.group(1)}-----")
+              print("\n".join(textwrap.wrap(body, 70)))
+              print(f"-----END {m.group(1)}-----")
+          PY
+          chmod 600 ~/.ssh/deploy
           ssh-keygen -y -f ~/.ssh/deploy > /dev/null || { echo "::error::DEPLOY_SSH_KEY повреждён при копировании — вставьте его заново целиком"; exit 1; }
           # Проверяем, что это именно наш сервер: сравниваем отпечаток ключа
           ssh-keyscan -p "$PORT" -t ecdsa "$HOST" 2>/dev/null > ~/.ssh/scan
