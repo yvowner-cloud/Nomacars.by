@@ -48,6 +48,12 @@
 - Поставщик данных аукционов (платный API) — выбрать до этапа 6.
 - Онлайн-эквайринг — не нужен на старте.
 
+## Обновление 15.11.2026
+- Сервер куплен: **Ubuntu 26.04**, IP **87.232.71.75**. `setup-server.sh` отработал (Node 22, PostgreSQL, Nginx, ufw, служба `nomacars`, `/srv/nomacars/.env`, база работает). A-записи DNS владелец добавил.
+- Выкладка по SSH-ключу из GitHub Actions **не заработала**: `DEPLOY_SSH_KEY` в секретах GitHub приходил испорченным (длина 379, строки [34,70,70,70,67,56,6]) даже после копирования через `Set-Clipboard`. Схему заменили на **pull**: сервер сам забирает код из GitHub каждые 2 минуты (`deploy/install-autoupdate.sh`, systemd-таймер `nomacars-update.timer`, скрипт `/srv/nomacars/update.sh`, журнал `logs/update.log`). Actions теперь только проверяет сборку (`check.yml`). Секреты DEPLOY_* не нужны.
+- HTTPS ещё не выпущен — после проверки DNS: `certbot --nginx -d nomacars.by -d www.nomacars.by --redirect --agree-tos --register-unsafely-without-email -n`.
+- Владельцу удобнее через PowerShell `ssh root@87.232.71.75`; многострочные вставки в PowerShell портятся — давать **однострочные** команды.
+
 ## Мины и факты окружения
 - Пуш в GitHub работает (установлен Claude GitHub App на репозиторий).
 - npauctions.com за защитой Incapsula — программно не открывается; стиль делался по скриншотам владельца.

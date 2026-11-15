@@ -1,41 +1,39 @@
 # Размещение на сервере hoster.by
 
-Сайт работает на облачном сервере (Ubuntu 22.04/24.04, от 2 ГБ RAM): Node.js + PostgreSQL + Nginx + HTTPS.
-Обновление автоматическое: каждый push в `main` → GitHub Actions собирает сайт, прогоняет тесты и выкладывает его на сервер.
+Сервер: Ubuntu, IP **87.232.71.75**, домен **nomacars.by** (A-записи `@` и `www` → IP).
+Стек на сервере: Node.js 22 + PostgreSQL + Nginx (+ HTTPS через Certbot).
 
-## Шаг 1. DNS
-В панели hoster.by → домен `nomacars.by` → DNS добавьте записи:
-- `A`  `nomacars.by`     → IP сервера
-- `A`  `www.nomacars.by` → IP сервера
+## Как сайт попадает на сервер
+**Без ключей и секретов.** Сервер каждые 2 минуты проверяет ветку `main` в GitHub. Если там новый код —
+забирает его, ставит зависимости, прогоняет тесты, собирает и перезапускает сайт. Если тесты или сборка
+упали — работающая версия остаётся.
 
-## Шаг 2. Настройка сервера (один раз)
-Откройте консоль сервера (панель hoster.by → облачный сервер → «Консоль») и под `root` выполните:
+В GitHub Actions (`.github/workflows/check.yml`) — только проверка: тесты и сборка на каждом изменении.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/yvowner-cloud/Nomacars.by/main/deploy/setup-server.sh | bash
-```
+## Первичная настройка (один раз, под root)
+1. Базовая настройка (Node, PostgreSQL, Nginx, файрвол, swap, служба сайта, база и `/srv/nomacars/.env`):
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/yvowner-cloud/Nomacars.by/main/deploy/setup-server.sh | bash
+   ```
+2. Автообновление + первая сборка:
+   ```bash
+   curl -fsSL https://raw.githubusercontent.com/yvowner-cloud/Nomacars.by/main/deploy/install-autoupdate.sh | bash
+   ```
+3. HTTPS (когда домен уже указывает на сервер):
+   ```bash
+   certbot --nginx -d nomacars.by -d www.nomacars.by --redirect --agree-tos --register-unsafely-without-email -n
+   ```
 
-Скрипт ставит всё нужное (~10 минут) и в конце печатает 4 значения.
-
-## Шаг 3. Секреты в GitHub
-`github.com/yvowner-cloud/Nomacars.by` → **Settings → Secrets and variables → Actions → New repository secret**.
-Создайте 4 секрета с именами и значениями из вывода скрипта:
-
-| Имя | Что это |
-|---|---|
-| `DEPLOY_HOST` | IP сервера |
-| `DEPLOY_PORT` | порт SSH (обычно 22) |
-| `DEPLOY_KNOWN_HOSTS` | «отпечаток» сервера — защита от подмены |
-| `DEPLOY_SSH_KEY` | ключ, который умеет только обновлять сайт |
-
-Показать значения ещё раз: `bash /srv/nomacars/show-secrets.sh`
-
-## Шаг 4. Первый запуск
-GitHub → вкладка **Actions** → «Deploy to server» → **Run workflow**. Через 3–5 минут сайт откроется на https://nomacars.by.
-
-## Полезное на сервере
+## Полезное
 - Состояние сайта: `systemctl status nomacars`
-- Журнал: `tail -f /srv/nomacars/logs/app.log`
+- Журнал сайта: `tail -n 50 /srv/nomacars/logs/app.log`
+- Журнал обновлений: `tail -n 50 /srv/nomacars/logs/update.log`
+- Обновить прямо сейчас: `sudo -H -u deploy /srv/nomacars/update.sh --force`
 - Настройки и ключи сервисов: `/srv/nomacars/.env` (в GitHub не попадают)
-- Откат на прошлую версию: `ls /srv/nomacars/releases`, затем
+- Откат: `ls /srv/nomacars/releases`, затем
   `ln -sfn /srv/nomacars/releases/<папка> /srv/nomacars/current && systemctl restart nomacars`
+  (следующий новый коммит снова обновит сайт)
+
+## Секреты DEPLOY_* в GitHub
+Больше не используются (схема «GitHub заходит на сервер по ключу» заменена). Их можно удалить:
+Settings → Secrets and variables → Actions.

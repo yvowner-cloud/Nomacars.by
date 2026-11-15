@@ -1,0 +1,26 @@
+name: Check build
+
+# Проверка каждого изменения: установка, тесты, сборка.
+# Выкладка на сервер идёт без ключей: сервер сам забирает новый код из GitHub
+# каждые 2 минуты (deploy/install-autoupdate.sh).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
