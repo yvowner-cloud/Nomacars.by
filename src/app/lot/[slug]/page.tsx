@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
   const t = `${l.year} ${l.make} ${l.model} ${l.trim} с аукциона ${l.auction}`;
   return {
     title: t,
-    description: `${t}: ${kmStr(l.miles)}, ${engineStr(l.cc, l.hp)}, повреждение: ${l.damage.toLowerCase()}. Разбор Nomacars и расчёт под ключ в РБ и РФ.`,
+    description: `${t}: ${kmStr(l.miles)}, ${engineStr(l.cc, l.hp, l.hpEstimated)}, повреждение: ${l.damage.toLowerCase()}. Разбор Nomacars и расчёт под ключ в РБ и РФ.`,
     openGraph: { title: t, images: l.photos?.[0] ? [{ url: l.photos[0] }] : undefined },
   };
 }

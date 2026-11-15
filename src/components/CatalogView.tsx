@@ -127,7 +127,7 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
                   <div className="lrow-m">
                     <span>Пробег: <b className="num">{fmt(toKm(l.miles))} км</b></span>
                     <span>Оценка Nomacars: <b>{l.aiScore}</b></span>
-                    <span>Двигатель: <b>{engineStr(l.cc, l.hp)}</b></span>
+                    <span>Двигатель: <b>{engineStr(l.cc, l.hp, l.hpEstimated)}</b></span>
                   </div>
                   <div className="lrow-m">
                     <span>Повреждение: <b className={l.level === "light" ? "dmg-light" : "dmg-mid"}>{l.damage}</b></span>

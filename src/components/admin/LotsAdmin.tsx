@@ -48,8 +48,8 @@ export function LotsAdmin({ initial, readOnly }: { initial: AdminLot[]; readOnly
   if (!lots.length) {
     return (
       <div className="panel empty">
-        <b>Реальных лотов пока нет — на сайте показываются демо-машины</b>
-        <span>Загрузите подборку во вкладке «Импорт лотов» — лоты сразу появятся на сайте, а демо-машины исчезнут.</span>
+        <b>Лотов пока нет — на сайте написано «Подборка обновляется»</b>
+        <span>Загрузите подборку во вкладке «Импорт лотов» — лоты сразу появятся на сайте.</span>
         <Link className="btn btn-red" href="/admin?tab=import">Импорт лотов</Link>
       </div>
     );

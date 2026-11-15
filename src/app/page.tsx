@@ -21,7 +21,8 @@ export default async function Home() {
   const past = toPublicAll(pastOf(lots), user, T).slice(0, 8);
   const cal = upcomingFrom(lots).slice(0, 8);
   const PREMIUM = ["BMW", "Audi", "Mercedes-Benz", "Lexus", "Genesis", "Volvo", "Porsche", "Land Rover"];
-  const best = (f: (l: (typeof active)[number]) => boolean) => active.filter(f).sort((a, b) => b.aiScore - a.aiScore)[0] ?? active[0];
+  const withPhoto = active.filter((l) => l.photos?.length);
+  const best = (f: (l: (typeof active)[number]) => boolean) => withPhoto.filter(f).sort((a, b) => b.aiScore - a.aiScore)[0];
   const prem = best((l) => PREMIUM.includes(l.make));
 
   const tiles = [
@@ -29,11 +30,11 @@ export default async function Home() {
     { t: "Седаны", href: "/catalog?body=sedan", bg: "#6d6d6d", lot: best((l) => l.body === "sedan"), n: active.filter((l) => l.body === "sedan").length },
     { t: "Премиум", href: prem && PREMIUM.includes(prem.make) ? `/catalog?make=${encodeURIComponent(prem.make)}` : "/catalog", bg: "#2f6aa8", lot: prem, n: active.filter((l) => PREMIUM.includes(l.make)).length },
     { t: "Гибриды и электро", href: "/catalog?fuel=Гибрид", bg: "#9e9e9e", lot: best((l) => l.fuel !== "Бензин" && l.fuel !== "Дизель"), n: active.filter((l) => l.fuel === "Гибрид" || l.fuel === "Электро").length },
-  ].filter((t) => t.lot);
+  ].filter((t) => t.lot && t.n > 0);
 
   return (
     <>
-      <HeroSlider lots={[...top, ...active.filter((l) => !l.top)]} />
+      <HeroSlider lots={[...top, ...active.filter((l) => !l.top)].filter((l) => l.photos?.length)} />
 
       <div className="wrap">
         <div className="tiles">
@@ -74,7 +75,9 @@ export default async function Home() {
       <section className="sec" style={{ paddingTop: 0 }}>
         <div className="wrap">
           <div className="sec-h"><h2>Топ недели</h2><Link href="/catalog?top=1">Смотреть все ›</Link></div>
-          <div className="grid">{top.slice(0, 8).map((l) => <LotCard key={l.id} lot={l} />)}</div>
+          {top.length ? <div className="grid">{top.slice(0, 8).map((l) => <LotCard key={l.id} lot={l} />)}</div> : (
+            <div className="panel empty"><b>Подборка обновляется</b><span>Скоро здесь появятся лучшие лоты недели. А пока опишите, какую машину ищете, и мы подберём её под ваш бюджет.</span><PickButton /></div>
+          )}
         </div>
       </section>
 
@@ -92,12 +95,14 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="sec" style={{ paddingTop: 0 }}>
-        <div className="wrap">
-          <div className="sec-h"><h2>Реальные цены выкупа</h2><Link href="/sold">Все прошедшие торги ›</Link></div>
-          <div className="grid">{past.map((l) => <LotCard key={l.id} lot={l} />)}</div>
-        </div>
-      </section>
+      {past.length > 0 && (
+        <section className="sec" style={{ paddingTop: 0 }}>
+          <div className="wrap">
+            <div className="sec-h"><h2>Реальные цены выкупа</h2><Link href="/sold">Все прошедшие торги ›</Link></div>
+            <div className="grid">{past.map((l) => <LotCard key={l.id} lot={l} />)}</div>
+          </div>
+        </section>
+      )}
 
       <section className="sec" id="faq" style={{ paddingTop: 0 }}>
         <div className="wrap two">

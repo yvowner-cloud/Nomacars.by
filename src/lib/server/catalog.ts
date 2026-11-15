@@ -1,19 +1,16 @@
 import { dbConfigured, q, q1 } from "./db";
-import { demoLots, slugify } from "../lots";
+import { slugify } from "../lots";
 import type { ImportCheck, ImportedLot } from "../lot-import";
 import type { DamageZone, Lot } from "../types";
 
-/**
- * Каталог лотов. Реальные лоты — из таблицы lots (наполняется загрузкой подборок).
- * Если в базе нет ни одного опубликованного лота — показываются демо-лоты, чтобы сайт не был пустым.
- */
+/** Каталог лотов — только реальные лоты из таблицы lots (наполняется загрузкой подборок). */
 interface Row {
   id: number; auction: string; lot_number: string; slug: string; data: ImportedLot; score: number;
   sale_at: string | null; status: string; sold_price: number | null; visible: boolean; created_at: string;
 }
 
 const TOP_COUNT = 12;
-let cache: { at: number; lots: Lot[]; demo: boolean } | null = null;
+let cache: { at: number; lots: Lot[] } | null = null;
 export const invalidateCatalog = () => { cache = null; };
 
 const COLORS: Record<string, string> = {
@@ -69,7 +66,7 @@ const markTop = (lots: Lot[]) => {
 };
 
 /** Лоты для сайта (видимые). Кеш 20 секунд. */
-export async function getCatalog(): Promise<{ lots: Lot[]; demo: boolean }> {
+export async function getCatalog(): Promise<{ lots: Lot[] }> {
   if (cache && Date.now() - cache.at < 20_000) return cache;
   let lots: Lot[] = [];
   if (dbConfigured()) {
@@ -79,8 +76,7 @@ export async function getCatalog(): Promise<{ lots: Lot[]; demo: boolean }> {
       lots = rows.map((r) => rowToLot(r));
     } catch (e) { console.error("[catalog]", (e as Error).message); }
   }
-  const demo = lots.length === 0;
-  cache = { at: Date.now(), lots: demo ? demoLots() : markTop(lots), demo };
+  cache = { at: Date.now(), lots: markTop(lots) };
   return cache;
 }
 
@@ -89,7 +85,6 @@ export async function lotById(id: number | null | undefined): Promise<Lot | null
   if (!id) return null;
   const fromCatalog = (await getCatalog()).lots.find((l) => l.id === id);
   if (fromCatalog) return fromCatalog;
-  if (id < 1000) return demoLots().find((l) => l.id === id) ?? null;
   if (!dbConfigured()) return null;
   const r = await q1<Row>(`select id, auction, lot_number, slug, data, score, sale_at, status, sold_price::float8 as sold_price, visible, created_at from lots where id=$1`, [id]).catch(() => null);
   return r ? rowToLot(r) : null;
