@@ -5,12 +5,12 @@ import { useEffect, useMemo, useState } from "react";
 import type { PublicLot } from "@/lib/server/public-lots";
 type Lot = PublicLot;
 import { LotBadge, LotCard } from "./LotCard";
-import { CarArt } from "./CarArt";
+import { LotImage } from "./LotImage";
 import { TurnkeyPrice, WatchButton } from "./Price";
 import { CardTimer } from "./Timer";
 import { useApp } from "./Providers";
 import { engineStr, fmt, toKm } from "@/lib/format";
-import { US_STATES } from "@/lib/geo";
+import { stateInfo } from "@/lib/geo";
 
 export interface Initial { q?: string; make?: string; body?: string; fuel?: string; auction?: string; top?: string; watch?: string; sort?: string }
 type Sort = "rec" | "date" | "price" | "year" | "miles";
@@ -49,7 +49,7 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
     });
     const cmp: Record<Sort, (a: Lot, b: Lot) => number> = {
       rec: (a, b) => Number(b.top) - Number(a.top) || b.aiScore - a.aiScore,
-      date: (a, b) => a.saleOffsetDays - b.saleOffsetDays,
+      date: (a, b) => Date.parse(a.saleAt) - Date.parse(b.saleAt),
       price: (a, b) => total(a) - total(b),
       year: (a, b) => b.year * 12 + b.month - (a.year * 12 + a.month),
       miles: (a, b) => a.miles - b.miles,
@@ -121,7 +121,7 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
           <div className="rows">
             {shown.map((l) => (
               <Link key={l.id} href={`/lot/${l.slug}`} className="lrow">
-                <span className="thumb"><CarArt lot={l} /></span>
+                <span className="thumb"><LotImage lot={l} /></span>
                 <div style={{ minWidth: 0 }}>
                   <div className="lrow-t">{l.year} {l.make} {l.model} {l.trim} <LotBadge lot={l} /></div>
                   <div className="lrow-m">
@@ -135,12 +135,12 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
                   <div className="lrow-m">
                     <span>Лот №: <b className="num">{l.lotNo}</b></span>
                     <span><b>{l.auction}</b></span>
-                    <span><b>{US_STATES[l.state].name}</b></span>
+                    <span><b>{stateInfo(l.state).name}</b></span>
                   </div>
                 </div>
                 <div className="lrow-r">
                   <TurnkeyPrice lot={l} />
-                  <CardTimer offsetDays={l.saleOffsetDays} active={l.status === "active"} />
+                  <CardTimer at={l.saleAt} active={l.status === "active"} />
                   <span style={{ position: "relative", width: 32, height: 32 }}><WatchButton id={l.id} /></span>
                 </div>
               </Link>

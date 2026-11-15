@@ -1,14 +1,17 @@
 import type { MetadataRoute } from "next";
-import { LOTS } from "@/lib/lots";
+import { getCatalog } from "@/lib/server/catalog";
 import { COMPANY } from "@/lib/company";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const { lots } = await getCatalog();
   const base = `https://${COMPANY.domain}`;
   return [
     { url: base, changeFrequency: "weekly", priority: 1 },
     { url: `${base}/catalog`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/sold`, changeFrequency: "daily", priority: 0.6 },
     { url: `${base}/calc`, changeFrequency: "monthly", priority: 0.7 },
-    ...LOTS.map((l) => ({ url: `${base}/lot/${l.slug}`, changeFrequency: "daily" as const, priority: 0.8 })),
+    ...lots.map((l) => ({ url: `${base}/lot/${l.slug}`, changeFrequency: "daily" as const, priority: 0.8 })),
   ];
 }

@@ -1,5 +1,6 @@
 import type { CalcInput, CalcResult, Country, Tariffs } from "./types";
-import { DEFAULT_TARIFFS, US_STATES } from "./tariffs";
+import { DEFAULT_TARIFFS } from "./tariffs";
+import { stateInfo } from "./geo";
 
 const pick = (table: [number, number][], v: number) =>
   (table.find(([limit]) => v <= limit) ?? table[table.length - 1])[1];
@@ -10,7 +11,8 @@ export function calcTurnkey(i: CalcInput, country: Country, T: Tariffs = DEFAULT
   const cc = Math.max(0, Number(i.cc) || 0);
   const hp = Math.max(0, Number(i.hp) || 0);
   const fee = pick(T.fees, price);
-  const inland = T.inland[i.state] ?? 450;
+  const zone = stateInfo(String(i.state)).zone;
+  const inland = T.inland[String(i.state).toUpperCase()] ?? T.inland[zone] ?? 450;
   const land = country === "by" ? T.landBy : T.landRu;
   const customsValue = price + fee + inland + T.ocean;
 
@@ -44,7 +46,7 @@ export function calcTurnkey(i: CalcInput, country: Country, T: Tariffs = DEFAULT
   }
 
   const broker = country === "by" ? T.brokerBy : T.brokerRu;
-  const st = US_STATES[i.state as keyof typeof US_STATES] ?? { name: "США", port: "порт" };
+  const st = stateInfo(String(i.state));
 
   const lines = [
     { label: "Ставка на аукционе", usd: price, note: i.auction || "Copart / IAAI" },

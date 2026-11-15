@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import type { CalcResult, Country } from "@/lib/types";
 import type { PublicLot } from "@/lib/server/public-lots";
-import { CarArt } from "./CarArt";
+import { LotImage } from "./LotImage";
 import { useApp } from "./Providers";
 import { WatchButton } from "./Price";
 import { BigCountdown } from "./Timer";
@@ -16,17 +16,25 @@ const VIEWS = ["Слева", "Справа", "Повреждение", "Общи
 
 export function LotGallery({ lot }: { lot: PublicLot }) {
   const [v, setV] = useState(0);
+  const photos = lot.photos ?? [];
+  const count = photos.length || VIEWS.length;
+  const label = photos.length ? `фото ${v + 1}/${count}` : `${VIEWS[v]} · фото ${v + 1}/4`;
+  const go = (d: number) => setV((x) => (x + d + count) % count);
   return (
     <div>
       <div className="gal-main ph">
-        <CarArt lot={lot} view={v} />
+        <LotImage lot={lot} index={v} eager />
         <div className="badges"><LotBadge lot={lot} /></div>
-        <span className="lotno mono">{VIEWS[v]} · фото {v + 1}/4</span>
+        {count > 1 && <>
+          <button className="gal-nav gal-prev" onClick={() => go(-1)} aria-label="Предыдущее фото">‹</button>
+          <button className="gal-nav gal-next" onClick={() => go(1)} aria-label="Следующее фото">›</button>
+        </>}
+        <span className="lotno mono">{label}</span>
       </div>
-      <div className="thumbs">
-        {VIEWS.map((name, i) => (
-          <button key={name} aria-pressed={v === i} onClick={() => setV(i)} aria-label={`Фото: ${name}`}>
-            <CarArt lot={lot} view={i} /><span>{name}</span>
+      <div className={`thumbs${photos.length > 4 ? " thumbs-many" : ""}`}>
+        {Array.from({ length: count }, (_, i) => (
+          <button key={i} aria-pressed={v === i} onClick={() => setV(i)} aria-label={`Фото ${i + 1}`}>
+            <LotImage lot={lot} index={i} />{!photos.length && <span>{VIEWS[i]}</span>}
           </button>
         ))}
       </div>
@@ -43,7 +51,7 @@ export function BidBox({ lot, calc }: { lot: PublicLot; calc: Record<Country, Ca
     <div className="panel bidbox">
       <div className="panel-h">{active ? "Информация о торгах" : "Торги завершены"}</div>
       <div className="box">
-        {active && <BigCountdown offsetDays={lot.saleOffsetDays} />}
+        {active && <BigCountdown at={lot.saleAt} />}
         <div>
           <div className="bid-row"><span>{lot.status === "sold" ? "Цена выкупа" : lot.status === "ended" ? "Цена выкупа" : "Текущая ставка"}</span>
             {lot.status === "ended" ? <span className="muted">не раскрыта</span>

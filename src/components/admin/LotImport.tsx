@@ -13,7 +13,7 @@ export function LotImport({ initial, readOnly }: { initial: ImportRow[]; readOnl
   const [text, setText] = useState("");
   const [rows, setRows] = useState(initial);
   const [busy, setBusy] = useState(false);
-  const [saved, setSaved] = useState<null | { id: number; total: number; valid: number }>(null);
+  const [saved, setSaved] = useState<null | { id: number; total: number; valid: number; added?: number; updated?: number }>(null);
   const check = useMemo(() => (text.trim() ? checkImport(text) : null), [text]);
 
   const save = async () => {
@@ -23,7 +23,7 @@ export function LotImport({ initial, readOnly }: { initial: ImportRow[]; readOnl
       const j = await r.json();
       if (!r.ok) throw new Error(j.error);
       setSaved(j); setText("");
-      toast(`Подборка сохранена: ${j.valid} из ${j.total} лотов прошли проверку`);
+      toast(`Подборка сохранена и опубликована: ${j.valid} из ${j.total} лотов`);
       const l = await fetch("/api/admin/lot-imports").then((x) => x.json());
       setRows(l.imports || []);
     } catch (e) { toast((e as Error).message || "Не удалось сохранить"); }
@@ -37,9 +37,12 @@ export function LotImport({ initial, readOnly }: { initial: ImportRow[]; readOnl
         <div className="box">
           <p className="note" style={{ margin: 0 }}>
             Вставьте сюда JSON подборки (формат из промта для Claude с браузером) или выберите файл. Сайт проверит каждый лот:
-            обязательные поля, год, исключённые повреждения и документы, фото. Публикация на сайте — следующий шаг этапа 6.
+            обязательные поля, год, исключённые повреждения и документы, фото. Принятые лоты сразу появляются на сайте;
+            если лот уже есть — его данные обновятся.
           </p>
-          {saved && <div className="hint" style={{ background: "var(--green-soft)", color: "var(--green)" }}>Сохранено: подборка №{saved.id}, принято {saved.valid} из {saved.total}. Скачать её можно в списке ниже.</div>}
+          {saved && <div className="hint" style={{ background: "var(--green-soft)", color: "var(--green)" }}>
+            Сохранено: подборка №{saved.id}, принято {saved.valid} из {saved.total}. На сайте: новых лотов {saved.added ?? 0}, обновлено {saved.updated ?? 0}.
+            Снять лишнее с сайта можно во вкладке «Лоты и подборка».</div>}
           <label className="t-field">JSON подборки
             <textarea className="field mono" id="import-json" rows={10} value={text} disabled={readOnly}
               placeholder={'{\n  "source": "claude-browser-test",\n  "lots": [ … ]\n}'} onChange={(e) => { setText(e.target.value); setSaved(null); }} />

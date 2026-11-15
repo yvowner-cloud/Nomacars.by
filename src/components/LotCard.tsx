@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Lot } from "@/lib/types";
 import type { PublicLot } from "@/lib/server/public-lots";
-import { CarArt } from "./CarArt";
+import { LotImage } from "./LotImage";
 import { TurnkeyPrice, WatchButton } from "./Price";
 import { CardTimer } from "./Timer";
 import { engineStr, kmStr } from "@/lib/format";
@@ -17,7 +17,7 @@ export function LotCard({ lot }: { lot: PublicLot }) {
   return (
     <Link className="card" href={`/lot/${lot.slug}`}>
       <div className="ph">
-        <CarArt lot={lot} />
+        <LotImage lot={lot} />
         <div className="badges"><LotBadge lot={lot} /></div>
         <WatchButton id={lot.id} />
         <span className="lotno mono">{lot.auction} · {lot.lotNo}</span>
@@ -25,7 +25,7 @@ export function LotCard({ lot }: { lot: PublicLot }) {
       <div className="cbody">
         <div className="ctitle">
           {lot.year} {lot.make} {lot.model}
-          <small>{lot.trim} · {lot.body === "suv" ? "кроссовер" : "седан"}</small>
+          <small>{[lot.trim, lot.body === "suv" ? "кроссовер" : lot.body === "sedan" ? "седан" : null].filter(Boolean).join(" · ")}</small>
         </div>
         <dl className="specs">
           <dt>Пробег</dt><dd className="num">{kmStr(lot.miles)}</dd>
@@ -34,7 +34,7 @@ export function LotCard({ lot }: { lot: PublicLot }) {
         </dl>
         <div className="cfoot">
           <TurnkeyPrice lot={lot} />
-          <CardTimer offsetDays={lot.saleOffsetDays} active={lot.status === "active"} />
+          <CardTimer at={lot.saleAt} active={lot.status === "active"} />
         </div>
       </div>
     </Link>

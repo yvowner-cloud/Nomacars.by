@@ -3,6 +3,7 @@ import { AuthError } from "@/lib/server/auth";
 import { requireOwner, requireStaff } from "@/lib/server/guard";
 import { q, q1 } from "@/lib/server/db";
 import { checkImport } from "@/lib/lot-import";
+import { publishImport } from "@/lib/server/catalog";
 
 /** Загруженные подборки лотов: список и загрузка новой (JSON в теле запроса). */
 export const GET = api(async () => {
@@ -23,5 +24,7 @@ export const POST = api(async (req) => {
     `insert into lot_imports (source, notes, collected_at, total, valid, payload, checked, created_by)
      values ($1,$2,$3,$4,$5,$6,$7,$8) returning id::int`,
     [check.source, check.notes, check.collectedAt, check.lots.length, check.valid, JSON.stringify(payload), JSON.stringify(check), user.id]);
-  return { id: row!.id, total: check.lots.length, valid: check.valid };
+  // сразу публикуем на сайте (владелец решил: подборка публикуется автоматически, лишнее снимается тумблером)
+  const pub = await publishImport(row!.id);
+  return { id: row!.id, total: check.lots.length, valid: check.valid, added: pub.added, updated: pub.updated };
 });

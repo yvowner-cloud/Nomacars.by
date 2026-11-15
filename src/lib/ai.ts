@@ -28,6 +28,11 @@ const ZONE: Record<Lot["zone"], { plain: string; risks: string[] }> = {
 const POPULAR = ["Toyota", "Hyundai", "Kia", "Honda", "Mazda"];
 
 export function aiReview(l: Lot) {
+  if (l.review?.summary) {
+    const why = l.review.why.length ? [...l.review.why] : [];
+    if (l.monthKnown !== false) why.push(`Проходной возраст: льготная пошлина до ${graceUntil(l)}`);
+    return { summary: l.review.summary, plain: l.review.plain || ZONE[l.zone].plain, why, risks: l.review.risks };
+  }
   const z = ZONE[l.zone];
   const why = [
     l.level === "light" ? "Лёгкое повреждение, силовые элементы не затронуты" : "Повреждение среднее, но ремонт предсказуемый",

@@ -4,7 +4,7 @@ import { currentUser } from "@/lib/server/auth";
 import { AuthError } from "@/lib/server/auth";
 import { getRequisites, invoiceWithLead } from "@/lib/server/billing";
 import { getTariffs } from "@/lib/server/settings";
-import { LOTS } from "@/lib/lots";
+import { lotById } from "@/lib/server/catalog";
 import { fmt, money } from "@/lib/format";
 import { LoginGate } from "@/components/admin/LoginGate";
 import { PrintButton } from "@/components/PrintButton";
@@ -24,7 +24,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   }
   const { inv, lead } = data;
   const [req, T] = await Promise.all([getRequisites(), getTariffs()]);
-  const lot = lead.lot_id ? LOTS.find((l) => l.id === lead.lot_id) : null;
+  const lot = await lotById(lead.lot_id);
   const num = `NC-${lead.id}-${inv.id}`;
   const date = new Date(inv.created_at).toLocaleDateString("ru-RU", { day: "2-digit", month: "long", year: "numeric" });
   const filled = Boolean(req.legalName && req.account);

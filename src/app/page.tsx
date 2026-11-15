@@ -2,8 +2,9 @@ import Link from "next/link";
 import { LotCard } from "@/components/LotCard";
 import { HeroSlider } from "@/components/HeroSlider";
 import { PickButton } from "@/components/LeadForms";
-import { CarArt } from "@/components/CarArt";
-import { activeLots, pastLots, upcomingAuctions, LOTS } from "@/lib/lots";
+import { LotImage } from "@/components/LotImage";
+import { activeOf, pastOf, upcomingFrom } from "@/lib/lots";
+import { getCatalog } from "@/lib/server/catalog";
 import { COMPANY } from "@/lib/company";
 import { currentUser } from "@/lib/server/auth";
 import { toPublicAll } from "@/lib/server/public-lots";
@@ -14,19 +15,21 @@ export const dynamic = "force-dynamic";
 const plural = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? "лот" : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "лота" : "лотов");
 
 export default async function Home() {
-  const [user, T] = await Promise.all([currentUser(), getTariffs()]);
-  const active = toPublicAll(activeLots(), user, T);
+  const [user, T, { lots }] = await Promise.all([currentUser(), getTariffs(), getCatalog()]);
+  const active = toPublicAll(activeOf(lots), user, T);
   const top = active.filter((l) => l.top).sort((a, b) => b.aiScore - a.aiScore);
-  const past = toPublicAll(pastLots(), user, T);
-  const cal = upcomingAuctions().slice(0, 8);
-  const pick = (id: number) => LOTS.find((l) => l.id === id)!;
+  const past = toPublicAll(pastOf(lots), user, T).slice(0, 8);
+  const cal = upcomingFrom(lots).slice(0, 8);
+  const PREMIUM = ["BMW", "Audi", "Mercedes-Benz", "Lexus", "Genesis", "Volvo", "Porsche", "Land Rover"];
+  const best = (f: (l: (typeof active)[number]) => boolean) => active.filter(f).sort((a, b) => b.aiScore - a.aiScore)[0] ?? active[0];
+  const prem = best((l) => PREMIUM.includes(l.make));
 
   const tiles = [
-    { t: "Кроссоверы", href: "/catalog?body=suv", bg: "#000000", lot: pick(7), n: active.filter((l) => l.body === "suv").length },
-    { t: "Седаны", href: "/catalog?body=sedan", bg: "#6d6d6d", lot: pick(5), n: active.filter((l) => l.body === "sedan").length },
-    { t: "Премиум", href: "/catalog?make=Mercedes-Benz", bg: "#2f6aa8", lot: pick(12), n: active.filter((l) => ["BMW", "Audi", "Mercedes-Benz"].includes(l.make)).length },
-    { t: "Гибриды и электро", href: "/catalog?fuel=Электро", bg: "#9e9e9e", lot: pick(15), n: active.filter((l) => l.fuel !== "Бензин").length },
-  ];
+    { t: "Кроссоверы", href: "/catalog?body=suv", bg: "#000000", lot: best((l) => l.body === "suv"), n: active.filter((l) => l.body === "suv").length },
+    { t: "Седаны", href: "/catalog?body=sedan", bg: "#6d6d6d", lot: best((l) => l.body === "sedan"), n: active.filter((l) => l.body === "sedan").length },
+    { t: "Премиум", href: prem && PREMIUM.includes(prem.make) ? `/catalog?make=${encodeURIComponent(prem.make)}` : "/catalog", bg: "#2f6aa8", lot: prem, n: active.filter((l) => PREMIUM.includes(l.make)).length },
+    { t: "Гибриды и электро", href: "/catalog?fuel=Гибрид", bg: "#9e9e9e", lot: best((l) => l.fuel !== "Бензин" && l.fuel !== "Дизель"), n: active.filter((l) => l.fuel === "Гибрид" || l.fuel === "Электро").length },
+  ].filter((t) => t.lot);
 
   return (
     <>
@@ -39,7 +42,7 @@ export default async function Home() {
               <b>{t.t}</b>
               <div className="tile-card" style={{ background: t.bg }}>
                 <u>Смотреть лоты · {t.n}</u>
-                <CarArt lot={t.lot} />
+                <span className="tile-img"><LotImage lot={t.lot!} /></span>
               </div>
             </Link>
           ))}

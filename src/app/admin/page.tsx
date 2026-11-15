@@ -4,7 +4,8 @@ import { currentUser } from "@/lib/server/auth";
 import { editableTariffs, effectiveRates, fxState, history } from "@/lib/server/settings";
 import { newLeadsCount } from "@/lib/server/leads";
 import { linkedChats, telegramConfigured } from "@/lib/server/telegram";
-import { LOTS } from "@/lib/lots";
+import { adminLots, lotsByIds } from "@/lib/server/catalog";
+import { LotsAdmin } from "@/components/admin/LotsAdmin";
 import { TariffEditor } from "@/components/admin/TariffEditor";
 import { LeadsBoard, type LeadLotInfo } from "@/components/admin/LeadsBoard";
 import { TelegramPanel } from "@/components/admin/TelegramPanel";
@@ -22,13 +23,13 @@ const TABS = [
   { key: "tariffs", label: "Тарифы и курсы", ready: true },
   { key: "requisites", label: "Реквизиты", ready: true },
   { key: "import", label: "Импорт лотов", ready: true },
-  { key: "lots", label: "Лоты и подборка", ready: false, note: "этап 6" },
+  { key: "lots", label: "Лоты и подборка", ready: true },
   { key: "staff", label: "Сотрудники", ready: false, note: "позже" },
 ];
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
-  const tab = sp.tab === "tariffs" || sp.tab === "requisites" || sp.tab === "import" ? sp.tab : "leads";
+  const tab = sp.tab === "tariffs" || sp.tab === "requisites" || sp.tab === "import" || sp.tab === "lots" ? sp.tab : "leads";
   const user = await currentUser();
   const staff = user && (user.role === "owner" || user.role === "manager");
   const newCount = staff ? await newLeadsCount().catch(() => 0) : 0;
@@ -61,10 +62,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               <div style={{ display: "grid", gap: 16 }}>
                 <LeadsBoard
                   initialOpen={sp.lead ? Number(sp.lead) || null : null}
-                  lots={Object.fromEntries(LOTS.map((l) => [l.id, { id: l.id, slug: l.slug, title: `${l.year} ${l.make} ${l.model} ${l.trim}`, lotNo: l.lotNo, auction: l.auction } satisfies LeadLotInfo]))}
+                  lots={Object.fromEntries([...(await lotsByIds((await q<{ lot_id: number }>("select distinct lot_id from leads where lot_id is not null").catch(() => [])).map((r) => r.lot_id))).values()]
+                    .map((l) => [l.id, { id: l.id, slug: l.slug, title: `${l.year} ${l.make} ${l.model} ${l.trim}`, lotNo: l.lotNo, auction: l.auction } satisfies LeadLotInfo]))}
                 />
                 <TelegramPanel configured={telegramConfigured()} chats={await linkedChats()} readOnly={user.role !== "owner"} />
               </div>
+            ) : tab === "lots" ? (
+              <LotsAdmin readOnly={user.role !== "owner"} initial={JSON.parse(JSON.stringify(await adminLots().catch(() => [])))} />
             ) : tab === "import" ? (
               <LotImport readOnly={user.role !== "owner"} initial={JSON.parse(JSON.stringify(await q(`select i.id::int, i.source, i.notes, i.collected_at, i.total, i.valid, i.created_at, coalesce(nullif(u.name,''), u.phone) as who
                 from lot_imports i left join users u on u.id = i.created_by order by i.created_at desc limit 30`).catch(() => [])))} />

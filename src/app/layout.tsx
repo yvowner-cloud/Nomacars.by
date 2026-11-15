@@ -4,7 +4,8 @@ import { Providers } from "@/components/Providers";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { COMPANY } from "@/lib/company";
-import { upcomingAuctions } from "@/lib/lots";
+import { upcomingFrom } from "@/lib/lots";
+import { getCatalog } from "@/lib/server/catalog";
 import { currentUser, favoriteIds } from "@/lib/server/auth";
 import { newLeadsCount } from "@/lib/server/leads";
 import { unseenCount } from "@/lib/server/billing";
@@ -26,7 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const staff = user && (user.role === "owner" || user.role === "manager");
   const newLeads = staff ? await newLeadsCount().catch(() => 0) : 0;
   const unseen = user && !staff ? await unseenCount(user.id).catch(() => 0) : 0;
-  const upcoming = upcomingAuctions().map((u) => ({ iso: u.date.toISOString(), auction: u.auction, count: u.count }));
+  const upcoming = upcomingFrom((await getCatalog()).lots).map((u) => ({ iso: u.date.toISOString(), auction: u.auction, count: u.count }));
   return (
     <html lang="ru">
       <head>

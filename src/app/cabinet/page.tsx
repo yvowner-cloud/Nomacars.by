@@ -6,13 +6,13 @@ import { docsOf, invoicesOf, markSeen } from "@/lib/server/billing";
 import { q1 } from "@/lib/server/db";
 import { getTariffs } from "@/lib/server/settings";
 import { toPublicAll } from "@/lib/server/public-lots";
-import { LOTS } from "@/lib/lots";
+import { lotsByIds } from "@/lib/server/catalog";
 import { LEAD_STATUSES } from "@/lib/lead-status";
 import { TRACK, trackStep } from "@/lib/track";
 import { money } from "@/lib/format";
 import { LoginGate } from "@/components/admin/LoginGate";
 import { LotCard } from "@/components/LotCard";
-import { CarArt } from "@/components/CarArt";
+import { LotImage } from "@/components/LotImage";
 import { ProfileForm } from "@/components/ProfileForm";
 import { PickButton } from "@/components/LeadForms";
 
@@ -43,7 +43,8 @@ export default async function CabinetPage({ searchParams }: { searchParams: Prom
 
   const total = invoices.reduce((s, i) => s + i.amount, 0);
   const paid = invoices.filter((i) => i.paid_at).reduce((s, i) => s + i.amount, 0);
-  const lotOf = (id: number | null) => (id ? LOTS.find((l) => l.id === id) : undefined);
+  const lotMap = await lotsByIds(leads.map((l) => l.lot_id));
+  const lotOf = (id: number | null) => (id ? lotMap.get(id) : undefined);
   const leadTitle = (leadId: number) => {
     const l = leads.find((x) => x.id === leadId);
     const lot = lotOf(l?.lot_id ?? null);
@@ -72,7 +73,7 @@ export default async function CabinetPage({ searchParams }: { searchParams: Prom
           return (
             <div key={l.id} className={`panel car-card${fresh ? " is-fresh" : ""}`}>
               <div className="car-head">
-                {lot && <Link href={`/lot/${lot.slug}`} className="car-thumb"><CarArt lot={lot} /></Link>}
+                {lot && <Link href={`/lot/${lot.slug}`} className="car-thumb"><LotImage lot={lot} /></Link>}
                 <div style={{ minWidth: 0 }}>
                   <div className="ctitle" style={{ fontSize: 16 }}>{lot ? `${lot.year} ${lot.make} ${lot.model} ${lot.trim}` : l.kind === "pick" ? "Подбор автомобиля" : "Точный расчёт"}</div>
                   <div className="note">Заявка №{l.id} от {dd(l.created_at)}{lot ? ` · ${lot.auction} ${lot.lotNo}` : ""}{l.max_bid ? ` · ставка до ${money(l.max_bid)}` : ""}{l.budget ? ` · бюджет ${money(l.budget)}` : ""}</div>
@@ -149,7 +150,7 @@ export default async function CabinetPage({ searchParams }: { searchParams: Prom
     );
   } else if (tab === "fav") {
     const favIds = await favoriteIds(user.id);
-    const favLots = toPublicAll(LOTS.filter((l) => favIds.includes(l.id)), user, await getTariffs());
+    const favLots = toPublicAll([...(await lotsByIds(favIds)).values()], user, await getTariffs());
     body = favLots.length === 0
       ? <div className="panel empty"><b>В избранном пусто</b><span>Нажмите ☆ на карточке лота, чтобы следить за ним.</span><Link className="btn btn-red" href="/catalog">Открыть каталог</Link></div>
       : <div className="grid">{favLots.map((l) => <LotCard key={l.id} lot={l} />)}</div>;

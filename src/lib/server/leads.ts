@@ -1,6 +1,8 @@
 import { q, q1 } from "./db";
 import { AuthError, type User } from "./auth";
-import { LOTS, lotTitle } from "../lots";
+import { lotTitle } from "../lots";
+import { getCatalog, lotById } from "./catalog";
+import { q as dbq } from "./db";
 import { calcTurnkey } from "../calc";
 import { getTariffs } from "./settings";
 import { notify, tgEscape as e } from "./telegram";
@@ -42,7 +44,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
   let calc: LeadRow["calc"] = null;
   let lotId: number | null = null;
   if (input.kind === "lot") {
-    const lot = LOTS.find((l) => l.id === Number(input.lotId));
+    const lot = await lotById(Number(input.lotId));
     if (!lot || lot.status !== "active") throw new AuthError("Торги по этому лоту уже прошли. Посмотрите другие машины в каталоге.", 404);
     lotId = lot.id;
     calc = { result: calcTurnkey(lot, country, T) };
@@ -81,7 +83,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
 }
 
 async function sendLeadNotification(l: LeadRow): Promise<boolean> {
-  const lot = l.lot_id ? LOTS.find((x) => x.id === l.lot_id) : null;
+  const lot = await lotById(l.lot_id);
   const site = process.env.SITE_URL || "https://nomacars.by";
   const lines = [
     `<b>Новая заявка №${l.id}</b> · ${KIND_LABEL[l.kind]}`,
@@ -109,7 +111,10 @@ export async function listLeads(opts: { status?: string; q?: string; limit?: num
   if (opts.q?.trim()) {
     const term = opts.q.trim();
     const digits = term.replace(/\D/g, "");
-    const lotIds = LOTS.filter((l) => `${l.year} ${l.make} ${l.model} ${l.lotNo}`.toLowerCase().includes(term.toLowerCase())).map((l) => l.id);
+    const t = term.toLowerCase();
+    const lotIds = (await getCatalog()).lots.filter((l) => `${l.year} ${l.make} ${l.model} ${l.lotNo}`.toLowerCase().includes(t)).map((l) => l.id);
+    const hidden = await dbq<{ id: number }>("select id from lots where lower(data->>'make' || ' ' || (data->>'model') || ' ' || lot_number) like $1", [`%${t}%`]).catch(() => []);
+    lotIds.push(...hidden.map((h) => h.id));
     const ors: string[] = [];
     p.push(`%${term}%`); ors.push(`name ilike $${p.length}`, `comment ilike $${p.length}`, `notes ilike $${p.length}`);
     if (digits.length >= 3) { p.push(`%${digits}%`); ors.push(`regexp_replace(phone, '\\D', '', 'g') like $${p.length}`); }

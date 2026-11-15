@@ -1,6 +1,6 @@
 export type Country = "by" | "ru";
 export type Fuel = "Бензин" | "Дизель" | "Гибрид" | "Электро";
-export type Body = "suv" | "sedan";
+export type Body = "suv" | "sedan" | "other";
 export type DamageZone = "front" | "rear" | "side" | "hail";
 export type DamageLevel = "light" | "mid";
 export type LotStatus = "active" | "sold" | "ended";
@@ -24,17 +24,33 @@ export interface Lot {
   level: DamageLevel;
   price: number; // текущая ставка или цена выкупа, $
   auction: "Copart" | "IAAI";
-  state: UsState;
+  /** Двухбуквенный код штата (любой штат США) */
+  state: UsState | string;
   aiScore: number; // 0–100
   repair: [number, number]; // оценка ремонта, $
   /** Медиана рынка, $ — только для внутреннего отбора, на сайте не показывается */
   market: { by: number; ru: number };
-  saleOffsetDays: number; // демо: торги относительно «сегодня»
+  /** Дата и время торгов, ISO */
+  saleAt: string;
   color: string;
   top: boolean;
   status: LotStatus;
   lotNo: string;
   vin: string;
+  /** Реальные фото с аукциона (у демо-лотов нет — рисуется заглушка) */
+  photos?: string[];
+  /** Известен ли месяц выпуска (иначе month = 1, считаем осторожно) */
+  monthKnown?: boolean;
+  /** Мощность не указана на аукционе — оценена по объёму */
+  hpEstimated?: boolean;
+  /** Разбор лота, подготовленный при отборе */
+  review?: { summary: string; plain: string; why: string[]; risks: string[] };
+  /** Доп. сведения с аукциона */
+  extra?: {
+    city?: string | null; title?: string | null; runAndDrive?: boolean | null; keys?: boolean | null;
+    airbags?: boolean | null; colorName?: string | null; drive?: string | null; transmission?: string | null;
+    engine?: string | null; odometerStatus?: string | null; secondaryDamage?: string | null; url?: string | null;
+  };
 }
 
 export interface CalcInput {

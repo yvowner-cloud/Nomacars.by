@@ -1,4 +1,5 @@
 import type { Body, DamageLevel, DamageZone, Fuel, Lot, UsState } from "./types";
+import { DAY } from "./time";
 
 /**
  * ДЕМО-ЛОТЫ для этапов 1–5. На этапе 6 заменяются данными из API аукционов
@@ -40,39 +41,42 @@ const VIN_PREFIX: Record<string, string> = {
   Chevrolet: "3GN", BMW: "5UX", Audi: "WA1", "Mercedes-Benz": "W1N", Tesla: "5YJ", Subaru: "JF2",
 };
 
-const slugify = (s: string) =>
+export const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-export const LOTS: Lot[] = RAW.map((r) => {
-  const [id, make, model, trim, year, month, body, fuel, cc, hp, miles, damage, zone, level, price, auction,
-    state, aiScore, repair, mBy, mRu, saleOffsetDays, color, top, status] = r;
-  return {
-    id, make, model, trim, year, month, body, fuel, cc, hp, miles, damage, zone, level, price, auction, state,
-    aiScore, repair, market: { by: mBy, ru: mRu }, saleOffsetDays, color, top, status: status ?? "active",
-    slug: `${slugify(`${make}-${model}-${year}`)}-${id}`,
-    lotNo: (auction === "Copart" ? "7" : "4") + String(1_000_000 + id * 73_919).slice(1, 8),
-    vin: `${VIN_PREFIX[make] ?? "1XX"}W1RFV${id % 9}${year === 2022 ? "N" : "P"}•••${String(4000 + id * 137).slice(-3)}`,
-  };
-});
+/** Демо-лоты (показываются, только если в базе нет ни одного реального лота). Даты торгов — от «сегодня». */
+export function demoLots(now = Date.now()): Lot[] {
+  return RAW.map((r) => {
+    const [id, make, model, trim, year, month, body, fuel, cc, hp, miles, damage, zone, level, price, auction,
+      state, aiScore, repair, mBy, mRu, offset, color, top, status] = r;
+    const sale = new Date(now + offset * DAY);
+    sale.setUTCHours(14, 0, 0, 0);
+    return {
+      id, make, model, trim, year, month, body, fuel, cc, hp, miles, damage, zone, level, price, auction, state,
+      aiScore, repair, market: { by: mBy, ru: mRu }, saleAt: sale.toISOString(), color, top, status: status ?? "active",
+      monthKnown: true,
+      slug: `${slugify(`${make}-${model}-${year}`)}-${id}`,
+      lotNo: (auction === "Copart" ? "7" : "4") + String(1_000_000 + id * 73_919).slice(1, 8),
+      vin: `${VIN_PREFIX[make] ?? "1XX"}W1RFV${id % 9}${year === 2022 ? "N" : "P"}•••${String(4000 + id * 137).slice(-3)}`,
+    };
+  });
+}
 
-import { DAY } from "./time";
 export { DAY };
-export const saleDate = (l: Lot, now = Date.now()) => new Date(now + l.saleOffsetDays * DAY);
-export const lotBySlug = (slug: string) => LOTS.find((l) => l.slug === slug);
-export const activeLots = () => LOTS.filter((l) => l.status === "active");
-export const pastLots = () => LOTS.filter((l) => l.status !== "active");
-export const lotTitle = (l: Lot) => `${l.year} ${l.make} ${l.model}`;
-export const graceUntil = (l: Lot) =>
-  `${String(l.month).padStart(2, "0")}.${l.year + 5}`;
-
-/** Ставка для расчёта: текущая ставка лота */
-export const bidFor = (l: Lot) => l.price;
+export const saleDate = (l: Lot) => new Date(l.saleAt);
+export const activeOf = (lots: Lot[]) => lots.filter((l) => l.status === "active");
+export const pastOf = (lots: Lot[]) => lots.filter((l) => l.status !== "active");
+export const lotTitle = (l: Pick<Lot, "year" | "make" | "model">) => `${l.year} ${l.make} ${l.model}`;
+/** До какого месяца действует льготная пошлина (5 лет с выпуска). */
+export const graceUntil = (l: Pick<Lot, "month" | "year" | "monthKnown">) =>
+  l.monthKnown === false ? `${l.year + 5} г. (уточнить месяц выпуска)` : `${String(l.month).padStart(2, "0")}.${l.year + 5}`;
 
 /** Ближайшие торги: группировка активных лотов по дню и аукциону. */
-export function upcomingAuctions(now = Date.now()) {
+export function upcomingFrom(lots: Lot[], now = Date.now()) {
   const m = new Map<string, { date: Date; auction: string; count: number }>();
-  for (const l of activeLots()) {
-    const d = saleDate(l, now);
+  for (const l of activeOf(lots)) {
+    const d = saleDate(l);
+    if (+d < now - 12 * 3_600_000) continue;
     const key = `${d.toDateString()}-${l.auction}`;
     const cur = m.get(key);
     if (cur) cur.count++; else m.set(key, { date: d, auction: l.auction, count: 1 });
