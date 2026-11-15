@@ -32,7 +32,8 @@ cat > "$BASE/update.sh" <<'EOF'
 # Обновить сайт из GitHub. --force — пересобрать даже без новых изменений.
 set -euo pipefail
 BASE=/srv/nomacars
-exec 9>"$BASE/.update.lock"; flock -n 9 || exit 0
+exec 9>"$BASE/.update.lock"
+if ! flock -n 9; then echo "Сборка уже идёт — подождите и смотрите $BASE/logs/update.log"; exit 0; fi
 cd "$BASE/src"
 git fetch -q --depth 50 origin main
 NEW="$(git rev-parse origin/main)"
@@ -97,7 +98,11 @@ systemctl enable --now nomacars-update.timer >/dev/null
 echo "    ✓ таймер включён"
 
 echo "==> Первая сборка сайта (3–6 минут, ждите)…"
-if sudo -H -u deploy "$BASE/update.sh" --force; then
+# если таймер уже начал сборку — дождаться её, иначе собрать самим
+sleep 2
+flock "$BASE/.update.lock" true
+if [ -s "$BASE/.deployed" ] || sudo -H -u deploy "$BASE/update.sh" --force; then
+  tail -n 3 "$BASE/logs/update.log" 2>/dev/null || true
   echo
   echo "==============================================================="
   echo "  ГОТОВО. Сайт запущен: http://$(curl -fsS4 https://ifconfig.me 2>/dev/null || hostname -I | awk '{print $1}')"
