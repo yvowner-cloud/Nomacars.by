@@ -73,10 +73,13 @@ jobs:
           import os, re, textwrap
           k = os.environ["KEY"]
           m = re.search(r"-----BEGIN ([A-Z ]+?)-----(.*?)-----END \1-----", k, re.S)
+          import sys
+          sys.stderr.write(f"[диагностика ключа] длина={len(k)}, строк={k.count(chr(10))+1}, BEGIN={'BEGIN' in k}, END={'END' in k}\n")
           if not m:
               print("BROKEN")
           else:
               body = re.sub(r"[^A-Za-z0-9+/=]", "", m.group(2))
+              sys.stderr.write(f"[диагностика ключа] тип={m.group(1)}, длина тела={len(body)}, кратно4={len(body)%4==0}\n")
               print(f"-----BEGIN {m.group(1)}-----")
               print("\n".join(textwrap.wrap(body, 70)))
               print(f"-----END {m.group(1)}-----")
