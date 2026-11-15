@@ -51,7 +51,8 @@
 ## Обновление 15.11.2026
 - Сервер куплен: **Ubuntu 26.04**, IP **87.232.71.75**. `setup-server.sh` отработал (Node 22, PostgreSQL, Nginx, ufw, служба `nomacars`, `/srv/nomacars/.env`, база работает). A-записи DNS владелец добавил.
 - Выкладка по SSH-ключу из GitHub Actions **не заработала**: `DEPLOY_SSH_KEY` в секретах GitHub приходил испорченным (длина 379, строки [34,70,70,70,67,56,6]) даже после копирования через `Set-Clipboard`. Схему заменили на **pull**: сервер сам забирает код из GitHub каждые 2 минуты (`deploy/install-autoupdate.sh`, systemd-таймер `nomacars-update.timer`, скрипт `/srv/nomacars/update.sh`, журнал `logs/update.log`). Actions теперь только проверяет сборку (`check.yml`). Секреты DEPLOY_* не нужны.
-- HTTPS ещё не выпущен — после проверки DNS: `certbot --nginx -d nomacars.by -d www.nomacars.by --redirect --agree-tos --register-unsafely-without-email -n`.
+- **HTTPS включён** для nomacars.by и www.nomacars.by (Let's Encrypt, автопродление, редирект с http). DNS: A @ и www → 87.232.71.75, AAAA нет, MX/TXT для почты hoster.by оставлены.
+- Владелец: `OWNER_PHONES=+375296292000` вписан в `/srv/nomacars/.env`, вход с правами владельца проверен.
 - Владельцу удобнее через PowerShell `ssh root@87.232.71.75`; многострочные вставки в PowerShell портятся — давать **однострочные** команды.
 
 ## Этап 2 (вход по SMS) — сделан 15.11.2026
