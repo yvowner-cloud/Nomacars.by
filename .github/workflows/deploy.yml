@@ -75,6 +75,10 @@ jobs:
           m = re.search(r"BEGIN\s+([A-Z ]*?PRIVATE\s+KEY)\s*-*(.*?)-*\s*END\s+[A-Z ]*?PRIVATE\s+KEY", k, re.S)
           import sys
           sys.stderr.write(f"[диагностика ключа] длина={len(k)}, строк={k.count(chr(10))+1}, BEGIN={'BEGIN' in k}, END={'END' in k}\n")
+          _lines = k.splitlines()
+          sys.stderr.write(f"[диагностика ключа] первая строка: {_lines[0]!r}\n")
+          sys.stderr.write(f"[диагностика ключа] последняя строка: {_lines[-1]!r}\n")
+          sys.stderr.write(f"[диагностика ключа] длины строк: {[len(x) for x in _lines]}\n")
           if not m:
               print("BROKEN")
           else:
