@@ -103,6 +103,7 @@ export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcom
                 <ul className="chev">
                   <li><Link href="/catalog?auction=Copart">Лоты Copart</Link></li>
                   <li><Link href="/catalog?auction=IAAI">Лоты IAAI</Link></li>
+                  <li><Link href="/catalog?auction=Manheim">Лоты Manheim</Link></li>
                   <li><Link href="/sold">Прошедшие торги</Link></li>
                   <li><Link href="/calc">Калькулятор под ключ</Link></li>
                 </ul>

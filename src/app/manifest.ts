@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Nomacars — авто из США под ключ",
     short_name: "Nomacars",
-    description: "Проходные автомобили 3–5 лет с аукционов Copart и IAAI под ключ в Беларусь и Россию.",
+    description: "Проходные автомобили 3–5 лет с аукционов Copart, IAAI и Manheim под ключ в Беларусь и Россию.",
     start_url: "/",
     display: "standalone",
     background_color: "#000000",

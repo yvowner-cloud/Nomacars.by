@@ -23,7 +23,7 @@ export interface Lot {
   zone: DamageZone;
   level: DamageLevel;
   price: number; // текущая ставка или цена выкупа, $
-  auction: "Copart" | "IAAI";
+  auction: "Copart" | "IAAI" | "Manheim";
   /** Двухбуквенный код штата (любой штат США) */
   state: UsState | string;
   aiScore: number; // 0–100
@@ -41,6 +41,8 @@ export interface Lot {
   photos?: string[];
   /** Известен ли месяц выпуска (иначе month = 1, считаем осторожно) */
   monthKnown?: boolean;
+  /** Оценка состояния Manheim (Condition Report, 0–5) */
+  conditionGrade?: number | null;
   /** Мощность не указана на аукционе — оценена по объёму */
   hpEstimated?: boolean;
   /** Разбор лота, подготовленный при отборе */

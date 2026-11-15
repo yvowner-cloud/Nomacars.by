@@ -3,7 +3,7 @@
  * Работает и в браузере (предпросмотр), и на сервере (сохранение).
  */
 export interface ImportedLot {
-  auction: "Copart" | "IAAI";
+  auction: "Copart" | "IAAI" | "Manheim";
   lot_number: string;
   url: string | null;
   vin: string | null;
@@ -40,6 +40,8 @@ export interface ImportedLot {
   damage_level: "light" | "mid";
   score: number;
   repair_estimate_usd: [number, number] | null;
+  condition_grade: number | null;
+  announcements: string | null;
   summary_ru: string;
   damage_plain_ru: string;
   why_ru: string[];
@@ -89,10 +91,10 @@ export function checkImport(input: unknown): ImportCheck {
     const errors: string[] = [];
     const warnings: string[] = [];
     const auctionRaw = String(x.auction || "").toLowerCase();
-    const auction = auctionRaw.includes("copart") ? "Copart" : auctionRaw.includes("iaa") ? "IAAI" : null;
-    const lotNo = str(x.lot_number, 30)?.replace(/\D/g, "") || null;
+    const auction = auctionRaw.includes("copart") ? "Copart" : auctionRaw.includes("iaa") ? "IAAI" : auctionRaw.includes("manheim") ? "Manheim" : null;
+    const lotNo = (auction === "Manheim" ? str(x.lot_number, 30)?.replace(/[^A-Za-z0-9-]/g, "") : str(x.lot_number, 30)?.replace(/\D/g, "")) || null;
     const key = `${auction ?? "?"}-${lotNo ?? index}`;
-    if (!auction) errors.push("аукцион должен быть Copart или IAAI");
+    if (!auction) errors.push("аукцион должен быть Copart, IAAI или Manheim");
     if (!lotNo) errors.push("нет номера лота");
     if (lotNo && seen.has(key)) errors.push("лот повторяется в подборке");
     seen.add(key);
@@ -112,8 +114,15 @@ export function checkImport(input: unknown): ImportCheck {
     const hp = num(x.hp);
     if (hp === null) warnings.push("мощность неизвестна — для РФ утильсбор посчитается приблизительно");
 
-    const primary = str(x.primary_damage, 80);
+    const primary = str(x.primary_damage, 80) || (auction === "Manheim" ? "None" : null);
     if (!primary) errors.push("нет основного повреждения");
+    const cgRaw = num(x.condition_grade);
+    const cg = cgRaw === null ? null : cgRaw > 5 && cgRaw <= 50 ? cgRaw / 10 : cgRaw; // 42 → 4.2
+    if (cg !== null && (cg < 0 || cg > 5)) errors.push("оценка состояния (condition_grade) должна быть от 0 до 5");
+    if (auction === "Manheim" && cg === null) warnings.push("нет оценки состояния (CR)");
+    if (auction === "Manheim" && cg !== null && cg < 3.5) warnings.push(`низкая оценка состояния: ${cg}`);
+    const ann = str(x.announcements, 500);
+    if (ann && /frame|structural|flood|salvage|rebuilt|tmu|odometer|lemon|buyback/i.test(ann)) errors.push(`исключающая отметка аукциона: ${ann}`);
     const secondary = str(x.secondary_damage, 80);
     if ((primary && BAD_DAMAGE.test(primary)) || (secondary && BAD_DAMAGE.test(secondary))) errors.push(`исключённое повреждение: ${[primary, secondary].filter(Boolean).join(", ")}`);
     const title = str(x.title, 80);
@@ -152,6 +161,7 @@ export function checkImport(input: unknown): ImportCheck {
       sale_date: sale, current_bid_usd: bid, buy_now_usd: num(x.buy_now_usd), est_retail_value_usd: erv,
       photos, damage_level: dl, score,
       repair_estimate_usd: rep && rep[0] !== null && rep[1] !== null ? [rep[0]!, rep[1]!] : null,
+      condition_grade: cg, announcements: ann,
       summary_ru: summary, damage_plain_ru: str(x.damage_plain_ru, 1500) || "",
       why_ru: strs(x.why_ru, 6, 300), risks_ru: strs(x.risks_ru, 6, 300),
     };

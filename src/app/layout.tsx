@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic"; // демо: даты торгов сч�
 export const metadata: Metadata = {
   metadataBase: new URL(`https://${COMPANY.domain}`),
   title: { default: `${COMPANY.brand}: авто из США под ключ в Беларусь и Россию`, template: `%s · ${COMPANY.brand}` },
-  description: "Проходные автомобили 3–5 лет с аукционов Copart и IAAI. Еженедельная подборка, калькулятор под ключ, доставка и растаможка в РБ и РФ.",
+  description: "Проходные автомобили 3–5 лет с аукционов Copart, IAAI и Manheim. Еженедельная подборка, калькулятор под ключ, доставка и растаможка в РБ и РФ.",
   openGraph: { type: "website", locale: "ru_RU", siteName: COMPANY.brand },
 };
 

@@ -37,6 +37,17 @@ describe("checkImport", () => {
     expect(r.valid).toBe(1);
     expect(r.lots[0].warnings.length).toBeGreaterThanOrEqual(3);
   });
+  it("принимает Manheim: номер с буквами, без повреждений, оценка CR", () => {
+    const r = checkImport({ lots: [{ ...good, auction: "Manheim", lot_number: "PA-1234567", primary_damage: null, condition_grade: 42, title: "Clean" }] });
+    expect(r.valid).toBe(1);
+    expect(r.lots[0].lot?.lot_number).toBe("PA-1234567");
+    expect(r.lots[0].lot?.primary_damage).toBe("None");
+    expect(r.lots[0].lot?.condition_grade).toBe(4.2);
+  });
+  it("отсеивает Manheim с отметкой о раме или затоплении", () => {
+    const r = checkImport({ lots: [{ ...good, auction: "Manheim", lot_number: "X1", announcements: "Frame damage, prior paint" }] });
+    expect(r.valid).toBe(0);
+  });
   it("сообщает о сломанном JSON", () => {
     expect(checkImport("{lots: [").fatal).toMatch(/JSON/);
   });

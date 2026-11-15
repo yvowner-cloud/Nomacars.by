@@ -40,7 +40,8 @@ export function rowToLot(r: Row, now = Date.now()): Lot {
   // мощность не указана — оцениваем осторожно (для РФ важна граница 160 л.с.)
   const hpEstimated = d.hp === null || d.hp === undefined;
   const hp = hpEstimated ? (d.fuel === "Электро" ? 200 : d.engine_cc >= 2000 ? 180 : 140) : d.hp!;
-  const damage = [d.primary_damage, d.secondary_damage].filter(Boolean).join(", ");
+  const noDamage = /^(none|no damage|normal wear|без повреждений)$/i.test(String(d.primary_damage || "").trim());
+  const damage = noDamage ? "Без повреждений" : [d.primary_damage, d.secondary_damage].filter(Boolean).join(", ");
   return {
     id: r.id, slug: r.slug, make: d.make, model: d.model, trim: d.trim || "", year: d.year,
     month: monthKnown ? m : 1, monthKnown, body: d.body, fuel: d.fuel, cc: d.engine_cc, hp, hpEstimated,
@@ -50,7 +51,7 @@ export function rowToLot(r: Row, now = Date.now()): Lot {
     repair: d.repair_estimate_usd ?? [0, 0], market: { by: 0, ru: 0 }, saleAt,
     color: colorHex(d.color), top: false, status, lotNo: d.lot_number,
     vin: d.vin && !d.vin_masked ? d.vin : d.vin ? `${d.vin.slice(0, 11)}••••••` : "скрыт аукционом",
-    photos: d.photos,
+    photos: d.photos, conditionGrade: d.condition_grade ?? null,
     review: d.summary_ru ? { summary: d.summary_ru, plain: d.damage_plain_ru, why: d.why_ru, risks: d.risks_ru } : undefined,
     extra: {
       city: d.location_city, title: d.title, runAndDrive: d.run_and_drive, keys: d.keys, airbags: d.airbags_deployed,

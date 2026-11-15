@@ -8,7 +8,7 @@ import { getTariffs } from "@/lib/server/settings";
 
 export const metadata: Metadata = {
   title: "Прошедшие торги и реальные цены выкупа",
-  description: "За сколько реально выкупаются автомобили на аукционах Copart и IAAI: архив лотов из нашей подборки.",
+  description: "За сколько реально выкупаются автомобили на аукционах Copart, IAAI и Manheim: архив лотов из нашей подборки.",
 };
 
 export const dynamic = "force-dynamic";

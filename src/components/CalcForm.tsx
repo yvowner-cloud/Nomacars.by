@@ -60,7 +60,7 @@ export function CalcForm() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 12 }}>
             {([
               ["Ставка на аукционе, $", <input key="p" className="field num" id="c-price" type="number" step={100} value={price} onChange={(e) => setPrice(e.target.value)} />],
-              ["Аукцион", <select key="a" className="field" id="c-auction" value={auction} onChange={(e) => setAuction(e.target.value)}><option>Copart</option><option>IAAI</option></select>],
+              ["Аукцион", <select key="a" className="field" id="c-auction" value={auction} onChange={(e) => setAuction(e.target.value)}><option>Copart</option><option>IAAI</option><option>Manheim</option></select>],
               ["Площадка (штат)", <select key="s" className="field" id="c-state" value={state} onChange={(e) => setState(e.target.value)}>{Object.entries(US_STATES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}</select>],
               ["Топливо", <select key="f" className="field" id="c-fuel" value={fuel} onChange={(e) => setFuel(e.target.value)}><option>Бензин</option><option>Дизель</option><option>Гибрид</option><option>Электро</option></select>],
               ["Объём двигателя, см³", <input key="c" className="field num" id="c-cc" type="number" value={cc} onChange={(e) => setCc(e.target.value)} />],

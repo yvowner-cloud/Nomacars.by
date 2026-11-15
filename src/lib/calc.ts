@@ -49,7 +49,7 @@ export function calcTurnkey(i: CalcInput, country: Country, T: Tariffs = DEFAULT
   const st = stateInfo(String(i.state));
 
   const lines = [
-    { label: "Ставка на аукционе", usd: price, note: i.auction || "Copart / IAAI" },
+    { label: "Ставка на аукционе", usd: price, note: i.auction || "Copart / IAAI / Manheim" },
     { label: "Сбор аукциона", usd: fee, note: "по шкале от цены лота" },
     { label: "Доставка по США", usd: inland, note: `${st.name} → порт ${st.port}` },
     { label: "Морской фрахт", usd: T.ocean, note: "контейнер до Клайпеды" },

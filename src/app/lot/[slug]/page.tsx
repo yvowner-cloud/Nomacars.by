@@ -91,6 +91,7 @@ export default async function LotPage({ params }: P) {
                   {l.extra?.transmission && <><dt>Коробка / привод</dt><dd>{[l.extra.transmission, l.extra.drive].filter(Boolean).join(" · ")}</dd></>}
                   <dt>Кузов</dt><dd>{l.body === "suv" ? "Кроссовер / SUV" : l.body === "sedan" ? "Седан" : "Другой"}{l.extra?.colorName ? ` · ${l.extra.colorName}` : ""}</dd>
                   <dt>Повреждение</dt><dd>{l.damage}</dd>
+                  {l.conditionGrade != null && <><dt>Оценка состояния (CR)</dt><dd>{l.conditionGrade.toFixed(1)} из 5</dd></>}
                   {l.extra?.title && <><dt>Документ (title)</dt><dd>{l.extra.title}</dd></>}
                   {l.extra && l.extra.runAndDrive !== null && l.extra.runAndDrive !== undefined && <><dt>На ходу (Run and Drive)</dt><dd>{l.extra.runAndDrive ? "да" : "нет"}</dd></>}
                   {l.extra && l.extra.keys !== null && l.extra.keys !== undefined && <><dt>Ключи</dt><dd>{l.extra.keys ? "есть" : "нет"}</dd></>}

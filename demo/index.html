@@ -600,7 +600,7 @@ function pHome(){
  </section>
  <div class="wrap"><div class="tiles">${tiles.map(t=>`<a class="tile" href="#catalog" data-act="preset" data-k="${t.k}" data-v="${t.v}"><b>${t.t}</b><div class="tile-card" style="background:${t.bg}"><u>Смотреть лоты · ${t.n}</u>${carSvg(lot(t.id))}</div></a>`).join("")}</div></div>
  <section class="band"><div class="wrap"><h2>Проходные авто из США по честной цене</h2>
-  <p>Каждую неделю Nomacars просматривает тысячи лотов и оставляет ${S.set.perWeek} лучших. Вы выбираете машину, мы торгуемся, везём морем через Клайпеду, растаможиваем и выдаём с документами. Наши услуги стоят $${fm(S.T.service)}, фиксированно.</p></div></section>
+  <p>Каждую неделю Nomacars просматривает тысячи лотов и оставляет ${S.set.perWeek} лучших. Вы выбираете машину, мы торгуемся, везём морем через Клайпеду, растамаживаем и выдаём с документами. Наши услуги стоят $${fm(S.T.service)}, фиксированно.</p></div></section>
  <section class="sec"><div class="wrap">
   <div class="sec-h"><h2>Ближайшие торги</h2><a href="#catalog" data-act="preset" data-k="sort" data-v="date">Все лоты ›</a></div>
   <div class="cal">${upcoming().slice(0,8).map(c=>`<a href="#catalog" data-act="preset" data-k="auction" data-v="${c.auction}"><span class="d"><b>${c.date.getDate()}</b><span>${c.date.toLocaleDateString("ru-RU",{month:"short"})}</span></span><strong>${c.auction}</strong><span class="note">${c.count} ${plural(c.count)} из подборки</span></a>`).join("")}</div>
@@ -991,7 +991,7 @@ function render(){
  document.querySelectorAll("#nav [data-r]").forEach(a=>a.dataset.r===navKey?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
  $("#brandName").textContent=S.set.brand.toUpperCase();
  $("#topPhone").textContent=S.set.phone;
- $("#fAbout").textContent=`${S.set.brand} пригоняет автомобили с аукционов Copart и IAAI в Беларусь и Россию. Каждую неделю мы отбираем проходные машины 3–5 лет с минимальными повреждениями, торгуемся, доставляем морем через Клайпеду, растаможиваем и выдаём автомобиль с документами. Каждый этап виден клиенту в личном кабинете.`;
+ $("#fAbout").textContent=`${S.set.brand} пригоняет автомобили с аукционов Copart и IAAI в Беларусь и Россию. Каждую неделю мы отбираем проходные машины 3–5 лет с минимальными повреждениями, торгуемся, доставляем морем через Клайпеду, растамаживаем и выдаём автомобиль с документами. Каждый этап виден клиенту в личном кабинете.`;
  $("#fUp").innerHTML=upcoming().slice(0,8).map(u=>`<li><a href="#catalog" data-act="preset" data-k="auction" data-v="${u.auction}">${u.auction} · торги ${dm(u.date)}</a></li>`).join("");
  $("#fContacts").innerHTML=`<li><span class="num">${esc(S.set.phone)}</span></li><li><span>Telegram ${esc(S.set.tg)}</span></li><li><span>${esc(S.set.city)}</span></li>`;
  $("#fLegal").innerHTML=`${esc(S.set.brand)} © ${new Date().getFullYear()}. Все права защищены<br><a href="#home">Политика конфиденциальности</a> | <a href="#home">Согласие на обработку данных</a> | <a href="#calc">Расчёты ориентировочные</a>`;

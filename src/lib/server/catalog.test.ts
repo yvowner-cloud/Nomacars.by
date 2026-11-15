@@ -10,6 +10,7 @@ const data: ImportedLot = {
   airbags_deployed: false, location_city: "Atlanta", location_state: "ga", sale_date: null, current_bid_usd: 12600, buy_now_usd: null,
   est_retail_value_usd: 26100, photos: ["https://vis.iaai.com/1.jpg"], damage_level: "light", score: 88, repair_estimate_usd: [800, 1300],
   summary_ru: "Почти новый Tucson.", damage_plain_ru: "Задний бампер.", why_ru: ["Небольшой пробег"], risks_ru: ["Парктроники"],
+  condition_grade: null, announcements: null,
 };
 const now = Date.parse("2026-11-15T12:00:00Z");
 const row = (over: Partial<{ status: string; sale_at: string | null; sold_price: number | null }> = {}) => ({
@@ -38,6 +39,12 @@ describe("rowToLot", () => {
   });
   it("прошедшие торги без итога — «Торги завершены»", () => {
     expect(rowToLot(row({ sale_at: "2026-11-10T14:00:00Z" }), now).status).toBe("ended");
+  });
+  it("Manheim без повреждений — «Без повреждений» и оценка состояния", () => {
+    const l = rowToLot({ ...row(), auction: "Manheim", data: { ...data, auction: "Manheim", primary_damage: "None", secondary_damage: null, condition_grade: 4.3 } }, now);
+    expect(l.auction).toBe("Manheim");
+    expect(l.damage).toBe("Без повреждений");
+    expect(l.conditionGrade).toBe(4.3);
   });
   it("продан — цена выкупа вместо ставки", () => {
     const l = rowToLot(row({ status: "sold", sold_price: 13900 }), now);

@@ -75,7 +75,7 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
           {row("Лот №", <input className="field" id="gs-lot" placeholder="- Все -" inputMode="numeric" value={f.lotNo} onChange={(e) => set("lotNo", e.target.value)} />)}
           {row("Марка", <select className="field" id="gs-make" value={f.make} onChange={(e) => set("make", e.target.value)}><option value="">- Все -</option>{makes.map((m) => <option key={m}>{m}</option>)}</select>)}
           {row("Модель", <select className="field" id="gs-model" value={f.model} onChange={(e) => set("model", e.target.value)}><option value="">- Все -</option>{models.map((m) => <option key={m}>{m}</option>)}</select>)}
-          {row("Аукцион", <select className="field" id="gs-auction" value={f.auction} onChange={(e) => set("auction", e.target.value)}><option value="">- Все -</option><option>Copart</option><option>IAAI</option></select>)}
+          {row("Аукцион", <select className="field" id="gs-auction" value={f.auction} onChange={(e) => set("auction", e.target.value)}><option value="">- Все -</option><option>Copart</option><option>IAAI</option><option>Manheim</option></select>)}
           {row("Кузов", <select className="field" id="gs-body" value={f.body} onChange={(e) => set("body", e.target.value)}><option value="">- Все -</option><option value="suv">Кроссовер / SUV</option><option value="sedan">Седан</option></select>)}
           {row("Топливо", <select className="field" id="gs-fuel" value={f.fuel} onChange={(e) => set("fuel", e.target.value)}><option value="">- Все -</option><option>Бензин</option><option>Гибрид</option><option>Электро</option></select>)}
           {row("Пробег", <div className="gs-pair"><input className="field num" id="gs-kmmin" inputMode="numeric" placeholder="От, км" value={f.kmMin} onChange={(e) => set("kmMin", e.target.value)} /><input className="field num" id="gs-kmmax" inputMode="numeric" placeholder="До, км" value={f.kmMax} onChange={(e) => set("kmMax", e.target.value)} /></div>)}
@@ -130,7 +130,7 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
                     <span>Двигатель: <b>{engineStr(l.cc, l.hp, l.hpEstimated)}</b></span>
                   </div>
                   <div className="lrow-m">
-                    <span>Повреждение: <b className={l.level === "light" ? "dmg-light" : "dmg-mid"}>{l.damage}</b></span>
+                    <span>{l.conditionGrade != null ? <>Состояние: <b className="dmg-light">CR {l.conditionGrade.toFixed(1)}</b>{l.damage !== "Без повреждений" && <> · {l.damage}</>}</> : <>Повреждение: <b className={l.level === "light" ? "dmg-light" : "dmg-mid"}>{l.damage}</b></>}</span>
                   </div>
                   <div className="lrow-m">
                     <span>Лот №: <b className="num">{l.lotNo}</b></span>

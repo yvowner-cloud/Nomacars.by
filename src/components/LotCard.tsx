@@ -30,7 +30,9 @@ export function LotCard({ lot }: { lot: PublicLot }) {
         <dl className="specs">
           <dt>Пробег</dt><dd className="num">{kmStr(lot.miles)}</dd>
           <dt>Двигатель</dt><dd>{engineStr(lot.cc, lot.hp, lot.hpEstimated)}</dd>
-          <dt>Повреждение</dt><dd className={lot.level === "light" ? "dmg-light" : "dmg-mid"} title={lot.damage}>{lot.damage}</dd>
+          {lot.conditionGrade != null
+            ? <><dt>Состояние</dt><dd className="dmg-light" title={lot.damage}>CR {lot.conditionGrade.toFixed(1)} из 5</dd></>
+            : <><dt>Повреждение</dt><dd className={lot.level === "light" ? "dmg-light" : "dmg-mid"} title={lot.damage}>{lot.damage}</dd></>}
         </dl>
         <div className="cfoot">
           <TurnkeyPrice lot={lot} />
