@@ -6,16 +6,17 @@ import { activeLots, pastLots, upcomingAuctions, LOTS } from "@/lib/lots";
 import { COMPANY } from "@/lib/company";
 import { currentUser } from "@/lib/server/auth";
 import { toPublicAll } from "@/lib/server/public-lots";
+import { getTariffs } from "@/lib/server/settings";
 
 export const dynamic = "force-dynamic";
 
 const plural = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? "лот" : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? "лота" : "лотов");
 
 export default async function Home() {
-  const user = await currentUser();
-  const active = toPublicAll(activeLots(), user);
+  const [user, T] = await Promise.all([currentUser(), getTariffs()]);
+  const active = toPublicAll(activeLots(), user, T);
   const top = active.filter((l) => l.top).sort((a, b) => b.aiScore - a.aiScore);
-  const past = toPublicAll(pastLots(), user);
+  const past = toPublicAll(pastLots(), user, T);
   const cal = upcomingAuctions().slice(0, 8);
   const pick = (id: number) => LOTS.find((l) => l.id === id)!;
 
@@ -47,7 +48,7 @@ export default async function Home() {
       <section className="band">
         <div className="wrap">
           <h2>Проходные авто из США по честной цене</h2>
-          <p>Каждую неделю Nomacars просматривает тысячи лотов и оставляет лучшие. Вы выбираете машину, мы торгуемся, везём морем через Клайпеду, растаможиваем и выдаём с документами. Наши услуги стоят ${COMPANY.serviceFee}, фиксированно.</p>
+          <p>Каждую неделю Nomacars просматривает тысячи лотов и оставляет лучшие. Вы выбираете машину, мы торгуемся, везём морем через Клайпеду, растаможиваем и выдаём с документами. Наши услуги стоят ${T.service}, фиксированно.</p>
         </div>
       </section>
 

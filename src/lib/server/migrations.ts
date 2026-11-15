@@ -47,6 +47,28 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       );
     `,
   },
+  {
+    version: 2,
+    name: "настройки (тарифы, курсы) и история изменений",
+    sql: `
+      create table settings (
+        key        text primary key,
+        value      jsonb not null,
+        updated_at timestamptz not null default now(),
+        updated_by bigint references users(id) on delete set null
+      );
+      create table settings_history (
+        id         bigserial primary key,
+        key        text not null,
+        before     jsonb,
+        after      jsonb not null,
+        changed    text[] not null default '{}',
+        user_id    bigint references users(id) on delete set null,
+        changed_at timestamptz not null default now()
+      );
+      create index settings_history_key_idx on settings_history (key, changed_at desc);
+    `,
+  },
 ];
 
 export async function migrate(): Promise<void> {

@@ -54,7 +54,10 @@ export function Header({ upcoming }: { upcoming: Upcoming[] }) {
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3z" /></svg>
           </Link>
           {user ? (
-            <button onClick={logout} title="Выйти">{user.name.split(" ")[0]} · Выйти</button>
+            <>
+              {(user.role === "owner" || user.role === "manager") && <Link href="/admin" aria-current={cur("/admin")} onMouseEnter={() => setMega(false)}>Кабинет</Link>}
+              <button onClick={logout} title="Выйти">{(user.name || "Аккаунт").split(" ")[0]} · Выйти</button>
+            </>
           ) : (
             <>
               <button onClick={() => openLogin()}>Вход</button>

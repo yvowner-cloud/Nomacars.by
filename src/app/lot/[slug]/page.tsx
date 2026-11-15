@@ -6,11 +6,11 @@ import { LotCard } from "@/components/LotCard";
 import { LOTS, graceUntil, lotBySlug, saleDate } from "@/lib/lots";
 import { aiReview } from "@/lib/ai";
 import { ageAtCustoms } from "@/lib/calc";
-import { DEFAULT_TARIFFS } from "@/lib/tariffs";
 import { US_STATES } from "@/lib/tariffs";
 import { engineStr, fmt, kmStr, money } from "@/lib/format";
 import { currentUser } from "@/lib/server/auth";
 import { lotCalc, toPublic, toPublicAll } from "@/lib/server/public-lots";
+import { getTariffs } from "@/lib/server/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -30,11 +30,11 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
 export default async function LotPage({ params }: P) {
   const l = lotBySlug((await params).slug);
   if (!l) notFound();
-  const user = await currentUser();
-  const pub = toPublic(l, user);
+  const [user, T] = await Promise.all([currentUser(), getTariffs()]);
+  const pub = toPublic(l, user, T);
   const ai = aiReview(l);
   const st = US_STATES[l.state];
-  const age = ageAtCustoms(l.year, l.month, saleDate(l), DEFAULT_TARIFFS.deliveryDays);
+  const age = ageAtCustoms(l.year, l.month, saleDate(l), T.deliveryDays);
   const similar = LOTS.filter((x) => x.id !== l.id && x.status === "active" && x.body === l.body)
     .sort((a, b) => b.aiScore - a.aiScore).slice(0, 4);
 
@@ -92,13 +92,13 @@ export default async function LotPage({ params }: P) {
               }
             />
           </div>
-          <BidBox lot={pub} calc={lotCalc(l, user)} />
+          <BidBox lot={pub} calc={lotCalc(l, user, T)} />
         </div>
 
         {similar.length > 0 && (
           <div style={{ marginTop: 30 }}>
             <div className="sec-h"><h2>Похожие лоты</h2></div>
-            <div className="grid">{toPublicAll(similar, user).map((x) => <LotCard key={x.id} lot={x} />)}</div>
+            <div className="grid">{toPublicAll(similar, user, T).map((x) => <LotCard key={x.id} lot={x} />)}</div>
           </div>
         )}
       </div>

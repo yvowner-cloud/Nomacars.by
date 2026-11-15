@@ -1,7 +1,7 @@
 import { api, body } from "@/lib/server/api";
 import { AuthError, currentUser } from "@/lib/server/auth";
 import { calcTurnkey } from "@/lib/calc";
-import { DEFAULT_TARIFFS } from "@/lib/tariffs";
+import { getTariffs } from "@/lib/server/settings";
 import type { CalcInput, Country } from "@/lib/types";
 
 /** Калькулятор под ключ — только для вошедших (тарифы не уходят в браузер). */
@@ -18,6 +18,6 @@ export const POST = api(async (req) => {
     hp: Math.min(Math.max(Number(i.hp) || 0, 0), 2_000),
   };
   const country: Country = b.country === "ru" ? "ru" : "by";
-  const T = DEFAULT_TARIFFS;
-  return { result: calcTurnkey(input, country), rates: { byn: T.byn, rub: T.rub, eurUsd: T.eurUsd } };
+  const T = await getTariffs();
+  return { result: calcTurnkey(input, country, T), rates: { byn: T.byn, rub: T.rub, eurUsd: T.eurUsd }, deliveryDays: T.deliveryDays };
 });

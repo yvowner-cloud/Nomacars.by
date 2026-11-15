@@ -8,6 +8,8 @@ export async function register() {
   const { migrate } = await import("./lib/server/migrations");
   try {
     await migrate();
+    const { startFxScheduler } = await import("./lib/server/settings");
+    startFxScheduler();
   } catch (e) {
     console.error("[db] ошибка миграции:", (e as Error).message);
   }
