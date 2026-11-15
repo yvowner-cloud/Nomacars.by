@@ -6,10 +6,11 @@ import { ageAtCustoms, DELIVERY_DAYS } from "@/lib/age";
 import { US_STATES } from "@/lib/geo";
 import { fmt, money } from "@/lib/format";
 import type { CalcResult } from "@/lib/types";
+import { ExactCalcButton } from "./LeadForms";
 
 /** Калькулятор: ввод — в браузере, расчёт — на сервере (/api/calc) и только для вошедших. */
 export function CalcForm() {
-  const { user, country, setCountry, openLogin, toast } = useApp();
+  const { user, country, setCountry, openLogin } = useApp();
   const [price, setPrice] = useState("14000");
   const [auction, setAuction] = useState("Copart");
   const [state, setState] = useState("NJ");
@@ -98,7 +99,7 @@ export function CalcForm() {
                 ))}
                 <div className="cl total"><div><b>Итого под ключ</b><small>≈ {fmt(c.local)} {c.currency} · срок {c.days}</small></div><div className="v num">{money(c.total)}</div></div>
               </div>
-              <button className="btn btn-red" onClick={() => toast("Запрос отправлен, менеджер пришлёт точный расчёт")}>Получить точный расчёт</button>
+              <ExactCalcButton input={{ price: Number(price), auction, state, fuel, cc: Number(cc), hp: Number(hp) }} />
               {res && <p className="note" style={{ margin: 0 }}>Курс: 1 $ = {res.rates.byn} BYN / {res.rates.rub} ₽, 1 € = {res.rates.eurUsd} $. Ставки демонстрационные.</p>}
             </>
           )}

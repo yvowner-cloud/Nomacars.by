@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { COMPANY } from "@/lib/company";
 import { upcomingAuctions } from "@/lib/lots";
 import { currentUser, favoriteIds } from "@/lib/server/auth";
+import { newLeadsCount } from "@/lib/server/leads";
 
 export const dynamic = "force-dynamic"; // демо: даты торгов считаются от «сегодня»
 
@@ -21,6 +22,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
   const favorites = user ? await favoriteIds(user.id).catch(() => []) : [];
+  const newLeads = user && (user.role === "owner" || user.role === "manager") ? await newLeadsCount().catch(() => 0) : 0;
   const upcoming = upcomingAuctions().map((u) => ({ iso: u.date.toISOString(), auction: u.auction, count: u.count }));
   return (
     <html lang="ru">
@@ -32,7 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Providers initialUser={user} initialFavorites={favorites}>
-          <Header upcoming={upcoming} />
+          <Header upcoming={upcoming} newLeads={newLeads} />
           <main>{children}</main>
           <Footer upcoming={upcoming} />
         </Providers>

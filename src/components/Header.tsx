@@ -10,7 +10,7 @@ export interface Upcoming { iso: string; auction: string; count: number }
 
 const dm = (iso: string) => new Date(iso).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
 
-export function Header({ upcoming }: { upcoming: Upcoming[] }) {
+export function Header({ upcoming, newLeads = 0 }: { upcoming: Upcoming[]; newLeads?: number }) {
   const { country, setCountry, user, openLogin, logout } = useApp();
   const path = usePathname();
   const [mega, setMega] = useState(false);
@@ -55,7 +55,7 @@ export function Header({ upcoming }: { upcoming: Upcoming[] }) {
           </Link>
           {user ? (
             <>
-              {(user.role === "owner" || user.role === "manager") && <Link href="/admin" aria-current={cur("/admin")} onMouseEnter={() => setMega(false)}>Кабинет</Link>}
+              {(user.role === "owner" || user.role === "manager") && <Link href="/admin" aria-current={cur("/admin")} onMouseEnter={() => setMega(false)}>Кабинет{newLeads > 0 && <span className="tab-badge" style={{ marginLeft: 6 }} aria-label={`новых заявок: ${newLeads}`}>{newLeads}</span>}</Link>}
               <button onClick={logout} title="Выйти">{(user.name || "Аккаунт").split(" ")[0]} · Выйти</button>
             </>
           ) : (

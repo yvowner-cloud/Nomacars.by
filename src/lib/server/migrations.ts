@@ -69,6 +69,45 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       create index settings_history_key_idx on settings_history (key, changed_at desc);
     `,
   },
+  {
+    version: 3,
+    name: "заявки и история заявок",
+    sql: `
+      create table leads (
+        id          bigserial primary key,
+        user_id     bigint references users(id) on delete set null,
+        kind        text not null check (kind in ('lot','pick','calc')),
+        lot_id      int,
+        status      text not null default 'new',
+        country     text not null default 'by',
+        name        text not null default '',
+        phone       text not null,
+        max_bid     numeric,
+        budget      numeric,
+        comment     text not null default '',
+        calc        jsonb,
+        notes       text not null default '',
+        tg_notified boolean not null default false,
+        created_at  timestamptz not null default now(),
+        updated_at  timestamptz not null default now()
+      );
+      create index leads_status_idx on leads (status, created_at desc);
+      create index leads_user_idx on leads (user_id, created_at desc);
+      create unique index leads_active_lot_idx on leads (user_id, lot_id)
+        where kind = 'lot' and status not in ('delivered','rejected');
+      create table lead_events (
+        id          bigserial primary key,
+        lead_id     bigint not null references leads(id) on delete cascade,
+        user_id     bigint references users(id) on delete set null,
+        type        text not null,
+        from_status text,
+        to_status   text,
+        text        text,
+        created_at  timestamptz not null default now()
+      );
+      create index lead_events_lead_idx on lead_events (lead_id, created_at);
+    `,
+  },
 ];
 
 export async function migrate(): Promise<void> {

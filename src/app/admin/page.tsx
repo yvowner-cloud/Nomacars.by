@@ -1,22 +1,31 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { currentUser } from "@/lib/server/auth";
 import { editableTariffs, effectiveRates, fxState, history } from "@/lib/server/settings";
+import { newLeadsCount } from "@/lib/server/leads";
+import { linkedChats, telegramConfigured } from "@/lib/server/telegram";
+import { LOTS } from "@/lib/lots";
 import { TariffEditor } from "@/components/admin/TariffEditor";
+import { LeadsBoard, type LeadLotInfo } from "@/components/admin/LeadsBoard";
+import { TelegramPanel } from "@/components/admin/TelegramPanel";
 import { LoginGate } from "@/components/admin/LoginGate";
 
 export const metadata: Metadata = { title: "Кабинет владельца", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 const TABS = [
+  { key: "leads", label: "Заявки", ready: true },
   { key: "tariffs", label: "Тарифы и курсы", ready: true },
-  { key: "leads", label: "Заявки", ready: false, note: "этап 4" },
   { key: "lots", label: "Лоты и подборка", ready: false, note: "этап 6" },
   { key: "staff", label: "Сотрудники", ready: false, note: "позже" },
 ];
 
-export default async function AdminPage() {
+export default async function AdminPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const sp = await searchParams;
+  const tab = sp.tab === "tariffs" ? "tariffs" : "leads";
   const user = await currentUser();
   const staff = user && (user.role === "owner" || user.role === "manager");
+  const newCount = staff ? await newLeadsCount().catch(() => 0) : 0;
 
   return (
     <section className="sec">
@@ -27,26 +36,38 @@ export default async function AdminPage() {
         </div>
 
         {!user ? (
-          <LoginGate text="Войдите с номером владельца, чтобы управлять тарифами и заявками." />
+          <LoginGate text="Войдите с номером владельца, чтобы управлять заявками и тарифами." />
         ) : !staff ? (
           <div className="panel empty"><b>Нет доступа</b><span>Этот раздел доступен только владельцу и менеджерам компании.</span></div>
         ) : (
           <>
             <nav className="tabs" aria-label="Разделы кабинета" style={{ marginBottom: 16 }}>
-              {TABS.map((t) => (
-                <button key={t.key} aria-selected={t.key === "tariffs"} disabled={!t.ready} title={t.ready ? undefined : `Появится: ${t.note}`}
-                  style={t.ready ? undefined : { opacity: 0.55, cursor: "not-allowed" }}>
-                  {t.label}{!t.ready && <small style={{ marginLeft: 6, fontSize: 11 }}>· {t.note}</small>}
-                </button>
+              {TABS.map((t) => t.ready ? (
+                <Link key={t.key} href={`/admin?tab=${t.key}`} className="tab-link" aria-current={t.key === tab ? "page" : undefined}>
+                  {t.label}{t.key === "leads" && newCount > 0 && <span className="tab-badge">{newCount}</span>}
+                </Link>
+              ) : (
+                <span key={t.key} className="tab-link tab-off" title={`Появится: ${t.note}`}>{t.label}<small> · {t.note}</small></span>
               ))}
             </nav>
-            <TariffEditor
-              readOnly={user.role !== "owner"}
-              initial={await (async () => {
-                const [tariffs, fx, hist] = await Promise.all([editableTariffs(), fxState(), history()]);
-                return { tariffs, fx, rates: effectiveRates(fx), history: JSON.parse(JSON.stringify(hist)) };
-              })()}
-            />
+
+            {tab === "leads" ? (
+              <div style={{ display: "grid", gap: 16 }}>
+                <LeadsBoard
+                  initialOpen={sp.lead ? Number(sp.lead) || null : null}
+                  lots={Object.fromEntries(LOTS.map((l) => [l.id, { id: l.id, slug: l.slug, title: `${l.year} ${l.make} ${l.model} ${l.trim}`, lotNo: l.lotNo, auction: l.auction } satisfies LeadLotInfo]))}
+                />
+                <TelegramPanel configured={telegramConfigured()} chats={await linkedChats()} readOnly={user.role !== "owner"} />
+              </div>
+            ) : (
+              <TariffEditor
+                readOnly={user.role !== "owner"}
+                initial={await (async () => {
+                  const [tariffs, fx, hist] = await Promise.all([editableTariffs(), fxState(), history()]);
+                  return { tariffs, fx, rates: effectiveRates(fx), history: JSON.parse(JSON.stringify(hist)) };
+                })()}
+              />
+            )}
           </>
         )}
       </div>

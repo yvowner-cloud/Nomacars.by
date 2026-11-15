@@ -10,6 +10,7 @@ import { WatchButton } from "./Price";
 import { BigCountdown } from "./Timer";
 import { fmt, money } from "@/lib/format";
 import { LotBadge } from "./LotCard";
+import { WantButton } from "./LeadForms";
 
 const VIEWS = ["Слева", "Справа", "Повреждение", "Общий план"];
 
@@ -34,14 +35,9 @@ export function LotGallery({ lot }: { lot: PublicLot }) {
 }
 
 export function BidBox({ lot, calc }: { lot: PublicLot; calc: Record<Country, CalcResult> | null }) {
-  const { user, country, setCountry, openLogin, toast } = useApp();
+  const { user, country, setCountry, openLogin } = useApp();
   const c = calc?.[country] ?? null;
   const active = lot.status === "active";
-
-  const want = () => {
-    const go = () => toast("Заявка принята, менеджер свяжется с вами в течение 30 минут. Кабинет и заявки появятся на этапе 4.");
-    if (user) go(); else openLogin(go);
-  };
 
   return (
     <div className="panel bidbox">
@@ -87,7 +83,7 @@ export function BidBox({ lot, calc }: { lot: PublicLot; calc: Record<Country, Ca
 
         {active ? (
           <div style={{ display: "grid", gap: 8 }}>
-            <button className="btn btn-red btn-block" onClick={want}>Хочу эту машину</button>
+            <WantButton lotId={lot.id} title={`${lot.year} ${lot.make} ${lot.model} ${lot.trim}`} bid={lot.bid ?? 0} />
             <WatchButton id={lot.id} big />
             <span className="note">Предоплата не нужна. Счёт выставляется после выигрыша торгов.</span>
           </div>

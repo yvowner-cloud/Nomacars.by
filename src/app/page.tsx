@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LotCard } from "@/components/LotCard";
 import { HeroSlider } from "@/components/HeroSlider";
+import { PickButton } from "@/components/LeadForms";
 import { CarArt } from "@/components/CarArt";
 import { activeLots, pastLots, upcomingAuctions, LOTS } from "@/lib/lots";
 import { COMPANY } from "@/lib/company";
@@ -112,7 +113,7 @@ export default async function Home() {
                 <span className="muted">{COMPANY.hours}</span>
                 <b className="num" style={{ fontSize: 18 }}>{COMPANY.phone}</b>
                 <span>Telegram {COMPANY.telegram} · WhatsApp {COMPANY.whatsapp}</span>
-                <Link className="btn btn-red" href="/catalog" style={{ justifySelf: "start" }}>Подобрать автомобиль</Link>
+                <span style={{ justifySelf: "start" }}><PickButton /></span>
               </div>
             </div>
           </div>
