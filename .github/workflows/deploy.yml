@@ -58,14 +58,26 @@ jobs:
           HOST: ${{ secrets.DEPLOY_HOST }}
           PORT: ${{ secrets.DEPLOY_PORT }}
           KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          KNOWN: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          # Отпечаток ECDSA-ключа сервера (не секрет). Сменили сервер — обновите значение
+          # (на сервере: ssh-keygen -lf /etc/ssh/ssh_host_ecdsa_key.pub)
+          HOST_FP: ${{ vars.DEPLOY_HOST_FP || 'SHA256:Et2xdgQJTjlEa9dbkv4wb1JmVSUKH7WdFR6+wfK3PrY' }}
         run: |
           set -euo pipefail
           PORT="${PORT:-22}"
+          HOST="$(printf '%s' "$HOST" | tr -d '[:space:]')"
+          PORT="$(printf '%s' "$PORT" | tr -d '[:space:]')"
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
-          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
-          SSH="ssh -i ~/.ssh/deploy -p $PORT -o StrictHostKeyChecking=yes"
+          printf '%s\n' "$KEY" | tr -d '\r' > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          ssh-keygen -y -f ~/.ssh/deploy > /dev/null || { echo "::error::DEPLOY_SSH_KEY повреждён при копировании — вставьте его заново целиком"; exit 1; }
+          # Проверяем, что это именно наш сервер: сравниваем отпечаток ключа
+          ssh-keyscan -p "$PORT" -t ecdsa "$HOST" 2>/dev/null > ~/.ssh/scan
+          GOT="$(ssh-keygen -lf ~/.ssh/scan | awk '{print $2}')"
+          if [ "$GOT" != "$HOST_FP" ]; then
+            echo "::error::Отпечаток сервера не совпал (получено: ${GOT:-ничего}). Проверьте DEPLOY_HOST или обновите DEPLOY_HOST_FP."
+            exit 1
+          fi
+          cp ~/.ssh/scan ~/.ssh/known_hosts
+          SSH="ssh -i ~/.ssh/deploy -p $PORT -o StrictHostKeyChecking=yes -o HostKeyAlgorithms=ecdsa-sha2-nistp256"
           REL="/srv/nomacars/releases/$(date +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}"
           rsync -az --delete -e "$SSH" dist/ "deploy@$HOST:$REL/"
           $SSH "deploy@$HOST" bash -s <<EOF
