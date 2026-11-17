@@ -106,6 +106,7 @@
 ## Переименование в Ncars (17.11.2026)
 - Владелец выбрал название **Ncars**, купил домен **ncars.by**. На сайте везде «Ncars» («Оценка/Разбор/Подборка Ncars»), логотип в шапке и счёте — красное NCARS + белое .BY; `COMPANY.domain = "ncars.by"`. Логотипы: `brand/ncars/`.
 - Перенос сервера: `deploy/switch-domain.sh` (проверка DNS → сертификат webroot `/var/www/acme` → новый конфиг Nginx `/etc/nginx/sites-available/nomacars` с бэкапом → `SITE_URL=https://ncars.by` → проверка). nomacars.by и www → 301 на https://ncars.by. Внутренние имена (`/srv/nomacars`, служба `nomacars`, репозиторий Nomacars.by) **не менялись** намеренно.
+- **Перенос выполнен владельцем (подтвердил 17.11.2026)** — сайт работает на https://ncars.by. Из облачной сессии Claude ncars.by не открывается (сеть сессии), проверять с сервера или просить владельца.
 - Сессии привязаны к домену — после переезда пользователям нужно войти заново. Промты подборок теперь ведут на https://ncars.by/admin?tab=import.
 - Анализ названий (Nomacars vs NCARS.BY) рекомендовал Nomacars из‑за созвучия NCARS с Encar («Энкар»); владелец осознанно выбрал Ncars.
 
