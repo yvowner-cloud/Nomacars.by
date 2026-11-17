@@ -51,6 +51,8 @@ export interface ImportedLot {
 export interface LotCheck { index: number; key: string; lot: ImportedLot | null; errors: string[]; warnings: string[] }
 export interface ImportCheck { ok: boolean; fatal: string | null; source: string; collectedAt: string | null; notes: string; lots: LotCheck[]; valid: number }
 
+import { ageAtCustoms, DELIVERY_DAYS } from "./age";
+
 const BAD_DAMAGE = /water|flood|fire|burn|biohazard|rollover|all over|undercarriage|frame|stripped|missing/i;
 const BAD_TITLE = /junk|parts only|destruction|non.?repairable|scrap/i;
 const FUELS = ["Бензин", "Дизель", "Гибрид", "Электро"];
@@ -101,7 +103,6 @@ export function checkImport(input: unknown): ImportCheck {
 
     const year = num(x.year);
     if (!year || year < 2015 || year > 2030) errors.push("неверный год");
-    else if (year < 2022 || year > 2023) warnings.push(`год ${year} — проверьте «проходной» возраст`);
     const make = str(x.make, 40), model = str(x.model, 60);
     if (!make || !model) errors.push("нет марки или модели");
     const bodyRaw = String(x.body || "").toLowerCase();
@@ -139,6 +140,19 @@ export function checkImport(input: unknown): ImportCheck {
     const sale = str(x.sale_date, 40);
     if (!sale || Number.isNaN(Date.parse(sale))) warnings.push("нет корректной даты торгов");
     else if (Date.parse(sale) < Date.now() - 86_400_000) warnings.push("торги уже прошли");
+    // «Проходной» возраст: 3–5 лет на дату растаможки (торги + ~75 дней) — по дате производства, не по модельному году
+    const mfd = str(x.manufactured, 10);
+    const mm = mfd ? /^(\d{4})-(\d{1,2})$/.exec(mfd) : null;
+    const saleTs = sale && !Number.isNaN(Date.parse(sale)) ? new Date(sale) : new Date();
+    if (year && mm && +mm[2] >= 1 && +mm[2] <= 12) {
+      const age = ageAtCustoms(+mm[1], +mm[2], saleTs, DELIVERY_DAYS);
+      if (age < 3 || age > 5) errors.push(`непроходной возраст: ${age.toFixed(1).replace(".", ",")} г. на дату растаможки (нужно 3–5)`);
+    } else if (year) {
+      if (mfd) warnings.push(`дата производства «${mfd}» не в формате ГГГГ-ММ`);
+      const lo = new Date(saleTs.getTime() + DELIVERY_DAYS * 86_400_000).getFullYear() - 5;
+      if (year < lo || year > lo + 3) errors.push(`модельный год ${year} не подходит под 3–5 лет на дату растаможки`);
+      else if (year === lo || year === lo + 2) warnings.push(`нет даты производства — у ${year} модельного года возраст может выйти за 3–5 лет, проверьте наклейку в проёме двери`);
+    }
     const photos = strs(x.photos, 40).filter((u) => /^https:\/\//.test(u));
     if (photos.length === 0) errors.push("нет ссылок на фото");
     else if (photos.length < 5) warnings.push(`мало фото: ${photos.length}`);

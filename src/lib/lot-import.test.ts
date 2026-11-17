@@ -33,7 +33,7 @@ describe("checkImport", () => {
     expect(r.lots[2].errors.join()).toMatch(/фото/);
   });
   it("предупреждает, но принимает спорные лоты", () => {
-    const r = checkImport({ lots: [{ ...good, year: 2021, hp: null, odometer_miles: 70000 }] });
+    const r = checkImport({ lots: [{ ...good, year: 2022, manufactured: null, hp: null, odometer_miles: 70000 }] });
     expect(r.valid).toBe(1);
     expect(r.lots[0].warnings.length).toBeGreaterThanOrEqual(3);
   });
@@ -47,6 +47,23 @@ describe("checkImport", () => {
   it("отсеивает Manheim с отметкой о раме или затоплении", () => {
     const r = checkImport({ lots: [{ ...good, auction: "Manheim", lot_number: "X1", announcements: "Frame damage, prior paint" }] });
     expect(r.valid).toBe(0);
+  });
+  it("проверяет проходной возраст по дате производства", () => {
+    const sale = "2026-11-20T10:00:00-05:00"; // растаможка ~ начало февраля 2027
+    const mk = (manufactured: string | null, year: number) => ({ ...good, lot_number: `${year}${manufactured}`, year, manufactured, sale_date: sale });
+    const r = checkImport({ lots: [mk("2021-08", 2022), mk("2022-06", 2022), mk("2023-09", 2024), mk("2024-05", 2024)] });
+    expect(r.lots[0].errors.join()).toMatch(/непроходной/); // старше 5 лет
+    expect(r.lots[1].errors).toEqual([]);
+    expect(r.lots[2].errors).toEqual([]);
+    expect(r.lots[3].errors.join()).toMatch(/непроходной/); // младше 3 лет
+  });
+  it("без даты производства: 2023 — молча, 2022/2024 — предупреждение, 2020 — отказ", () => {
+    const sale = "2026-11-20T10:00:00-05:00";
+    const r = checkImport({ lots: [2023, 2022, 2024, 2020].map((y) => ({ ...good, lot_number: String(y), year: y, manufactured: null, sale_date: sale })) });
+    expect(r.lots[0].warnings.join()).not.toMatch(/производства/);
+    expect(r.lots[1].warnings.join()).toMatch(/производства/);
+    expect(r.lots[2].warnings.join()).toMatch(/производства/);
+    expect(r.lots[3].errors.join()).toMatch(/не подходит/);
   });
   it("сообщает о сломанном JSON", () => {
     expect(checkImport("{lots: [").fatal).toMatch(/JSON/);
