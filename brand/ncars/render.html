@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap">
+<style>
+  /* Логотипы NCARS.BY в стиле Nomacars: чёрный фон, узкий Oswald, красный #c41f25. Снимаются скриптом render.js */
+  body { margin: 0; background: #777; display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; }
+  .art { position: relative; overflow: hidden; background: #000; }
+  .n { position: absolute; inset: 0; display: grid; place-items: center; }
+  .red { color: #c41f25; }
+  .white { color: #fff; }
+
+  /* Аватар (Instagram обрезает в круг) */
+  #avatar { width: 1080px; height: 1080px; }
+  #avatar .n svg { width: 56%; height: 56%; margin-top: -120px; }
+  #avatar .word { position: absolute; left: 0; right: 0; bottom: 215px; text-align: center; font: 700 104px/1 "Oswald", sans-serif; letter-spacing: .06em; }
+
+  /* Логотип для постов */
+  #post { width: 1080px; height: 1080px; display: grid; place-items: center; }
+  .wm { display: flex; align-items: center; gap: 22px; }
+  .small { font: 700 38px/1.05 "Oswald", sans-serif; color: #fff; text-transform: uppercase; text-align: right; white-space: nowrap; }
+  .big { font: 700 170px/.9 "Oswald", sans-serif; letter-spacing: -.005em; white-space: nowrap; }
+  #post .wm { margin-top: -60px; }
+  #post .redline { position: absolute; left: 0; right: 0; bottom: 120px; height: 12px; background: #a8191e; }
+  #post .bar { position: absolute; left: 0; right: 0; bottom: 0; height: 120px; background: #4a4a4a; display: flex; align-items: center; justify-content: center; gap: 30px;
+    font: 500 36px/1 "Oswald", sans-serif; color: #fff; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+  #post .bar i { width: 10px; height: 10px; background: #c41f25; transform: rotate(45deg); display: inline-block; }
+
+  /* Горизонтальный логотип */
+  #wide { width: 1600px; height: 400px; display: grid; place-items: center; }
+  #wide .small { font-size: 44px; }
+  #wide .big { font-size: 200px; }
+</style>
+</head>
+<body>
+  <template id="N"><svg viewBox="0 0 64 64"><path d="M19 8h9.2l8.6 26V8H45v40h-8.6L27.6 21.5V48H19z" fill="#c41f25"/><rect x="12" y="53" width="40" height="5" fill="#c41f25"/></svg></template>
+
+  <div class="art" id="avatar"><div class="n"></div><div class="word"><span class="white">NCARS</span><span class="red">.BY</span></div></div>
+
+  <div class="art" id="post">
+    <div class="wm"><span class="small">Авто<br>с аукционов<br>США</span><span class="big"><span class="red">NCARS</span><span class="white">.BY</span></span></div>
+    <div class="redline"></div>
+    <div class="bar">Copart <i></i> IAAI <i></i> Manheim <i></i> под ключ в РБ и РФ</div>
+  </div>
+
+  <div class="art" id="wide">
+    <div class="wm"><span class="small">Авто<br>с аукционов<br>США</span><span class="big"><span class="red">NCARS</span><span class="white">.BY</span></span></div>
+  </div>
+
+  <script>
+    const t = document.getElementById("N").innerHTML;
+    document.querySelectorAll(".n").forEach((el) => (el.innerHTML = t));
+  </script>
+</body>
+</html>
