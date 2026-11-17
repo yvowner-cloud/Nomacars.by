@@ -31,7 +31,7 @@ export function TelegramPanel({ configured, chats: initialChats, readOnly }: { c
           <>
             <p style={{ margin: 0 }}>Бот ещё не создан. Это займёт 2 минуты:</p>
             <ol className="steps-list">
-              <li>В Telegram откройте <b>@BotFather</b>, отправьте <span className="mono">/newbot</span>, придумайте имя (например, «Nomacars заявки») и адрес бота, оканчивающийся на <span className="mono">bot</span>.</li>
+              <li>В Telegram откройте <b>@BotFather</b>, отправьте <span className="mono">/newbot</span>, придумайте имя (например, «Ncars заявки») и адрес бота, оканчивающийся на <span className="mono">bot</span>.</li>
               <li>BotFather пришлёт <b>токен</b> — длинную строку вида <span className="mono">123456789:AA…</span>. Никому её не пересылайте.</li>
               <li>На сервере выполните (вместо ТОКЕН — ваш токен):<br /><code className="mono">echo &apos;TELEGRAM_BOT_TOKEN=ТОКЕН&apos; &gt;&gt; /srv/nomacars/.env &amp;&amp; systemctl restart nomacars</code></li>
               <li>Откройте своего бота в Telegram, нажмите <b>«Старт»</b> и вернитесь сюда — появится кнопка «Подключить».</li>

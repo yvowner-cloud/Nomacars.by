@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: P): Promise<Metadata> {
   const t = `${l.year} ${l.make} ${l.model} ${l.trim} с аукциона ${l.auction}`;
   return {
     title: t,
-    description: `${t}: ${kmStr(l.miles)}, ${engineStr(l.cc, l.hp, l.hpEstimated)}, повреждение: ${l.damage.toLowerCase()}. Разбор Nomacars и расчёт под ключ в РБ и РФ.`,
+    description: `${t}: ${kmStr(l.miles)}, ${engineStr(l.cc, l.hp, l.hpEstimated)}, повреждение: ${l.damage.toLowerCase()}. Разбор Ncars и расчёт под ключ в РБ и РФ.`,
     openGraph: { title: t, images: l.photos?.[0] ? [{ url: l.photos[0] }] : undefined },
   };
 }
@@ -60,7 +60,7 @@ export default async function LotPage({ params }: P) {
             <div className="eyebrow">{l.auction} · лот {l.lotNo} · {st.name}</div>
             <h1 style={{ fontSize: "clamp(22px,3vw,32px)", marginTop: 4 }}>{l.year} {l.make} {l.model} {l.trim}</h1>
           </div>
-          <span className="score">Оценка Nomacars {l.aiScore}/100</span>
+          <span className="score">Оценка Ncars {l.aiScore}/100</span>
         </div>
 
         <div className="lot">

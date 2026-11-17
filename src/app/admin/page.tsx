@@ -38,7 +38,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
     <section className="sec">
       <div className="wrap">
         <div className="sec-h">
-          <div><div className="eyebrow">Кабинет владельца</div><h1 style={{ fontSize: "clamp(24px,3.4vw,34px)" }}>Nomacars: управление</h1></div>
+          <div><div className="eyebrow">Кабинет владельца</div><h1 style={{ fontSize: "clamp(24px,3.4vw,34px)" }}>Ncars: управление</h1></div>
           {user && <span className="note">{user.name || user.phone} · {user.role === "owner" ? "владелец" : user.role === "manager" ? "менеджер" : "клиент"}</span>}
         </div>
 

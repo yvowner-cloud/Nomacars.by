@@ -43,7 +43,7 @@ export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcom
           </div>
           <Link href="/" className="logo" aria-label={`${COMPANY.brand}, на главную`}>
             <span className="logo-small">Авто<br />с аукционов<br />США</span>
-            <span className="logo-big">NOMACARS</span>
+            <span className="logo-big">NCARS<span className="logo-tld">.BY</span></span>
           </Link>
         </div>
       </div>

@@ -1,4 +1,4 @@
-/* NOMACARS — стиль по образцу NPA: чёрная верхняя полоса, серое меню с узкими заглавными пунктами,
+/* NCARS — стиль по образцу NPA: чёрная верхняя полоса, серое меню с узкими заглавными пунктами,
    тёмно-красный акцент, светло-серые панели, плотные строки лотов, Arial в тексте. Светлая тема — единственная, осознанно. */
 :root {
   color-scheme: light;
@@ -416,3 +416,5 @@ footer { background: var(--black); color: #ddd; margin-top: 30px; }
 .no-photo svg { width: 34px; height: 34px; fill: currentColor; opacity: .7; }
 .thumbs .no-photo, .lrow .no-photo { aspect-ratio: 4 / 3; font-size: 0; }
 .thumbs .no-photo svg, .lrow .no-photo svg { width: 22px; height: 22px; }
+.logo-tld { color: #fff; }
+@media print { .logo-tld { color: #000; } }

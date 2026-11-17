@@ -22,7 +22,7 @@ export const GET = api(async (req, ctx) => {
   return new Response(body, {
     headers: {
       "Content-Type": raw ? "text/plain; charset=utf-8" : "application/json; charset=utf-8",
-      "Content-Disposition": `attachment; filename="nomacars-lots-${date}-${id}${raw ? "-raw.txt" : ".json"}"`,
+      "Content-Disposition": `attachment; filename="ncars-lots-${date}-${id}${raw ? "-raw.txt" : ".json"}"`,
       "Cache-Control": "private, no-store",
     },
   });

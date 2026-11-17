@@ -1,6 +1,6 @@
 # Размещение на сервере hoster.by
 
-Сервер: Ubuntu, IP **87.232.71.75**, домен **nomacars.by** (A-записи `@` и `www` → IP).
+Сервер: Ubuntu, IP **87.232.71.75**. Основной домен **ncars.by** (A-записи `@` и `www` → IP); старый **nomacars.by** перенаправляется на него (301). Перенос — `deploy/switch-domain.sh`. Внутренние имена на сервере остались прежними: `/srv/nomacars`, служба `nomacars`.
 Стек на сервере: Node.js 22 + PostgreSQL + Nginx (+ HTTPS через Certbot).
 
 ## Как сайт попадает на сервер

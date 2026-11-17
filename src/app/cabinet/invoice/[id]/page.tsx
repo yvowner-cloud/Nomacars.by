@@ -38,7 +38,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         </div>
         <div className="invoice">
           <div className="inv-head">
-            <div><div className="logo-big" style={{ fontSize: 34 }}>NOMACARS</div><div className="note">Авто с аукционов США под ключ</div></div>
+            <div><div className="logo-big" style={{ fontSize: 34 }}>NCARS<span className="logo-tld">.BY</span></div><div className="note">Авто с аукционов США под ключ</div></div>
             <div style={{ textAlign: "right" }}>
               <h1 style={{ fontSize: 26 }}>Счёт № {num}</h1>
               <div>от {date}</div>

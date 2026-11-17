@@ -126,7 +126,7 @@ export function CatalogView({ lots, initial }: { lots: Lot[]; initial: Initial }
                   <div className="lrow-t">{l.year} {l.make} {l.model} {l.trim} <LotBadge lot={l} /></div>
                   <div className="lrow-m">
                     <span>Пробег: <b className="num">{fmt(toKm(l.miles))} км</b></span>
-                    <span>Оценка Nomacars: <b>{l.aiScore}</b></span>
+                    <span>Оценка Ncars: <b>{l.aiScore}</b></span>
                     <span>Двигатель: <b>{engineStr(l.cc, l.hp, l.hpEstimated)}</b></span>
                   </div>
                   <div className="lrow-m">

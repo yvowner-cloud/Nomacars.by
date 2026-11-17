@@ -5,14 +5,14 @@ import { useApp } from "../Providers";
 import type { Requisites } from "@/lib/server/billing";
 
 const FIELDS: { key: keyof Requisites; label: string; ph: string; wide?: boolean }[] = [
-  { key: "legalName", label: "Получатель (ИП или организация)", ph: "ИП Иванов Иван Иванович / ООО «Номакарс»", wide: true },
+  { key: "legalName", label: "Получатель (ИП или организация)", ph: "ИП Иванов Иван Иванович / ООО «Ваша компания»", wide: true },
   { key: "unp", label: "УНП", ph: "190000000" },
   { key: "address", label: "Юридический адрес", ph: "220000, г. Минск, ул. …", wide: true },
   { key: "bank", label: "Банк", ph: "ОАО «Банк», г. Минск" },
   { key: "bic", label: "БИК (BIC)", ph: "XXXXBY2X" },
   { key: "account", label: "Расчётный счёт (IBAN)", ph: "BY00 XXXX 0000 0000 0000 0000 0000", wide: true },
   { key: "phone", label: "Телефон в счёте", ph: "+375 29 …" },
-  { key: "email", label: "E-mail в счёте", ph: "info@nomacars.by" },
+  { key: "email", label: "E-mail в счёте", ph: "info@ncars.by" },
   { key: "note", label: "Примечание в счёте", ph: "Оплата в BYN по курсу НБРБ на день оплаты. В назначении платежа укажите номер счёта.", wide: true },
 ];
 

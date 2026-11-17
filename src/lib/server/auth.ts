@@ -51,7 +51,7 @@ export async function sendLoginCode(rawPhone: string): Promise<{ phone: string; 
   await q("insert into otp_codes (phone, code_hash, ip, expires_at) values ($1, $2, $3, now() + $4 * interval '1 millisecond')",
     [phone, hashCode(phone, code, pepper()), ip, OTP.ttlMs]);
   try {
-    await sendSms(phone, `Nomacars: код для входа ${code}. Никому не сообщайте его.`);
+    await sendSms(phone, `Ncars: код для входа ${code}. Никому не сообщайте его.`);
   } catch (e) {
     console.error("[sms] не отправлено:", (e as Error).message);
     throw new AuthError("Не удалось отправить SMS. Попробуйте через минуту.", 502);

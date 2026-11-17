@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Nomacars — авто из США под ключ",
-    short_name: "Nomacars",
+    name: "Ncars — авто из США под ключ",
+    short_name: "Ncars",
     description: "Проходные автомобили 3–5 лет с аукционов Copart, IAAI и Manheim под ключ в Беларусь и Россию.",
     start_url: "/",
     display: "standalone",

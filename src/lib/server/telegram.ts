@@ -52,7 +52,7 @@ export async function linkFromUpdates(): Promise<TgChat[]> {
   for (const c of found.values()) merged.set(c.id, c);
   const chats = [...merged.values()];
   await saveChats(chats);
-  await Promise.allSettled(chats.map((c) => tg("sendMessage", { chat_id: c.id, text: "Nomacars: уведомления о новых заявках подключены ✅" })));
+  await Promise.allSettled(chats.map((c) => tg("sendMessage", { chat_id: c.id, text: "Ncars: уведомления о новых заявках подключены ✅" })));
   return chats;
 }
 

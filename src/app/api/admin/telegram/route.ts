@@ -16,7 +16,7 @@ export const POST = api(async (req) => {
     if (b.action === "link") return { configured: true, chats: await linkFromUpdates() };
     if (b.action === "unlink") { await unlinkChat(Number(b.chatId)); return { configured: telegramConfigured(), chats: await linkedChats() }; }
     if (b.action === "test") {
-      const ok = await notify(["<b>Nomacars</b>: тестовое уведомление. Так будут приходить новые заявки."]);
+      const ok = await notify(["<b>Ncars</b>: тестовое уведомление. Так будут приходить новые заявки."]);
       if (!ok) throw new Error("Не удалось отправить: проверьте токен бота и привязанные чаты");
       return { ok: true };
     }

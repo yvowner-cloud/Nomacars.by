@@ -84,7 +84,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
 
 async function sendLeadNotification(l: LeadRow): Promise<boolean> {
   const lot = await lotById(l.lot_id);
-  const site = process.env.SITE_URL || "https://nomacars.by";
+  const site = process.env.SITE_URL || "https://ncars.by";
   const lines = [
     `<b>Новая заявка №${l.id}</b> · ${KIND_LABEL[l.kind]}`,
     `${e(l.name || "Без имени")}, ${e(l.phone)} (${l.country === "by" ? "РБ" : "РФ"})`,

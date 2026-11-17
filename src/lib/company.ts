@@ -3,10 +3,10 @@
  * На этапе 3 переезжают в «Настройки компании» в кабинете владельца.
  */
 export const COMPANY = {
-  brand: "Nomacars",
-  domain: "nomacars.by",
+  brand: "Ncars",
+  domain: "ncars.by",
   phone: "+375 (29) 000-00-00",
-  telegram: "@nomacars",
+  telegram: "@ncars",
   whatsapp: "+375 29 000-00-00",
   office: "Минск, ул. Примерная, 1",
   hours: "Пн–Пт 9:00–19:00, Сб 10:00–16:00",

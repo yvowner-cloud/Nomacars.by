@@ -26,7 +26,7 @@ function fill(tpl: string, phone: string, text: string, encode: boolean) {
     .replaceAll("{phone_digits}", enc(phone.replace(/\D/g, "")))
     .replaceAll("{text}", enc(text))
     .replaceAll("{key}", enc(process.env.SMS_API_KEY || ""))
-    .replaceAll("{sender}", enc(process.env.SMS_SENDER || "Nomacars"));
+    .replaceAll("{sender}", enc(process.env.SMS_SENDER || "Ncars"));
 }
 
 export async function sendSms(phone: string, text: string): Promise<void> {
