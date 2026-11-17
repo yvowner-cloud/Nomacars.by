@@ -8,6 +8,7 @@ import { getCatalog } from "@/lib/server/catalog";
 import { aiReview } from "@/lib/ai";
 import { ageAtCustoms } from "@/lib/calc";
 import { stateInfo } from "@/lib/geo";
+import { BODY_LABEL } from "@/lib/types";
 import { engineStr, fmt, kmStr, money } from "@/lib/format";
 import { currentUser } from "@/lib/server/auth";
 import { lotCalc, toPublic, toPublicAll } from "@/lib/server/public-lots";
@@ -46,7 +47,7 @@ export default async function LotPage({ params }: P) {
     "@context": "https://schema.org", "@type": "Car",
     name: `${l.year} ${l.make} ${l.model} ${l.trim}`, brand: l.make, model: l.model, vehicleModelDate: String(l.year),
     mileageFromOdometer: { "@type": "QuantitativeValue", value: Math.round(l.miles * 1.609), unitCode: "KMT" },
-    fuelType: l.fuel, bodyType: l.body === "suv" ? "SUV" : l.body === "sedan" ? "Sedan" : undefined,
+    fuelType: l.fuel, bodyType: ({ suv: "SUV", sedan: "Sedan", coupe: "Coupe", convertible: "Convertible" } as Record<string, string>)[l.body],
     image: l.photos?.slice(0, 5),
   };
 
@@ -89,7 +90,7 @@ export default async function LotPage({ params }: P) {
                   <dt>Пробег</dt><dd className="num">{l.miles ? `${fmt(l.miles)} mi · ${kmStr(l.miles)}` : "не указан"}{l.extra?.odometerStatus && !/actual/i.test(l.extra.odometerStatus) ? ` (${l.extra.odometerStatus})` : ""}</dd>
                   <dt>Двигатель</dt><dd>{l.extra?.engine ? `${l.extra.engine} · ` : l.cc ? `${fmt(l.cc)} см³ · ` : ""}{l.hpEstimated ? "мощность уточняется" : `${l.hp} л.с.`} · {l.fuel}</dd>
                   {l.extra?.transmission && <><dt>Коробка / привод</dt><dd>{[l.extra.transmission, l.extra.drive].filter(Boolean).join(" · ")}</dd></>}
-                  <dt>Кузов</dt><dd>{l.body === "suv" ? "Кроссовер / SUV" : l.body === "sedan" ? "Седан" : "Другой"}{l.extra?.colorName ? ` · ${l.extra.colorName}` : ""}</dd>
+                  <dt>Кузов</dt><dd>{BODY_LABEL[l.body] ?? "Другой"}{l.extra?.colorName ? ` · ${l.extra.colorName}` : ""}</dd>
                   <dt>Повреждение</dt><dd>{l.damage}</dd>
                   {l.conditionGrade != null && <><dt>Оценка состояния (CR)</dt><dd>{l.conditionGrade.toFixed(1)} из 5</dd></>}
                   {l.extra?.title && <><dt>Документ (title)</dt><dd>{l.extra.title}</dd></>}

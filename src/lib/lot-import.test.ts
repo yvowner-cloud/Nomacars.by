@@ -21,6 +21,17 @@ describe("checkImport", () => {
     const r = checkImport("Вот результат:\n```json\n" + JSON.stringify({ lots: [good] }) + "\n```\nГотово.");
     expect(r.valid).toBe(1);
   });
+  it("купе и кабриолет: у премиума без замечаний, у массовых марок — предупреждение", () => {
+    const r = checkImport({ lots: [
+      { ...good, make: "BMW", model: "4 Series", body: "Coupe" },
+      { ...good, lot_number: "2", make: "Porsche", model: "911", body: "convertible" },
+      { ...good, lot_number: "3", make: "Ford", model: "Mustang", body: "coupe" },
+    ] });
+    expect(r.lots.map((l) => l.lot?.body)).toEqual(["coupe", "convertible", "coupe"]);
+    expect(r.lots[0].warnings.join()).not.toMatch(/премиум/);
+    expect(r.lots[1].warnings.join()).not.toMatch(/премиум/);
+    expect(r.lots[2].warnings.join()).toMatch(/премиум/);
+  });
   it("отсеивает утопленника и плохой документ", () => {
     const r = checkImport({ lots: [{ ...good, primary_damage: "Water/Flood" }, { ...good, lot_number: "2", title: "Parts Only" }] });
     expect(r.valid).toBe(0);

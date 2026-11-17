@@ -13,7 +13,7 @@ export interface ImportedLot {
   make: string;
   model: string;
   trim: string;
-  body: "suv" | "sedan" | "other";
+  body: "suv" | "sedan" | "coupe" | "convertible" | "other";
   color: string | null;
   fuel: "Бензин" | "Дизель" | "Гибрид" | "Электро";
   engine: string | null;
@@ -52,6 +52,11 @@ export interface LotCheck { index: number; key: string; lot: ImportedLot | null;
 export interface ImportCheck { ok: boolean; fatal: string | null; source: string; collectedAt: string | null; notes: string; lots: LotCheck[]; valid: number }
 
 import { ageAtCustoms, DELIVERY_DAYS } from "./age";
+import { PREMIUM_MAKES } from "./model-seed";
+import { normMake } from "./model-match";
+
+const PREMIUM = new Set(PREMIUM_MAKES.map(normMake));
+const isPremiumMake = (make: string) => PREMIUM.has(normMake(make));
 
 const BAD_DAMAGE = /water|flood|fire|burn|biohazard|rollover|all over|undercarriage|frame|stripped|missing/i;
 const BAD_TITLE = /junk|parts only|destruction|non.?repairable|scrap/i;
@@ -106,8 +111,11 @@ export function checkImport(input: unknown): ImportCheck {
     const make = str(x.make, 40), model = str(x.model, 60);
     if (!make || !model) errors.push("нет марки или модели");
     const bodyRaw = String(x.body || "").toLowerCase();
-    const body = bodyRaw === "suv" || bodyRaw === "sedan" ? bodyRaw : "other";
-    if (body === "other") warnings.push("кузов не кроссовер и не седан");
+    const body = bodyRaw === "suv" || bodyRaw === "sedan" ? bodyRaw
+      : /coupe|купе/.test(bodyRaw) ? "coupe" : /convertible|cabrio|roadster|кабриолет/.test(bodyRaw) ? "convertible" : "other";
+    if (body === "other") warnings.push("кузов не кроссовер, не седан, не купе и не кабриолет");
+    if ((body === "coupe" || body === "convertible") && make && !isPremiumMake(make))
+      warnings.push("купе/кабриолет берём только у премиум-марок — проверьте, нужен ли этот лот");
     const fuel = FUELS.includes(String(x.fuel)) ? (String(x.fuel) as ImportedLot["fuel"]) : null;
     if (!fuel) errors.push("топливо: Бензин, Дизель, Гибрид или Электро");
     const cc = num(x.engine_cc);

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Lot } from "@/lib/types";
+import { BODY_SHORT, type Lot } from "@/lib/types";
 import type { PublicLot } from "@/lib/server/public-lots";
 import { LotImage } from "./LotImage";
 import { TurnkeyPrice, WatchButton } from "./Price";
@@ -25,7 +25,7 @@ export function LotCard({ lot }: { lot: PublicLot }) {
       <div className="cbody">
         <div className="ctitle">
           {lot.year} {lot.make} {lot.model}
-          <small>{[lot.trim, lot.body === "suv" ? "кроссовер" : lot.body === "sedan" ? "седан" : null].filter(Boolean).join(" · ")}</small>
+          <small>{[lot.trim, BODY_SHORT[lot.body] ?? null].filter(Boolean).join(" · ")}</small>
         </div>
         <dl className="specs">
           <dt>Пробег</dt><dd className="num">{kmStr(lot.miles)}</dd>

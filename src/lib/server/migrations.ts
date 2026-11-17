@@ -1,4 +1,7 @@
 import { pool } from "./db";
+import { MODEL_SEED, TIER_TARGET } from "../model-seed";
+
+const sqlStr = (s: string) => `'${s.replace(/'/g, "''")}'`;
 
 /**
  * Миграции базы. Выполняются автоматически при старте сайта (src/instrumentation.ts).
@@ -180,6 +183,24 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
         unique (auction, lot_number)
       );
       create index lots_status_idx on lots (status, sale_at);
+    `,
+  },
+  {
+    version: 7,
+    name: "список моделей для наполнения каталога (уровни A/B/C)",
+    sql: `
+      create table model_targets (
+        id         serial primary key,
+        make       text not null,
+        model      text not null,
+        tier       text not null default 'B' check (tier in ('A','B','C')),
+        target     int not null default 4 check (target between 0 and 50),
+        active     boolean not null default true,
+        created_at timestamptz not null default now()
+      );
+      create unique index model_targets_uq on model_targets (lower(make), lower(model));
+      insert into model_targets (make, model, tier, target) values
+      ${MODEL_SEED.map((m) => `(${sqlStr(m.make)}, ${sqlStr(m.model)}, '${m.tier}', ${TIER_TARGET[m.tier]})`).join(",\n      ")};
     `,
   },
 ];

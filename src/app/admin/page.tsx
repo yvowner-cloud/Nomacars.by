@@ -6,6 +6,8 @@ import { newLeadsCount } from "@/lib/server/leads";
 import { linkedChats, telegramConfigured } from "@/lib/server/telegram";
 import { adminLots, lotsByIds } from "@/lib/server/catalog";
 import { LotsAdmin } from "@/components/admin/LotsAdmin";
+import { ModelsAdmin } from "@/components/admin/ModelsAdmin";
+import { modelsWithCoverage } from "@/lib/server/models";
 import { TariffEditor } from "@/components/admin/TariffEditor";
 import { LeadsBoard, type LeadLotInfo } from "@/components/admin/LeadsBoard";
 import { TelegramPanel } from "@/components/admin/TelegramPanel";
@@ -24,12 +26,13 @@ const TABS = [
   { key: "requisites", label: "Реквизиты", ready: true },
   { key: "import", label: "Импорт лотов", ready: true },
   { key: "lots", label: "Лоты и подборка", ready: true },
+  { key: "models", label: "Модели", ready: true },
   { key: "staff", label: "Сотрудники", ready: false, note: "позже" },
 ];
 
 export default async function AdminPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const sp = await searchParams;
-  const tab = sp.tab === "tariffs" || sp.tab === "requisites" || sp.tab === "import" || sp.tab === "lots" ? sp.tab : "leads";
+  const tab = sp.tab === "tariffs" || sp.tab === "requisites" || sp.tab === "import" || sp.tab === "lots" || sp.tab === "models" ? sp.tab : "leads";
   const user = await currentUser();
   const staff = user && (user.role === "owner" || user.role === "manager");
   const newCount = staff ? await newLeadsCount().catch(() => 0) : 0;
@@ -67,6 +70,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 />
                 <TelegramPanel configured={telegramConfigured()} chats={await linkedChats()} readOnly={user.role !== "owner"} />
               </div>
+            ) : tab === "models" ? (
+              <ModelsAdmin readOnly={user.role !== "owner"} initial={JSON.parse(JSON.stringify(await modelsWithCoverage().catch(() => ({ rows: [], unmatched: [] }))))} />
             ) : tab === "lots" ? (
               <LotsAdmin readOnly={user.role !== "owner"} initial={JSON.parse(JSON.stringify(await adminLots().catch(() => [])))} />
             ) : tab === "import" ? (

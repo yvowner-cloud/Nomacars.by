@@ -1,6 +1,9 @@
 export type Country = "by" | "ru";
 export type Fuel = "Бензин" | "Дизель" | "Гибрид" | "Электро";
-export type Body = "suv" | "sedan" | "other";
+export type Body = "suv" | "sedan" | "coupe" | "convertible" | "other";
+/** Подписи кузова: полная (страница лота, фильтр) и короткая (карточка). */
+export const BODY_LABEL: Record<Body, string> = { suv: "Кроссовер / SUV", sedan: "Седан", coupe: "Купе", convertible: "Кабриолет", other: "Другой" };
+export const BODY_SHORT: Record<Body, string | null> = { suv: "кроссовер", sedan: "седан", coupe: "купе", convertible: "кабриолет", other: null };
 export type DamageZone = "front" | "rear" | "side" | "hail";
 export type DamageLevel = "light" | "mid";
 export type LotStatus = "active" | "sold" | "ended";

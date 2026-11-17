@@ -26,7 +26,7 @@ export function QuickFind({ makes }: { makes: string[] }) {
       <div className="two" style={{ gap: 10 }}>
         <label>Кузов
           <select className="field" id="qf-body" value={body} onChange={(e) => setBody(e.target.value)}>
-            <option value="">Любой</option><option value="suv">Кроссовер / SUV</option><option value="sedan">Седан</option>
+            <option value="">Любой</option><option value="suv">Кроссовер / SUV</option><option value="sedan">Седан</option><option value="coupe">Купе</option><option value="convertible">Кабриолет</option>
           </select>
         </label>
         <label>Топливо
