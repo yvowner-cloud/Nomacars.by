@@ -54,7 +54,13 @@ export async function sendLoginCode(rawPhone: string): Promise<{ phone: string; 
     await sendSms(phone, `Ncars: код для входа ${code}. Никому не сообщайте его.`);
   } catch (e) {
     console.error("[sms] не отправлено:", (e as Error).message);
-    throw new AuthError("Не удалось отправить SMS. Попробуйте через минуту.", 502);
+    // Запасной вход владельца: если SMS-сервис сломался, код владельца пишется в журнал сервера,
+    // чтобы владелец не остался без доступа к кабинету.
+    if (ownerPhones().has(phone)) {
+      console.log(`[SMS] ${phone}: (SMS не ушла, запасной код владельца) ${code}`);
+      return { phone, delivery: "log" };
+    }
+    throw new AuthError("Не удалось отправить SMS. Попробуйте через минуту или напишите нам в Telegram.", 502);
   }
   return { phone, delivery: smsMode() };
 }

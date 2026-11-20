@@ -29,6 +29,18 @@ function fill(tpl: string, phone: string, text: string, encode: boolean) {
     .replaceAll("{sender}", enc(process.env.SMS_SENDER || "Ncars"));
 }
 
+/** Ответ сервиса для журнала: JSON с \uXXXX превращается в читаемый текст, ключ не попадает. */
+export function readable(answer: string): string {
+  let s = answer;
+  try {
+    const j = JSON.parse(answer);
+    s = typeof j === "object" && j && ("error" in j || "message" in j) ? String(j.error ?? j.message) : JSON.stringify(j);
+  } catch { /* не JSON — как есть */ }
+  const key = process.env.SMS_API_KEY;
+  if (key) s = s.split(key).join("***");
+  return s.slice(0, 300);
+}
+
 export async function sendSms(phone: string, text: string): Promise<void> {
   const provider = process.env.SMS_PROVIDER || "log";
   if (provider === "log") {
@@ -49,7 +61,7 @@ export async function sendSms(phone: string, text: string): Promise<void> {
     const answer = await res.text();
     const okWord = process.env.SMS_HTTP_OK;
     if (!res.ok || (okWord && !answer.includes(okWord))) {
-      throw new Error(`SMS-сервис ответил ${res.status}: ${answer.slice(0, 200)}`);
+      throw new Error(`SMS-сервис ответил ${res.status}: ${readable(answer)}`);
     }
     return;
   }
