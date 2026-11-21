@@ -45,7 +45,7 @@ export function Footer({ upcoming }: { upcoming: Upcoming[] }) {
             <li><a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></li>
             <li><a href={CONTACT_LINKS.viber}>Viber</a></li>
             <li><a href={CONTACT_LINKS.instagram} target="_blank" rel="noreferrer">Instagram @ncars.by</a></li>
-            <li><span>{COMPANY.office}</span></li>
+            <li><a href={COMPANY.officeMap} target="_blank" rel="noreferrer">{COMPANY.office}</a></li>
           </ul>
           <p style={{ marginTop: 10, color: "#aaa" }}>{COMPANY.hours}</p>
         </div>

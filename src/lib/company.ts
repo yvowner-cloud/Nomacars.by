@@ -10,7 +10,9 @@ export const COMPANY = {
   phoneE164: "+375296292000",
   telegram: "+375 29 629-20-00",
   whatsapp: "+375 29 629-20-00",
-  office: "Минск, ул. Примерная, 1",
+  office: "Минск, ул. Богдановича, 149А, офис 25-3",
+  officeFull: "220040, Беларусь, г. Минск, ул. Богдановича, д. 149А, оф. 25-3",
+  officeMap: "https://yandex.by/maps/?text=" + encodeURIComponent("Минск, улица Богдановича, 149А"),
   hours: "Пн–Пт 9:00–19:00, Сб 10:00–16:00",
   serviceFee: 700,
 };

@@ -118,6 +118,7 @@ export default async function Home() {
             <div className="panel">
               <div className="panel-h">{COMPANY.office}</div>
               <div className="box">
+                <span className="muted">{COMPANY.officeFull} · <a href={COMPANY.officeMap} target="_blank" rel="noreferrer">на карте</a></span>
                 <span className="muted">{COMPANY.hours}</span>
                 <a className="num" href={CONTACT_LINKS.tel} style={{ fontSize: 18, fontWeight: 700, color: "inherit" }}>{COMPANY.phone}</a>
                 <span>
