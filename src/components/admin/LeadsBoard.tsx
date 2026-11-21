@@ -12,7 +12,7 @@ import type { CalcInput, CalcResult } from "@/lib/types";
 export interface LeadLotInfo { id: number; slug: string; title: string; lotNo: string; auction: string }
 interface Lead {
   id: number; kind: "lot" | "pick" | "calc"; lot_id: number | null; status: string; country: "by" | "ru"; name: string; phone: string;
-  max_bid: number | null; budget: number | null; comment: string; calc: { input?: CalcInput; result?: CalcResult } | null;
+  max_bid: number | null; budget: number | null; comment: string; calc: { input?: CalcInput; result?: CalcResult; poti?: CalcResult } | null;
   notes: string; tg_notified: boolean; created_at: string;
 }
 interface Ev { id: number; type: string; from_status: string | null; to_status: string | null; text: string | null; created_at: string; who: string | null }
@@ -141,7 +141,7 @@ function LeadDetail({ id, lead, lots, onChanged }: { id: number; lead: Lead; lot
           {lead.comment ? <div className="quote">«{lead.comment}»</div> : <div className="note">Комментария нет</div>}
           {res && (
             <details>
-              <summary>Расчёт на момент заявки ({lead.country === "by" ? "РБ" : "РФ"}): <b>{money(res.total)}</b></summary>
+              <summary>Расчёт на момент заявки ({lead.country === "by" ? "РБ" : "РФ"}): через Клайпеду <b>{money(res.total)}</b>{lead.calc?.poti && <> · через Поти <b>{money(lead.calc.poti.total)}</b></>}</summary>
               <div style={{ marginTop: 6 }}>
                 {res.lines.map((x) => <div className="cl" key={x.label}><div>{x.label}<small>{x.note}</small></div><div className="v num">{money(x.usd)}</div></div>)}
               </div>

@@ -73,12 +73,17 @@ export interface CalcLine {
   note: string;
 }
 
+/** Маршрут морской доставки: через Клайпеду (Литва) или через Поти (Грузия). */
+export type Route = "klaipeda" | "poti";
+
 export interface CalcResult {
   lines: CalcLine[];
   total: number;
   local: number;
   currency: "BYN" | "₽";
   days: string;
+  route: Route;
+  routeName: string;
 }
 
 export interface Tariffs {
@@ -86,6 +91,15 @@ export interface Tariffs {
   ocean: number;
   landBy: number;
   landRu: number;
+  /** Маршрут через Поти (Грузия) */
+  oceanPoti: number;
+  landPotiBy: number;
+  landPotiRu: number;
+  /** Срок в пути от торгов до получения, дней — по маршрутам и странам */
+  daysKlaipedaBy: number;
+  daysKlaipedaRu: number;
+  daysPotiBy: number;
+  daysPotiRu: number;
   brokerBy: number;
   brokerRu: number;
   inland: Record<string, number>;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ageAtCustoms, calcTurnkey, isPassable } from "./calc";
+import { ageAtCustoms, calcRoutes, calcTurnkey, cheapest, isPassable } from "./calc";
 import { DEFAULT_TARIFFS as T } from "./tariffs";
 
 const rav4 = { price: 14800, auction: "Copart", state: "NJ", fuel: "Бензин", cc: 2487, hp: 203 };
@@ -53,5 +53,22 @@ describe("ageAtCustoms", () => {
     expect(age).toBeGreaterThan(5); // к растаможке машина станет непроходной
     expect(isPassable(age)).toBe(false);
     expect(isPassable(ageAtCustoms(2022, 9, sale, 75))).toBe(true);
+  });
+});
+
+describe("маршруты Клайпеда / Поти", () => {
+  const car = { price: 14800, auction: "Copart", state: "NJ", fuel: "Бензин", cc: 2487, hp: 203 };
+  it("Поти считается по своим тарифам и подписям", () => {
+    const r = calcRoutes(car, "by");
+    expect(r.klaipeda.lines[3].usd).toBe(1350);
+    expect(r.poti.lines[3].usd).toBe(1500);
+    expect(r.poti.lines[4].label).toBe("Поти → Минск");
+    expect(r.klaipeda.lines[4].label).toBe("Клайпеда → Минск");
+    expect(r.poti.routeName).toBe("Поти");
+    expect(r.poti.days).toMatch(/75/);
+  });
+  it("cheapest берёт дешёвый маршрут", () => {
+    const r = calcRoutes(car, "ru");
+    expect(cheapest(car, "ru").total).toBe(Math.min(r.klaipeda.total, r.poti.total));
   });
 });

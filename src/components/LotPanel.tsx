@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { CalcResult, Country } from "@/lib/types";
-import type { PublicLot } from "@/lib/server/public-lots";
+import type { LotCalc, PublicLot } from "@/lib/server/public-lots";
+import { RouteCompare } from "./RouteCompare";
 import { LotImage } from "./LotImage";
 import { useApp } from "./Providers";
 import { WatchButton } from "./Price";
@@ -42,7 +42,7 @@ export function LotGallery({ lot }: { lot: PublicLot }) {
   );
 }
 
-export function BidBox({ lot, calc }: { lot: PublicLot; calc: Record<Country, CalcResult> | null }) {
+export function BidBox({ lot, calc }: { lot: PublicLot; calc: LotCalc | null }) {
   const { user, country, setCountry, openLogin } = useApp();
   const c = calc?.[country] ?? null;
   const active = lot.status === "active";
@@ -72,12 +72,7 @@ export function BidBox({ lot, calc }: { lot: PublicLot; calc: Record<Country, Ca
                 <button aria-pressed={country === "ru"} onClick={() => setCountry("ru")}>Россия</button>
               </span>
             </div>
-            <div>
-              {c.lines.map((x) => (
-                <div className="cl" key={x.label}><div>{x.label}<small>{x.note}</small></div><div className="v num">{money(x.usd)}</div></div>
-              ))}
-              <div className="cl total"><div><b>Итого под ключ</b><small>≈ {fmt(c.local)} {c.currency} · срок {c.days}</small></div><div className="v num">{money(c.total)}</div></div>
-            </div>
+            <RouteCompare r={c} country={country} />
             <p className="note" style={{ margin: 0 }}>Расчёт по текущей ставке. Ориентировочно, точную сумму фиксирует менеджер.</p>
           </>
         ) : (

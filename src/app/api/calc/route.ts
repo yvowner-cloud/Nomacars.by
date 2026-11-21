@@ -1,6 +1,6 @@
 import { api, body } from "@/lib/server/api";
 import { AuthError, currentUser } from "@/lib/server/auth";
-import { calcTurnkey } from "@/lib/calc";
+import { calcRoutes } from "@/lib/calc";
 import { getTariffs } from "@/lib/server/settings";
 import type { CalcInput, Country } from "@/lib/types";
 
@@ -19,5 +19,5 @@ export const POST = api(async (req) => {
   };
   const country: Country = b.country === "ru" ? "ru" : "by";
   const T = await getTariffs();
-  return { result: calcTurnkey(input, country, T), rates: { byn: T.byn, rub: T.rub, eurUsd: T.eurUsd }, deliveryDays: T.deliveryDays };
+  return { routes: calcRoutes(input, country, T), rates: { byn: T.byn, rub: T.rub, eurUsd: T.eurUsd }, deliveryDays: T.deliveryDays };
 });

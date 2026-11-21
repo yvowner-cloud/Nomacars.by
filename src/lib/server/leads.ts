@@ -14,7 +14,7 @@ import { docsOf, invoicesOf } from "./billing";
 export interface LeadRow {
   id: number; user_id: number | null; kind: "lot" | "pick" | "calc"; lot_id: number | null; status: LeadStatus;
   country: Country; name: string; phone: string; max_bid: number | null; budget: number | null; comment: string;
-  calc: { input?: CalcInput; result?: CalcResult } | null; notes: string; tg_notified: boolean; created_at: string; updated_at: string;
+  calc: { input?: CalcInput; result?: CalcResult; poti?: CalcResult } | null; notes: string; tg_notified: boolean; created_at: string; updated_at: string;
 }
 export interface LeadEvent { id: number; type: string; from_status: string | null; to_status: string | null; text: string | null; created_at: string; who: string | null }
 
@@ -47,7 +47,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
     const lot = await lotById(Number(input.lotId));
     if (!lot || lot.status !== "active") throw new AuthError("Торги по этому лоту уже прошли. Посмотрите другие машины в каталоге.", 404);
     lotId = lot.id;
-    calc = { result: calcTurnkey(lot, country, T) };
+    calc = { result: calcTurnkey(lot, country, T), poti: calcTurnkey(lot, country, T, "poti") };
     const ex = await q1<LeadRow>(`select ${COLS} from leads where user_id=$1 and lot_id=$2 and kind='lot' and status not in ('delivered','rejected')`, [user.id, lotId]);
     if (ex) return { lead: ex, existing: true };
   } else if (input.kind === "calc") {
@@ -56,7 +56,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
       price: Math.min(Math.max(Number(i.price) || 0, 0), 1_000_000), auction: clip(i.auction || "Copart", 20), state: clip(i.state || "NJ", 4),
       fuel: clip(i.fuel || "Бензин", 20), cc: Math.min(Math.max(Number(i.cc) || 0, 0), 10_000), hp: Math.min(Math.max(Number(i.hp) || 0, 0), 2_000),
     };
-    calc = { input: ci, result: calcTurnkey(ci, country, T) };
+    calc = { input: ci, result: calcTurnkey(ci, country, T), poti: calcTurnkey(ci, country, T, "poti") };
   } else if (input.kind !== "pick") {
     throw new AuthError("Неизвестный тип заявки");
   }

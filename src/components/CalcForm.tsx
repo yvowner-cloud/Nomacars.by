@@ -5,7 +5,8 @@ import { useApp } from "./Providers";
 import { ageAtCustoms, DELIVERY_DAYS } from "@/lib/age";
 import { US_STATES } from "@/lib/geo";
 import { fmt, money } from "@/lib/format";
-import type { CalcResult } from "@/lib/types";
+import type { CalcResult, Route } from "@/lib/types";
+import { RouteCompare } from "./RouteCompare";
 import { ExactCalcButton } from "./LeadForms";
 
 /** Калькулятор: ввод — в браузере, расчёт — на сервере (/api/calc) и только для вошедших. */
@@ -18,7 +19,7 @@ export function CalcForm() {
   const [cc, setCc] = useState("2487");
   const [hp, setHp] = useState("203");
   const [date, setDate] = useState("2022-06");
-  const [res, setRes] = useState<{ result: CalcResult; rates: { byn: number; rub: number; eurUsd: number } } | null>(null);
+  const [res, setRes] = useState<{ routes: Record<Route, CalcResult>; rates: { byn: number; rub: number; eurUsd: number } } | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -46,7 +47,7 @@ export function CalcForm() {
     return () => { clearTimeout(t); ctrl.abort(); };
   }, [user, price, auction, state, fuel, cc, hp, country]);
 
-  const c = res?.result;
+  const c = res?.routes;
 
   return (
     <div className="lot">
@@ -94,10 +95,7 @@ export function CalcForm() {
           ) : (
             <>
               <div style={{ opacity: loading ? 0.6 : 1, transition: "opacity .15s" }}>
-                {c.lines.map((x) => (
-                  <div className="cl" key={x.label}><div>{x.label}<small>{x.note}</small></div><div className="v num">{money(x.usd)}</div></div>
-                ))}
-                <div className="cl total"><div><b>Итого под ключ</b><small>≈ {fmt(c.local)} {c.currency} · срок {c.days}</small></div><div className="v num">{money(c.total)}</div></div>
+                <RouteCompare r={c} country={country} />
               </div>
               <ExactCalcButton input={{ price: Number(price), auction, state, fuel, cc: Number(cc), hp: Number(hp) }} />
               {res && <p className="note" style={{ margin: 0 }}>Курс: 1 $ = {res.rates.byn} BYN / {res.rates.rub} ₽, 1 € = {res.rates.eurUsd} $. Ставки демонстрационные.</p>}

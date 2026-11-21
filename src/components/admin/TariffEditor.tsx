@@ -79,7 +79,8 @@ export function TariffEditor({ initial, readOnly }: { initial: TariffState; read
         fees: p.fees, ccRates: p.ccRates, byn: rate("byn"), rub: rate("rub"), eurUsd: rate("eurUsd"),
       } as Tariffs;
       const by = calcTurnkey(SAMPLE, "by", T), ru = calcTurnkey(SAMPLE, "ru", T);
-      return Number.isFinite(by.total) && Number.isFinite(ru.total) ? { by, ru } : null;
+      const byP = calcTurnkey(SAMPLE, "by", T, "poti"), ruP = calcTurnkey(SAMPLE, "ru", T, "poti");
+      return [by, ru, byP, ruP].every((x) => Number.isFinite(x.total)) ? { by, ru, byP, ruP } : null;
     } catch { return null; }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [d, fees, cc, manual, st]);
@@ -198,6 +199,13 @@ export function TariffEditor({ initial, readOnly }: { initial: TariffState; read
           {num("ocean", "Морской фрахт до Клайпеды", "$")}
           {num("landBy", "Клайпеда → Минск", "$")}
           {num("landRu", "Клайпеда → Москва", "$")}
+          {num("oceanPoti", "Морской фрахт до Поти", "$")}
+          {num("landPotiBy", "Поти → Минск", "$")}
+          {num("landPotiRu", "Поти → Москва", "$")}
+          {num("daysKlaipedaBy", "Срок через Клайпеду в РБ", "дней")}
+          {num("daysKlaipedaRu", "Срок через Клайпеду в РФ", "дней")}
+          {num("daysPotiBy", "Срок через Поти в РБ", "дней")}
+          {num("daysPotiRu", "Срок через Поти в РФ", "дней")}
           {num("brokerBy", "Брокер, СВХ, оформление РБ", "$")}
           {num("brokerRu", "Брокер, СВХ, оформление РФ", "$")}
         </div>
@@ -216,8 +224,9 @@ export function TariffEditor({ initial, readOnly }: { initial: TariffState; read
             <div className="two">
               {(["by", "ru"] as const).map((c) => (
                 <div key={c}>
-                  <b>{c === "by" ? "Беларусь" : "Россия"}: {money(preview[c].total)}</b>
-                  <div className="note">≈ {fmt(preview[c].local)} {preview[c].currency}</div>
+                  <b>{c === "by" ? "Беларусь" : "Россия"}</b>
+                  <div>через Клайпеду: <b className="num">{money(preview[c].total)}</b> <span className="note">≈ {fmt(preview[c].local)} {preview[c].currency} · {preview[c].days}</span></div>
+                  <div>через Поти: <b className="num">{money(preview[c === "by" ? "byP" : "ruP"].total)}</b> <span className="note">≈ {fmt(preview[c === "by" ? "byP" : "ruP"].local)} {preview[c].currency} · {preview[c === "by" ? "byP" : "ruP"].days}</span></div>
                 </div>
               ))}
             </div>

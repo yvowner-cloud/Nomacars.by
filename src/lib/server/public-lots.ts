@@ -1,5 +1,5 @@
-import type { CalcResult, Lot, Tariffs } from "../types";
-import { calcTurnkey } from "../calc";
+import type { CalcResult, Country, Lot, Route, Tariffs } from "../types";
+import { calcRoutes, cheapest } from "../calc";
 import type { User } from "./auth";
 
 /**
@@ -24,14 +24,17 @@ export function toPublic(l: Lot, user: User | null, T: Tariffs): PublicLot {
     ...rest,
     bid: l.status === "active" ? price : null,
     soldPrice: authed && l.status === "sold" ? price : null,
-    turnkey: authed && l.status === "active" ? { by: calcTurnkey(l, "by", T).total, ru: calcTurnkey(l, "ru", T).total } : null,
+    // на карточке — цена «от»: самый дешёвый из маршрутов (Клайпеда / Поти)
+    turnkey: authed && l.status === "active" ? { by: cheapest(l, "by", T).total, ru: cheapest(l, "ru", T).total } : null,
   };
 }
 
 export const toPublicAll = (lots: Lot[], user: User | null, T: Tariffs) => lots.map((l) => toPublic(l, user, T));
 
-/** Полный расчёт по строкам для карточки лота — только для вошедших. */
-export function lotCalc(l: Lot, user: User | null, T: Tariffs): { by: CalcResult; ru: CalcResult } | null {
+export type LotCalc = Record<Country, Record<Route, CalcResult>>;
+
+/** Полный расчёт по строкам для страницы лота (оба маршрута) — только для вошедших. */
+export function lotCalc(l: Lot, user: User | null, T: Tariffs): LotCalc | null {
   if (!user || l.status !== "active") return null;
-  return { by: calcTurnkey(l, "by", T), ru: calcTurnkey(l, "ru", T) };
+  return { by: calcRoutes(l, "by", T), ru: calcRoutes(l, "ru", T) };
 }

@@ -11,7 +11,7 @@ export function TurnkeyPrice({ lot }: { lot: PublicLot }) {
     return (<div><div className="plabel">Цена выкупа</div><div className="muted" style={{ fontWeight: 700 }}>не раскрыта</div></div>);
   }
   const sold = lot.status === "sold";
-  const label = sold ? "Продан за" : `Под ключ в ${country === "by" ? "РБ" : "РФ"}`;
+  const label = sold ? "Продан за" : `Под ключ в ${country === "by" ? "РБ" : "РФ"} от`;
   const value = sold ? lot.soldPrice : lot.turnkey?.[country] ?? null;
   if (!user || value === null) {
     return (
