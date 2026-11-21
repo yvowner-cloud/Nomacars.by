@@ -12,7 +12,7 @@ import { BODY_LABEL } from "@/lib/types";
 import { engineStr, fmt, kmStr, money } from "@/lib/format";
 import { currentUser } from "@/lib/server/auth";
 import { lotCalc, toPublic, toPublicAll } from "@/lib/server/public-lots";
-import { getTariffs } from "@/lib/server/settings";
+import { accessOpen, getTariffs } from "@/lib/server/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +35,9 @@ export default async function LotPage({ params }: P) {
   const l = await bySlug((await params).slug);
   if (!l) notFound();
   const { lots } = await getCatalog();
-  const [user, T] = await Promise.all([currentUser(), getTariffs()]);
-  const pub = toPublic(l, user, T);
+  const [user, T, open] = await Promise.all([currentUser(), getTariffs(), accessOpen()]);
+  const viewer = user ?? open;
+  const pub = toPublic(l, viewer, T);
   const ai = aiReview(l);
   const st = stateInfo(String(l.state));
   const age = ageAtCustoms(l.year, l.month, saleDate(l), T.deliveryDays);
@@ -104,13 +105,13 @@ export default async function LotPage({ params }: P) {
               }
             />
           </div>
-          <BidBox lot={pub} calc={lotCalc(l, user, T)} />
+          <BidBox lot={pub} calc={lotCalc(l, viewer, T)} />
         </div>
 
         {similar.length > 0 && (
           <div style={{ marginTop: 30 }}>
             <div className="sec-h"><h2>Похожие лоты</h2></div>
-            <div className="grid">{toPublicAll(similar, user, T).map((x) => <LotCard key={x.id} lot={x} />)}</div>
+            <div className="grid">{toPublicAll(similar, viewer, T).map((x) => <LotCard key={x.id} lot={x} />)}</div>
           </div>
         )}
       </div>

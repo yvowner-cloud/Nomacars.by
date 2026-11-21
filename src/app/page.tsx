@@ -11,7 +11,7 @@ import { getCatalog } from "@/lib/server/catalog";
 import { COMPANY, CONTACT_LINKS } from "@/lib/company";
 import { currentUser } from "@/lib/server/auth";
 import { toPublicAll } from "@/lib/server/public-lots";
-import { getTariffs } from "@/lib/server/settings";
+import { accessOpen, getTariffs } from "@/lib/server/settings";
 import { engineStr, kmStr, money } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -20,11 +20,12 @@ const plural = (n: number) => (n % 10 === 1 && n % 100 !== 11 ? "лот" : [2, 3
 const dm = (d: Date) => d.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", timeZone: "Europe/Minsk" });
 
 export default async function Home() {
-  const [user, T, { lots }] = await Promise.all([currentUser(), getTariffs(), getCatalog()]);
-  const active = toPublicAll(activeOf(lots), user, T);
+  const [user, T, { lots }, open] = await Promise.all([currentUser(), getTariffs(), getCatalog(), accessOpen()]);
+  const viewer = user ?? open;
+  const active = toPublicAll(activeOf(lots), viewer, T);
   const top = active.filter((l) => l.top).sort((a, b) => b.aiScore - a.aiScore);
   const rest = active.filter((l) => !l.top).sort((a, b) => b.aiScore - a.aiScore);
-  const past = toPublicAll(pastOf(lots), user, T).slice(0, 8);
+  const past = toPublicAll(pastOf(lots), viewer, T).slice(0, 8);
   const cal = upcomingFrom(lots);
   // живой лот на первом экране: лучший лот с фото, торги которого ещё впереди
   const hero = [...top, ...rest].find((l) => l.photos?.length && Date.parse(l.saleAt) > Date.now());

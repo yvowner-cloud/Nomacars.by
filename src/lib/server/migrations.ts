@@ -212,6 +212,13 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
        where key = 'tariffs';
     `,
   },
+  {
+    version: 9,
+    name: "открытый доступ без входа (пока не работают SMS)",
+    sql: `
+      insert into settings (key, value) values ('access', '{"open": true}') on conflict (key) do nothing;
+    `,
+  },
 ];
 
 export async function migrate(): Promise<void> {

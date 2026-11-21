@@ -11,7 +11,8 @@ import { ExactCalcButton } from "./LeadForms";
 
 /** Калькулятор: ввод — в браузере, расчёт — на сервере (/api/calc) и только для вошедших. */
 export function CalcForm() {
-  const { user, country, setCountry, openLogin } = useApp();
+  const { user, country, setCountry, openLogin, open } = useApp();
+  const priced = Boolean(user) || open;
   const [price, setPrice] = useState("14000");
   const [auction, setAuction] = useState("Copart");
   const [state, setState] = useState("NJ");
@@ -28,7 +29,7 @@ export function CalcForm() {
   const age = ageAtCustoms(y, m, new Date(), DELIVERY_DAYS);
 
   useEffect(() => {
-    if (!user) { setRes(null); return; }
+    if (!priced) { setRes(null); return; }
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
       setLoading(true);
@@ -46,7 +47,7 @@ export function CalcForm() {
       setLoading(false);
     }, 300);
     return () => { clearTimeout(t); ctrl.abort(); };
-  }, [user, price, auction, state, fuel, cc, hp, size, country]);
+  }, [priced, price, auction, state, fuel, cc, hp, size, country]);
 
   const c = res?.routes;
 
@@ -84,7 +85,7 @@ export function CalcForm() {
       <div className="panel">
         <div className="panel-h">Расчёт для {country === "by" ? "Беларуси" : "России"}</div>
         <div className="box" aria-busy={loading}>
-          {!user ? (
+          {!priced ? (
             <>
               <span className="pval blur" style={{ fontSize: 30 }} aria-hidden="true">$ 00 000</span>
               <p className="note" style={{ margin: 0 }}>Подробная разбивка с пошлиной, утильсбором и доставкой доступна после входа по номеру телефона.</p>

@@ -4,7 +4,7 @@ import { pastOf } from "@/lib/lots";
 import { getCatalog } from "@/lib/server/catalog";
 import { currentUser } from "@/lib/server/auth";
 import { toPublicAll } from "@/lib/server/public-lots";
-import { getTariffs } from "@/lib/server/settings";
+import { accessOpen, getTariffs } from "@/lib/server/settings";
 
 export const metadata: Metadata = {
   title: "Прошедшие торги и реальные цены выкупа",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function SoldPage() {
-  const lots = toPublicAll(pastOf((await getCatalog()).lots), await currentUser(), await getTariffs());
+  const lots = toPublicAll(pastOf((await getCatalog()).lots), (await currentUser()) ?? (await accessOpen()), await getTariffs());
   return (
     <section className="sec">
       <div className="wrap">

@@ -147,3 +147,20 @@ export function startFxScheduler() {
   setTimeout(tick, 5_000);
   g.__ncFx = setInterval(tick, 30 * 60_000);
 }
+
+/**
+ * Открытый доступ: пока SMS-вход не работает, цены, расчёты и заявки доступны без входа.
+ * Хранится в settings.access = { open: boolean }, переключает владелец во вкладке «Заявки».
+ */
+let accessCache: { at: number; open: boolean } | null = null;
+export async function accessOpen(): Promise<boolean> {
+  if (!dbConfigured()) return false;
+  if (accessCache && Date.now() - accessCache.at < 10_000) return accessCache.open;
+  const v = await read<{ open?: boolean }>("access").catch(() => null);
+  accessCache = { at: Date.now(), open: Boolean(v?.open) };
+  return accessCache.open;
+}
+export async function setAccessOpen(open: boolean, userId: number) {
+  await write("access", { open }, userId, ["open"]);
+  accessCache = null;
+}

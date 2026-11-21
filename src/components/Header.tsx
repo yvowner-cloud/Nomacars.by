@@ -11,7 +11,7 @@ export interface Upcoming { iso: string; auction: string; count: number }
 const dm = (iso: string) => new Date(iso).toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit" });
 
 export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcoming[]; newLeads?: number; unseen?: number }) {
-  const { country, setCountry, user, openLogin, logout } = useApp();
+  const { country, setCountry, user, openLogin, logout, open } = useApp();
   const path = usePathname();
   const [mega, setMega] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -63,7 +63,7 @@ export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcom
           ) : (
             <>
               <button onClick={() => openLogin()}>Вход</button>
-              <button onClick={() => openLogin()}>Регистрация</button>
+              {!open && <button onClick={() => openLogin()}>Регистрация</button>}
             </>
           )}
           <button aria-expanded={mega} aria-haspopup="true" onClick={() => setMega((m) => !m)} onMouseEnter={() => setMega(true)}>Аукционы</button>
@@ -111,7 +111,7 @@ export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcom
               <div className="mega-col">
                 <h3>С чего начать</h3>
                 <ul className="chev">
-                  {!user && (
+                  {!user && !open && (
                     <li className="plain">
                       <button className="reg-badge" onClick={() => { setMega(false); openLogin(); }}>Регистра&shy;ция</button>
                     </li>

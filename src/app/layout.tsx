@@ -10,6 +10,7 @@ import { getCatalog } from "@/lib/server/catalog";
 import { currentUser, favoriteIds } from "@/lib/server/auth";
 import { newLeadsCount } from "@/lib/server/leads";
 import { unseenCount } from "@/lib/server/billing";
+import { accessOpen } from "@/lib/server/settings";
 
 export const dynamic = "force-dynamic"; // демо: даты торгов считаются от «сегодня»
 
@@ -28,6 +29,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const staff = user && (user.role === "owner" || user.role === "manager");
   const newLeads = staff ? await newLeadsCount().catch(() => 0) : 0;
   const unseen = user && !staff ? await unseenCount(user.id).catch(() => 0) : 0;
+  const open = await accessOpen().catch(() => false);
   const upcoming = upcomingFrom((await getCatalog()).lots).map((u) => ({ iso: u.date.toISOString(), auction: u.auction, count: u.count }));
   return (
     <html lang="ru">
@@ -38,7 +40,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" />
       </head>
       <body>
-        <Providers initialUser={user} initialFavorites={favorites}>
+        <Providers initialUser={user} initialFavorites={favorites} open={open}>
           <Header upcoming={upcoming} newLeads={newLeads} unseen={unseen} />
           <main>{children}</main>
           <Footer upcoming={upcoming} />

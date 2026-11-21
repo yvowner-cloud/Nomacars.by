@@ -63,7 +63,7 @@ export function BidBox({ lot, calc }: { lot: PublicLot; calc: LotCalc | null }) 
           {lot.status === "sold" && <div className="bid-row"><span>Статус</span><span style={{ color: "var(--green)", fontWeight: 700 }}>Продан</span></div>}
         </div>
 
-        {active && (user && c ? (
+        {active && (c ? (
           <>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <h3>Расчёт под ключ</h3>

@@ -18,6 +18,8 @@ interface Ctx {
   watch: number[];
   toggleWatch: (id: number) => void;
   toast: (t: string) => void;
+  /** Открытый доступ: цены и заявки без входа (пока не работают SMS) */
+  open: boolean;
 }
 
 const C = createContext<Ctx | null>(null);
@@ -36,7 +38,7 @@ async function post<T>(url: string, data: unknown, method = "POST"): Promise<T> 
   return j as T;
 }
 
-export function Providers({ children, initialUser, initialFavorites }: { children: ReactNode; initialUser: SiteUser | null; initialFavorites: number[] }) {
+export function Providers({ children, initialUser, initialFavorites, open = false }: { children: ReactNode; initialUser: SiteUser | null; initialFavorites: number[]; open?: boolean }) {
   const router = useRouter();
   const [user, setUser] = useState<SiteUser | null>(initialUser);
   const [country, setCountryS] = useState<Country>(initialUser?.country ?? "by");
@@ -81,7 +83,7 @@ export function Providers({ children, initialUser, initialFavorites }: { childre
   };
 
   return (
-    <C.Provider value={{ country, setCountry, user, logout, openLogin: (after) => setLoginOpen({ after }), watch, toggleWatch, toast }}>
+    <C.Provider value={{ country, setCountry, user, logout, openLogin: (after) => setLoginOpen({ after }), watch, toggleWatch, toast, open }}>
       {children}
       {loginOpen && (
         <LoginModal

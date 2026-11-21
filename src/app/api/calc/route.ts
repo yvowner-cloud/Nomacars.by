@@ -1,12 +1,12 @@
 import { api, body } from "@/lib/server/api";
 import { AuthError, currentUser } from "@/lib/server/auth";
 import { calcRoutes } from "@/lib/calc";
-import { getTariffs } from "@/lib/server/settings";
+import { accessOpen, getTariffs } from "@/lib/server/settings";
 import type { CalcInput, Country } from "@/lib/types";
 
 /** Калькулятор под ключ — только для вошедших (тарифы не уходят в браузер). */
 export const POST = api(async (req) => {
-  if (!(await currentUser())) throw new AuthError("Войдите, чтобы увидеть расчёт", 401);
+  if (!(await currentUser()) && !(await accessOpen())) throw new AuthError("Войдите, чтобы увидеть расчёт", 401);
   const b = await body<{ input?: Partial<CalcInput>; country?: Country }>(req);
   const i = b.input || {};
   const input: CalcInput = {

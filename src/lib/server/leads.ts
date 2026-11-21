@@ -36,8 +36,13 @@ export interface NewLead {
 }
 
 /** Создать заявку. Повторная заявка на тот же лот (пока прошлая не закрыта) возвращает существующую. */
-export async function createLead(user: User, country: Country, input: NewLead): Promise<{ lead: LeadRow; existing: boolean }> {
-  const recent = await q1<{ n: number }>("select count(*)::int as n from leads where user_id=$1 and created_at > now() - interval '1 hour'", [user.id]);
+/** Кто оставляет заявку: вошедший пользователь или гость при открытом доступе (id = null, телефон из формы). */
+export interface LeadAuthor { id: number | null; name: string; phone: string }
+
+export async function createLead(user: LeadAuthor, country: Country, input: NewLead): Promise<{ lead: LeadRow; existing: boolean }> {
+  const recent = user.id !== null
+    ? await q1<{ n: number }>("select count(*)::int as n from leads where user_id=$1 and created_at > now() - interval '1 hour'", [user.id])
+    : await q1<{ n: number }>("select count(*)::int as n from leads where user_id is null and phone=$1 and created_at > now() - interval '1 hour'", [user.phone]);
   if ((recent?.n ?? 0) >= 10) throw new AuthError("Слишком много заявок за час. Мы уже работаем с вашими запросами — свяжемся в ближайшее время.", 429);
 
   const T = await getTariffs();
@@ -48,7 +53,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
     if (!lot || lot.status !== "active") throw new AuthError("Торги по этому лоту уже прошли. Посмотрите другие машины в каталоге.", 404);
     lotId = lot.id;
     calc = { result: calcTurnkey(lot, country, T), poti: calcTurnkey(lot, country, T, "poti") };
-    const ex = await q1<LeadRow>(`select ${COLS} from leads where user_id=$1 and lot_id=$2 and kind='lot' and status not in ('delivered','rejected')`, [user.id, lotId]);
+    const ex = await activeLotLead(user, lotId);
     if (ex) return { lead: ex, existing: true };
   } else if (input.kind === "calc") {
     const i = input.calcInput || {};
@@ -70,7 +75,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
     [user.id, input.kind, lotId, country, user.name, user.phone, money0(input.maxBid, 1_000_000), money0(input.budget, 1_000_000), clip(input.comment, 1000), calc ? JSON.stringify(calc) : null]);
   if (!lead) {
     // гонка двух одинаковых запросов — вернуть уже созданную
-    const ex = await q1<LeadRow>(`select ${COLS} from leads where user_id=$1 and lot_id=$2 and kind='lot' and status not in ('delivered','rejected')`, [user.id, lotId]);
+    const ex = lotId !== null ? await activeLotLead(user, lotId) : null;
     if (ex) return { lead: ex, existing: true };
     throw new AuthError("Не удалось создать заявку", 500);
   }
@@ -81,6 +86,13 @@ export async function createLead(user: User, country: Country, input: NewLead): 
     .then(async (ok) => { if (ok) await q("update leads set tg_notified=true where id=$1", [lead.id]); })
     .catch((err) => console.error("[leads] уведомление:", (err as Error).message));
   return { lead, existing: false };
+}
+
+/** Незакрытая заявка этого человека на этот лот (вошедший — по аккаунту, гость — по телефону). */
+async function activeLotLead(user: LeadAuthor, lotId: number) {
+  return user.id !== null
+    ? q1<LeadRow>(`select ${COLS} from leads where user_id=$1 and lot_id=$2 and kind='lot' and status not in ('delivered','rejected')`, [user.id, lotId])
+    : q1<LeadRow>(`select ${COLS} from leads where user_id is null and phone=$1 and lot_id=$2 and kind='lot' and status not in ('delivered','rejected')`, [user.phone, lotId]);
 }
 
 async function sendLeadNotification(l: LeadRow): Promise<boolean> {

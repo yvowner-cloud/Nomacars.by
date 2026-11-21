@@ -4,7 +4,7 @@ import { activeOf } from "@/lib/lots";
 import { getCatalog } from "@/lib/server/catalog";
 import { currentUser } from "@/lib/server/auth";
 import { toPublicAll } from "@/lib/server/public-lots";
-import { getTariffs } from "@/lib/server/settings";
+import { accessOpen, getTariffs } from "@/lib/server/settings";
 
 export const metadata: Metadata = {
   title: "Каталог лотов Copart, IAAI и Manheim",
@@ -21,7 +21,7 @@ export default async function CatalogPage({ searchParams }: { searchParams: Prom
         <div className="sec-h">
           <div><div className="eyebrow">Подборка Ncars · обновляется еженедельно</div><h1 style={{ fontSize: "clamp(24px,3.4vw,34px)" }}>Каталог лотов Copart, IAAI и Manheim</h1></div>
         </div>
-        <CatalogView key={key} lots={toPublicAll(activeOf((await getCatalog()).lots), await currentUser(), await getTariffs())} initial={initial} />
+        <CatalogView key={key} lots={toPublicAll(activeOf((await getCatalog()).lots), (await currentUser()) ?? (await accessOpen()), await getTariffs())} initial={initial} />
       </div>
     </section>
   );

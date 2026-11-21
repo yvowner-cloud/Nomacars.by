@@ -11,6 +11,8 @@ import { modelsWithCoverage } from "@/lib/server/models";
 import { TariffEditor } from "@/components/admin/TariffEditor";
 import { LeadsBoard, type LeadLotInfo } from "@/components/admin/LeadsBoard";
 import { TelegramPanel } from "@/components/admin/TelegramPanel";
+import { AccessPanel } from "@/components/admin/AccessPanel";
+import { accessOpen } from "@/lib/server/settings";
 import { LoginGate } from "@/components/admin/LoginGate";
 import { RequisitesForm } from "@/components/admin/RequisitesForm";
 import { getRequisites } from "@/lib/server/billing";
@@ -68,6 +70,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   lots={Object.fromEntries([...(await lotsByIds((await q<{ lot_id: number }>("select distinct lot_id from leads where lot_id is not null").catch(() => [])).map((r) => r.lot_id))).values()]
                     .map((l) => [l.id, { id: l.id, slug: l.slug, title: `${l.year} ${l.make} ${l.model} ${l.trim}`, lotNo: l.lotNo, auction: l.auction } satisfies LeadLotInfo]))}
                 />
+                <AccessPanel initial={await accessOpen()} readOnly={user.role !== "owner"} />
                 <TelegramPanel configured={telegramConfigured()} chats={await linkedChats()} readOnly={user.role !== "owner"} />
               </div>
             ) : tab === "models" ? (
