@@ -23,7 +23,7 @@ export function Footer({ upcoming }: { upcoming: Upcoming[] }) {
             <li><Link href="/">Главная</Link></li>
             <li><Link href="/catalog">Каталог</Link></li>
             <li><Link href="/catalog?top=1">Топ недели</Link></li>
-            <li><Link href="/sold">Цены выкупа</Link></li>
+            <li><Link href="/sold">Прошедшие аукционы</Link></li>
             <li><Link href="/calc">Калькулятор</Link></li>
             <li><Link href="/#how">Как купить</Link></li>
             <li><Link href="/#faq">Вопросы и ответы</Link></li>

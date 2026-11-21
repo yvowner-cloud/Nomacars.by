@@ -66,10 +66,10 @@ export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcom
               <button onClick={() => openLogin()}>Регистрация</button>
             </>
           )}
-          <button aria-expanded={mega} aria-haspopup="true" onClick={() => setMega((m) => !m)} onMouseEnter={() => setMega(true)}>Купить</button>
+          <button aria-expanded={mega} aria-haspopup="true" onClick={() => setMega((m) => !m)} onMouseEnter={() => setMega(true)}>Аукционы</button>
           <Link href="/catalog" aria-current={cur("/catalog")} onMouseEnter={() => setMega(false)}>Поиск</Link>
           <Link href="/calc" aria-current={cur("/calc")} onMouseEnter={() => setMega(false)}>Калькулятор</Link>
-          <Link href="/sold" aria-current={cur("/sold")} onMouseEnter={() => setMega(false)}>Цены выкупа</Link>
+          <Link href="/sold" aria-current={cur("/sold")} onMouseEnter={() => setMega(false)}>Прошедшие аукционы</Link>
           <Link href="/#how" onMouseEnter={() => setMega(false)}>Как купить</Link>
           <Link href="/#contacts" onMouseEnter={() => setMega(false)}>Контакты</Link>
         </div>
