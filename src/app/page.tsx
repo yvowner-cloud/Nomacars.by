@@ -123,7 +123,8 @@ export default async function Home() {
                 <span>
                   <a href={CONTACT_LINKS.telegram} target="_blank" rel="noreferrer">Telegram</a>{" · "}
                   <a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>{" · "}
-                  <a href={CONTACT_LINKS.viber}>Viber</a>
+                  <a href={CONTACT_LINKS.viber}>Viber</a>{" · "}
+                  <a href={CONTACT_LINKS.instagram} target="_blank" rel="noreferrer">Instagram</a>
                 </span>
                 <span style={{ justifySelf: "start" }}><PickButton /></span>
               </div>

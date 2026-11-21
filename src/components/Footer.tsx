@@ -44,6 +44,7 @@ export function Footer({ upcoming }: { upcoming: Upcoming[] }) {
             <li><a href={CONTACT_LINKS.telegram} target="_blank" rel="noreferrer">Telegram</a></li>
             <li><a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></li>
             <li><a href={CONTACT_LINKS.viber}>Viber</a></li>
+            <li><a href={CONTACT_LINKS.instagram} target="_blank" rel="noreferrer">Instagram @ncars.by</a></li>
             <li><span>{COMPANY.office}</span></li>
           </ul>
           <p style={{ marginTop: 10, color: "#aaa" }}>{COMPANY.hours}</p>
@@ -57,6 +58,7 @@ export function Footer({ upcoming }: { upcoming: Upcoming[] }) {
           </div>
           <div className="soc" aria-label="Мы в соцсетях">
             <span style={{ display: "contents" }}>
+              <a href={CONTACT_LINKS.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">IG</a>
               <a href={CONTACT_LINKS.telegram} target="_blank" rel="noreferrer" aria-label="Telegram">TG</a>
               <a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp">WA</a>
               <a href={CONTACT_LINKS.viber} aria-label="Viber">VB</a>

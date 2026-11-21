@@ -21,4 +21,5 @@ export const CONTACT_LINKS = {
   whatsapp: `https://wa.me/${COMPANY.phoneE164.replace(/\D/g, "")}`,
   viber: `viber://chat?number=%2B${COMPANY.phoneE164.replace(/\D/g, "")}`,
   telegram: `https://t.me/${COMPANY.phoneE164}`,
+  instagram: "https://www.instagram.com/ncars.by/",
 };
