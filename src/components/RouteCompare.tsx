@@ -7,7 +7,6 @@ const R = { textAlign: "right" as const, whiteSpace: "nowrap" as const };
 /** Расчёт под ключ сразу по двум маршрутам: Клайпеда и Поти — строки рядом, итог и срок по каждому. */
 export function RouteCompare({ r, country }: { r: Record<Route, CalcResult>; country: Country }) {
   const k = r.klaipeda, p = r.poti;
-  const cheaper: Route | null = Math.round(k.total) === Math.round(p.total) ? null : k.total < p.total ? "klaipeda" : "poti";
   const city = country === "by" ? "Минск" : "Москва";
   const label = (i: number, l: string) => (i === 4 ? `Автовоз до: ${city}` : l);
   const note = (i: number, n: string) =>
@@ -30,18 +29,16 @@ export function RouteCompare({ r, country }: { r: Record<Route, CalcResult>; cou
       <div className="cl total" style={{ display: "grid", gridTemplateColumns: COLS, gap: 8 }}>
         <div><b>Итого под ключ</b></div>
         {([k, p] as const).map((c) => (
-          <div className="v num" key={c.route} style={{ ...R, fontSize: 17, ...(c.route === cheaper ? { color: "var(--green)" } : {}) }}>
+          <div className="v num" key={c.route} style={{ ...R, fontSize: 17 }}>
             {money(c.total)}
             <small style={{ display: "block", fontWeight: 400 }}>≈ {fmt(c.local)} {c.currency}</small>
             <small style={{ display: "block", fontWeight: 400 }}>{c.days}</small>
           </div>
         ))}
       </div>
-      {cheaper && (
-        <p className="note" style={{ margin: "6px 0 0" }}>
-          Выгоднее через {cheaper === "klaipeda" ? "Клайпеду" : "Поти"} на {money(Math.abs(k.total - p.total))}. Маршрут выбираете вы — менеджер подскажет, что быстрее сейчас.
-        </p>
-      )}
+      <p className="note" style={{ margin: "6px 0 0" }}>
+        Основной маршрут — через Клайпеду. Если автомобиль не проходит ограничения на ввоз через Литву (клиренс, объём двигателя), он едет через Поти. Маршрут подтверждает менеджер.
+      </p>
     </div>
   );
 }
