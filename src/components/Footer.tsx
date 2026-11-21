@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { COMPANY } from "@/lib/company";
+import { COMPANY, CONTACT_LINKS } from "@/lib/company";
 import type { Upcoming } from "./Header";
 import { ToTop } from "./ToTop";
 
@@ -40,9 +40,10 @@ export function Footer({ upcoming }: { upcoming: Upcoming[] }) {
         <div>
           <h3>Контакты</h3>
           <ul className="chev">
-            <li><span className="num">{COMPANY.phone}</span></li>
-            <li><span>Telegram {COMPANY.telegram}</span></li>
-            <li><span>WhatsApp {COMPANY.whatsapp}</span></li>
+            <li><a className="num" href={CONTACT_LINKS.tel}>{COMPANY.phone}</a></li>
+            <li><a href={CONTACT_LINKS.telegram} target="_blank" rel="noreferrer">Telegram</a></li>
+            <li><a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a></li>
+            <li><a href={CONTACT_LINKS.viber}>Viber</a></li>
             <li><span>{COMPANY.office}</span></li>
           </ul>
           <p style={{ marginTop: 10, color: "#aaa" }}>{COMPANY.hours}</p>
@@ -56,10 +57,10 @@ export function Footer({ upcoming }: { upcoming: Upcoming[] }) {
           </div>
           <div className="soc" aria-label="Мы в соцсетях">
             <span style={{ display: "contents" }}>
-              <a href="#contacts" aria-label="Telegram">TG</a>
-              <a href="#contacts" aria-label="Instagram">IG</a>
-              <a href="#contacts" aria-label="YouTube">YT</a>
-              <a href="#contacts" aria-label="WhatsApp">WA</a>
+              <a href={CONTACT_LINKS.telegram} target="_blank" rel="noreferrer" aria-label="Telegram">TG</a>
+              <a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp">WA</a>
+              <a href={CONTACT_LINKS.viber} aria-label="Viber">VB</a>
+              <a href={CONTACT_LINKS.tel} aria-label="Позвонить">☎</a>
             </span>
           </div>
         </div>

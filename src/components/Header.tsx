@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useApp } from "./Providers";
-import { COMPANY } from "@/lib/company";
+import { COMPANY, CONTACT_LINKS } from "@/lib/company";
 
 export interface Upcoming { iso: string; auction: string; count: number }
 
@@ -39,7 +39,7 @@ export function Header({ upcoming, newLeads = 0, unseen = 0 }: { upcoming: Upcom
             </span>
             <Link href="/#how">Доставка</Link>
             <Link href="/calc">Растаможка</Link>
-            <span className="num">{COMPANY.phone}</span>
+            <a className="num" href={CONTACT_LINKS.tel}>{COMPANY.phone}</a>
           </div>
           <Link href="/" className="logo" aria-label={`${COMPANY.brand}, на главную`}>
             <span className="logo-small">Авто<br />с аукционов<br />США</span>

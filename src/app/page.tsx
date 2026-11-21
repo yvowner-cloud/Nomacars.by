@@ -5,7 +5,7 @@ import { PickButton } from "@/components/LeadForms";
 import { LotImage } from "@/components/LotImage";
 import { activeOf, pastOf, upcomingFrom } from "@/lib/lots";
 import { getCatalog } from "@/lib/server/catalog";
-import { COMPANY } from "@/lib/company";
+import { COMPANY, CONTACT_LINKS } from "@/lib/company";
 import { currentUser } from "@/lib/server/auth";
 import { toPublicAll } from "@/lib/server/public-lots";
 import { getTariffs } from "@/lib/server/settings";
@@ -119,8 +119,12 @@ export default async function Home() {
               <div className="panel-h">{COMPANY.office}</div>
               <div className="box">
                 <span className="muted">{COMPANY.hours}</span>
-                <b className="num" style={{ fontSize: 18 }}>{COMPANY.phone}</b>
-                <span>Telegram {COMPANY.telegram} · WhatsApp {COMPANY.whatsapp}</span>
+                <a className="num" href={CONTACT_LINKS.tel} style={{ fontSize: 18, fontWeight: 700, color: "inherit" }}>{COMPANY.phone}</a>
+                <span>
+                  <a href={CONTACT_LINKS.telegram} target="_blank" rel="noreferrer">Telegram</a>{" · "}
+                  <a href={CONTACT_LINKS.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>{" · "}
+                  <a href={CONTACT_LINKS.viber}>Viber</a>
+                </span>
                 <span style={{ justifySelf: "start" }}><PickButton /></span>
               </div>
             </div>
