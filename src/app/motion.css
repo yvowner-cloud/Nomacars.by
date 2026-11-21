@@ -1,0 +1,164 @@
+/* Ncars, обновлённый дизайн (ноябрь 2026): тот же стиль NPA — чёрный верх, тёмно-красный акцент, Oswald, —
+   плюс движение: появление блоков, живой лот на первом экране, бегущая строка торгов, наведение на карточки.
+   При «уменьшить движение» в системе все анимации отключаются (в конце файла). */
+
+/* ---------- меню: подчёркивание вместо заливки ---------- */
+.nav { background: var(--nav-dark); box-shadow: 0 1px 0 rgba(255,255,255,.04); }
+.nav-in > a, .nav-in > button { position: relative; transition: color .2s, background .2s; }
+.nav-in > a::after, .nav-in > button::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 12px; height: 2px; background: var(--red-hi);
+  transform: scaleX(0); transform-origin: left; transition: transform .3s cubic-bezier(.2,.7,.2,1);
+}
+.nav-in > a:hover, .nav-in > button:hover, .nav-in > [aria-expanded="true"] { background: transparent; }
+.nav-in > a:hover::after, .nav-in > button:hover::after, .nav-in > [aria-current="page"]::after, .nav-in > [aria-expanded="true"]::after { transform: scaleX(1); }
+.nav-in > [aria-current="page"] { background: transparent; }
+.nav-in > .nav-home { background: var(--red); }
+.nav-in > .nav-home::after { display: none; }
+.nav-in > .nav-home:hover { background: var(--red-hi); }
+.mega { animation: x-drop .22s cubic-bezier(.2,.7,.2,1); }
+@keyframes x-drop { from { opacity: 0; transform: translateY(-8px); } }
+
+/* ---------- кнопки ---------- */
+.btn { transition: background .2s, color .2s, transform .2s, box-shadow .2s; }
+.btn-red:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(168,25,30,.3); }
+.x-btn { min-height: 48px; padding: 0 24px; font-family: var(--f-head); font-weight: 500; font-size: 17px; letter-spacing: .03em; }
+.x-btn-line { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px rgba(255,255,255,.55); }
+.x-btn-line:hover { color: #fff; box-shadow: inset 0 0 0 2px #fff; transform: translateY(-2px); }
+.x-btn-white { background: #fff; color: var(--red); }
+.x-btn-white:hover { background: #fff; color: var(--red-dark); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+.x-arr { display: inline-block; transition: transform .25s; }
+.btn:hover .x-arr { transform: translateX(5px); }
+
+/* ---------- появление ---------- */
+.x-rise { opacity: 0; transform: translateY(26px); animation: x-rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+.x-d1 { animation-delay: .05s; } .x-d2 { animation-delay: .18s; } .x-d3 { animation-delay: .31s; }
+.x-d4 { animation-delay: .44s; } .x-d5 { animation-delay: .57s; } .x-d6 { animation-delay: .7s; }
+@keyframes x-rise { to { opacity: 1; transform: none; } }
+/* блоки ниже первого экрана: прячутся только если JS увидел, что они вне экрана (Reveal) */
+.rv-wait { opacity: 0; transform: translateY(28px); }
+.rv-in { opacity: 1; transform: none; transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); }
+
+/* ---------- первый экран ---------- */
+.x-hero { background: #0e0e0e; color: #fff; position: relative; overflow: hidden; }
+.x-hero::before {
+  content: ""; position: absolute; right: -140px; top: -170px; width: 580px; height: 580px; border-radius: 50%;
+  border: 90px solid rgba(168,25,30,.18); pointer-events: none;
+}
+.x-hero-in { display: flex; flex-wrap: wrap; gap: 48px; align-items: center; padding-block: 64px 72px; position: relative; }
+.x-hero-text { flex: 1 1 520px; min-width: 0; display: grid; gap: 22px; justify-items: start; }
+.x-kicker { font-family: var(--f-head); text-transform: uppercase; letter-spacing: .12em; font-size: 15px; color: var(--amber); }
+.x-hero h1 { font-size: clamp(42px, 6vw, 80px); font-weight: 600; line-height: 1.02; }
+.x-hero h1 span { display: block; }
+.x-hero h1 .x-accent { color: var(--red-hi); }
+.x-bar { height: 6px; width: 140px; background: var(--red-hi); transform: scaleX(0); transform-origin: left; animation: x-bar .9s .5s cubic-bezier(.2,.7,.2,1) forwards; }
+@keyframes x-bar { to { transform: scaleX(1); } }
+.x-hero p { margin: 0; max-width: 56ch; font-size: 18px; color: #cfcfcf; }
+.x-cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+
+.x-live-wrap { flex: 1 1 380px; min-width: 0; max-width: 460px; animation: x-float 6s ease-in-out infinite; }
+@keyframes x-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.x-live { display: block; background: #fff; color: var(--ink); border-radius: 6px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.5); text-decoration: none; }
+.x-live:hover { color: var(--ink); }
+.x-live .ph { aspect-ratio: 16 / 9.5; overflow: hidden; }
+.x-live .ph img { transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+.x-live:hover .ph img { transform: scale(1.05); }
+.x-live-body { padding: 18px 20px; display: grid; gap: 12px; }
+.x-live h2 { font-size: 24px; font-weight: 500; }
+.x-live-meta { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+.x-live-nums { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--panel); padding-top: 12px; }
+.x-live-nums small { display: block; font-size: 12px; color: var(--muted); }
+.x-live-bid { font-family: var(--f-head); font-size: 32px; font-weight: 600; line-height: 1.1; }
+.x-live-timer { font-family: var(--f-mono); font-size: 24px; color: var(--red); margin-top: 4px; }
+.x-live-price { background: var(--row); border-radius: 3px; padding: 10px 12px; }
+.x-badge-live { position: absolute; left: 14px; top: 14px; z-index: 2; display: inline-flex; align-items: center; gap: 8px; font-family: var(--f-head); text-transform: uppercase; font-size: 13px; letter-spacing: .08em; color: #fff; background: var(--red); padding: 5px 10px; border-radius: 2px; }
+.x-dot { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: x-pulse 1.4s infinite; }
+@keyframes x-pulse { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.8); } 70% { box-shadow: 0 0 0 9px rgba(255,255,255,0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); } }
+.x-live-empty { background: #fff; color: var(--ink); border-radius: 6px; padding: 28px; display: grid; gap: 12px; box-shadow: 0 30px 60px rgba(0,0,0,.5); }
+.x-live-empty h2 { font-size: 26px; }
+
+/* ---------- бегущая строка торгов ---------- */
+.x-ticker { overflow: hidden; background: #1b1b1b; border-block: 1px solid #2f2f2f; }
+.x-track { display: flex; gap: 48px; width: max-content; padding-block: 12px; animation: x-marquee 36s linear infinite; }
+.x-ticker:hover .x-track, .x-ticker:focus-within .x-track { animation-play-state: paused; }
+@keyframes x-marquee { to { transform: translateX(-50%); } }
+.x-tk { font-family: var(--f-head); text-transform: uppercase; font-size: 15px; color: #cfcfcf; white-space: nowrap; display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.x-tk:hover { color: #fff; }
+.x-tk b { color: #fff; font-weight: 500; }
+.x-tk i { font-style: normal; color: var(--amber); }
+
+/* ---------- секции ---------- */
+.x-sec { padding-block: 72px; }
+.x-sec-grey { background: var(--row); }
+.x-sec-panel { background: var(--panel); }
+.x-head { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-end; margin-bottom: 28px; }
+.x-head .eyebrow { display: block; margin-bottom: 10px; letter-spacing: .08em; }
+.x-head h2 { font-size: clamp(32px, 3.6vw, 48px); }
+.x-more { display: flex; justify-content: center; margin-top: 28px; }
+
+/* фильтр-чипсы */
+.x-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.x-chip { border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 999px; min-height: 40px; padding: 0 16px; font-size: 14px; cursor: pointer; transition: border-color .2s, background .2s, color .2s; }
+.x-chip:hover { border-color: var(--ink); }
+.x-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.x-chip em { font-style: normal; opacity: .6; margin-left: 4px; }
+
+/* ---------- карточки лотов (везде на сайте) ---------- */
+.grid { gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+.card { background: #fff; border-radius: 4px; overflow: hidden; transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s, border-color .3s; }
+.card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,.14); border-color: #bdbdbd; background: #fff; }
+.card .ph { overflow: hidden; }
+.card .ph img { transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+.card:hover .ph img { transform: scale(1.06); }
+/* появление — через translate, чтобы не мешать transform при наведении */
+.x-cards .card { opacity: 0; animation: x-card-in .7s cubic-bezier(.2,.7,.2,1) forwards; }
+@keyframes x-card-in { from { opacity: 0; translate: 0 24px; } to { opacity: 1; translate: 0 0; } }
+.x-cards .card:nth-child(1) { animation-delay: .05s; } .x-cards .card:nth-child(2) { animation-delay: .12s; }
+.x-cards .card:nth-child(3) { animation-delay: .19s; } .x-cards .card:nth-child(4) { animation-delay: .26s; }
+.x-cards .card:nth-child(5) { animation-delay: .33s; } .x-cards .card:nth-child(6) { animation-delay: .4s; }
+.x-cards .card:nth-child(7) { animation-delay: .47s; } .x-cards .card:nth-child(8) { animation-delay: .54s; }
+
+/* ---------- как купить: четыре шага с заполняющейся линией ---------- */
+.x-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 28px; }
+.x-step { position: relative; padding-top: 28px; }
+.x-step::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--line); }
+.x-step::after { content: ""; position: absolute; top: 0; left: 0; height: 3px; width: 100%; background: var(--red); transform: scaleX(0); transform-origin: left; transition: transform 1.1s cubic-bezier(.2,.7,.2,1); }
+.rv-in .x-step::after, .x-steps:not(.rv-wait) .x-step::after { transform: scaleX(1); }
+.x-step:nth-child(2)::after { transition-delay: .35s; } .x-step:nth-child(3)::after { transition-delay: .7s; } .x-step:nth-child(4)::after { transition-delay: 1.05s; }
+.x-step-n { font-family: var(--f-head); font-size: 56px; line-height: 1; color: var(--red); font-weight: 600; }
+.x-step h3 { font-size: 22px; margin-top: 8px; }
+.x-step p { margin: 8px 0 0; color: var(--muted); font-size: 15px; }
+
+/* ---------- маршруты ---------- */
+.x-map { background: #fff; border-radius: 4px; padding: 16px 20px; margin-bottom: 20px; }
+.x-map svg { display: block; width: 100%; height: auto; }
+.x-path { stroke-dasharray: 6 8; animation: x-dash 1.2s linear infinite; }
+@keyframes x-dash { to { stroke-dashoffset: -28; } }
+.x-ship { animation: x-sail 8s ease-in-out infinite; }
+@keyframes x-sail { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(160px); } }
+.x-routes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 20px; }
+.x-route { border: 1px solid var(--line); border-radius: 4px; padding: 24px; background: #fff; transition: transform .3s, box-shadow .3s; }
+.x-route:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0,0,0,.1); }
+.x-route h3 { font-size: 26px; }
+.x-route p { margin: 10px 0 0; color: var(--muted); font-size: 15px; }
+
+/* ---------- красная полоса-призыв ---------- */
+.x-cta { background: var(--red); color: #fff; padding-block: 60px; }
+.x-cta .wrap { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
+.x-cta h2 { font-size: clamp(30px, 3.4vw, 44px); }
+.x-cta p { margin: 8px 0 0; color: #f3d6d7; font-size: 17px; max-width: 60ch; }
+
+/* ---------- подвал ---------- */
+footer { background: #0e0e0e; margin-top: 0; }
+.legal { background: #070707; }
+
+@media (max-width: 520px) {
+  .x-hero-in { padding-block: 40px 48px; gap: 32px; }
+  .x-sec { padding-block: 52px; }
+  .x-live-bid { font-size: 26px; } .x-live-timer { font-size: 19px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .x-rise, .x-cards .card, .rv-wait { opacity: 1 !important; transform: none !important; }
+  .x-bar, .x-step::after { transform: none !important; }
+}

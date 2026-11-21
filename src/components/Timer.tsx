@@ -32,6 +32,17 @@ export function CardTimer({ at, active }: { at: string; active: boolean }) {
   );
 }
 
+/** Компактный отсчёт «2 д 04:12:09» — для живого лота на главной. */
+export function LiveCountdown({ at, className }: { at: string; className?: string }) {
+  const now = useNow(1000);
+  if (now === null) return <div className={className}>--:--:--</div>;
+  const left = Math.max(0, new Date(at).getTime() - now);
+  if (left === 0) return <div className={className}>идут</div>;
+  const p = (n: number) => String(n).padStart(2, "0");
+  const d = Math.floor(left / DAY), h = Math.floor((left % DAY) / 3_600_000), m = Math.floor((left % 3_600_000) / 60_000), s = Math.floor((left % 60_000) / 1000);
+  return <div className={className}>{d > 0 ? `${d} д ` : ""}{p(h)}:{p(m)}:{p(s)}</div>;
+}
+
 export function BigCountdown({ at }: { at: string }) {
   const now = useNow(1000);
   if (now === null) return <div className="countdown"><b>--:--:--</b><span>до начала торгов</span></div>;
