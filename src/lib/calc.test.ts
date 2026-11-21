@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { DEFAULT_TARIFFS } from "./tariffs";
 import { ageAtCustoms, calcRoutes, calcTurnkey, cheapest, isPassable } from "./calc";
 import { DEFAULT_TARIFFS as T } from "./tariffs";
 
@@ -56,16 +57,30 @@ describe("ageAtCustoms", () => {
   });
 });
 
-describe("маршруты Клайпеда / Поти", () => {
+describe("маршруты Клайпеда / Поти по прайсу Lion Trans", () => {
   const car = { price: 14800, auction: "Copart", state: "NJ", fuel: "Бензин", cc: 2487, hp: 203 };
-  it("Поти считается по своим тарифам и подписям", () => {
-    const r = calcRoutes(car, "by");
-    expect(r.klaipeda.lines[3].usd).toBe(1350);
-    expect(r.poti.lines[3].usd).toBe(1500);
-    expect(r.poti.lines[4].label).toBe("Поти → Минск");
-    expect(r.klaipeda.lines[4].label).toBe("Клайпеда → Минск");
+  const T = { ...DEFAULT_TARIFFS, eurUsd: 1.1 };
+  it("седан из NJ: море по прайсу, порт и автовоз", () => {
+    const r = calcRoutes({ ...car, size: "sedan" as const }, "by", T);
+    expect(r.klaipeda.lines[2].usd).toBe(750);
+    expect(r.klaipeda.lines[3].usd).toBeCloseTo((310 + 15) * 1.1 + 100);
+    expect(r.klaipeda.lines[4].usd).toBeCloseTo(650 * 1.1);
+    expect(r.poti.lines[2].usd).toBe(850);
+    expect(r.poti.lines[3].usd).toBe(300);
+    expect(r.poti.lines[4].usd).toBe(2150);
     expect(r.poti.routeName).toBe("Поти");
-    expect(r.poti.days).toMatch(/75/);
+  });
+  it("класс машины определяется по модели, большой SUV дороже", () => {
+    const x5 = calcRoutes({ ...car, body: "suv", make: "BMW", model: "X5" }, "by", T);
+    const x7 = calcRoutes({ ...car, body: "suv", make: "BMW", model: "X7" }, "by", T);
+    expect(x5.poti.lines[2].usd).toBe(950);
+    expect(x7.poti.lines[2].usd).toBe(1150);
+    expect(x7.poti.lines[4].usd).toBe(2350);
+    expect(x7.klaipeda.lines[2].usd).toBe(750 + 200);
+  });
+  it("гибрид: +150 за погрузку; Иллинойс берёт свою зону", () => {
+    expect(calcTurnkey({ ...car, fuel: "Гибрид", size: "suv" }, "by", T, "poti").lines[2].usd).toBe(950 + 150);
+    expect(calcTurnkey({ ...car, state: "MI", size: "sedan" }, "by", T).lines[2].usd).toBe(1000);
   });
   it("cheapest берёт дешёвый маршрут", () => {
     const r = calcRoutes(car, "ru");

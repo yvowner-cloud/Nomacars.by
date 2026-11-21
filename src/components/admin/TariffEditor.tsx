@@ -16,19 +16,23 @@ export interface TariffState { tariffs: EditableTariffs; fx: Fx; rates: Rates; h
 
 const LAST = Number.MAX_SAFE_INTEGER;
 const LABELS: Record<string, string> = {
-  service: "услуги компании", ocean: "морской фрахт", landBy: "доставка до Минска", landRu: "доставка до Москвы",
+  service: "услуги компании", sea: "доставка по США и море", klBigExtra: "надбавка за большой SUV (Клайпеда)",
+  landKlByEur: "Клайпеда → Минск", loadKlEur: "погрузка в Клайпеде", fwdKlEur: "экспедирование Клайпеда", landRu: "Клайпеда → Москва",
+  landPotiBy: "Поти → Минск", landPotiByBig: "Поти → Минск (большой SUV)", landPotiRu: "Поти → Москва", fwdPoti: "экспедирование Поти",
+  logistService: "услуга логиста", evLoad: "погрузка гибрида/электро",
+  daysKlaipedaBy: "срок Клайпеда РБ", daysKlaipedaRu: "срок Клайпеда РФ", daysPotiBy: "срок Поти РБ", daysPotiRu: "срок Поти РФ",
   brokerBy: "брокер РБ", brokerRu: "брокер РФ", utilBy: "утильсбор РБ", utilRuLow: "утильсбор РФ до 160 л.с.",
   utilRuHigh: "утильсбор РФ свыше 160 л.с.", evRuPct: "пошлина на электро РФ", deliveryDays: "срок до растаможки",
-  inland: "доставка по США", fees: "сбор аукциона", ccRates: "ставки пошлины",
+  fees: "сбор аукциона", ccRates: "ставки пошлины",
   "manual.byn": "курс $→BYN", "manual.rub": "курс $→₽", "manual.eurUsd": "курс €→$",
 };
-const SAMPLE = { price: 14800, auction: "Copart", state: "NJ", fuel: "Бензин", cc: 2487, hp: 203 };
+const SAMPLE = { price: 14800, auction: "Copart", state: "NJ", fuel: "Бензин", cc: 2487, hp: 203, size: "suv" as const };
 
 type Draft = Record<string, string>;
 const toDraft = (t: EditableTariffs) => {
   const d: Record<string, string> = {};
   for (const [k, v] of Object.entries(t)) if (typeof v === "number") d[k] = String(v);
-  for (const [k, v] of Object.entries(t.inland)) d[`inland.${k}`] = String(v);
+  for (const [k, v] of Object.entries(t.sea)) d[`sea.${k}`] = String(v);
   return d as Draft;
 };
 const rowsOf = (r: [number, number][]) => r.map(([a, b]) => [a >= LAST ? "" : String(a), String(b)]);
@@ -51,12 +55,12 @@ export function TariffEditor({ initial, readOnly }: { initial: TariffState; read
 
   const payload = () => {
     const t: Record<string, unknown> = {};
-    const inland: Record<string, string> = {};
+    const sea: Record<string, string> = {};
     for (const [k, v] of Object.entries(d)) {
-      if (k.startsWith("inland.")) inland[k.slice(7)] = v;
+      if (k.startsWith("sea.")) sea[k.slice(4)] = v.replace(",", ".");
       else t[k] = v;
     }
-    t.inland = inland;
+    t.sea = sea;
     t.fees = fees.map(([a, b]) => [a === "" ? LAST : Number(a.replace(",", ".")), Number(b.replace(",", "."))]);
     t.ccRates = cc.map(([a, b]) => [a === "" ? LAST : Number(a.replace(",", ".")), Number(b.replace(",", "."))]);
     for (const k of Object.keys(t)) if (typeof t[k] === "string") t[k] = (t[k] as string).replace(",", ".");
@@ -74,8 +78,8 @@ export function TariffEditor({ initial, readOnly }: { initial: TariffState; read
       const rate = (k: "byn" | "rub" | "eurUsd") => (manual[k] ? Number(manual[k].replace(",", ".")) : st.rates[k]);
       const T: Tariffs = {
         ...st.tariffs,
-        ...Object.fromEntries(Object.entries(p).filter(([k]) => !["inland", "fees", "ccRates"].includes(k)).map(([k, v]) => [k, num(v)])),
-        inland: Object.fromEntries(Object.entries(p.inland).map(([k, v]) => [k, num(v)])),
+        ...Object.fromEntries(Object.entries(p).filter(([k]) => !["sea", "fees", "ccRates"].includes(k)).map(([k, v]) => [k, num(v)])),
+        sea: Object.fromEntries(Object.entries(p.sea).map(([k, v]) => [k, num(v)])),
         fees: p.fees, ccRates: p.ccRates, byn: rate("byn"), rub: rate("rub"), eurUsd: rate("eurUsd"),
       } as Tariffs;
       const by = calcTurnkey(SAMPLE, "by", T), ru = calcTurnkey(SAMPLE, "ru", T);
@@ -193,19 +197,56 @@ export function TariffEditor({ initial, readOnly }: { initial: TariffState; read
       </div>
 
       <div className="panel">
-        <div className="panel-h">Логистика</div>
+        <div className="panel-h">Логистика: доставка со стоянки аукциона и море, $</div>
+        <div className="box">
+          <p className="note" style={{ margin: 0 }}>По прайсу логиста: штат стоянки × класс машины. Класс определяется сам: седан, SUV (как BMW X5) или большой SUV (BMW X7, Audi Q7, Ford Explorer). В Клайпеду большой SUV = седан + надбавка.</p>
+          <div className="tbl-wrap"><table>
+            <thead><tr><th>Штат</th><th className="r">Клайпеда<br />седан</th><th className="r">Клайпеда<br />SUV</th><th className="r">Поти<br />седан</th><th className="r">Поти<br />SUV</th><th className="r">Поти<br />большой SUV</th></tr></thead>
+            <tbody>{Object.entries(US_STATES).map(([z, v]) => (
+              <tr key={z}>
+                <td>{v.name}</td>
+                {["kl." + z + ".sedan", "kl." + z + ".suv", "poti." + z + ".sedan", "poti." + z + ".suv", "poti." + z + ".big"].map((k) => (
+                  <td className="r" key={k}><input className="field num" style={{ width: 84, textAlign: "right" }} inputMode="decimal" aria-label={k} value={d[`sea.${k}`] ?? ""} disabled={readOnly}
+                    onChange={(e) => setD((x) => ({ ...x, [`sea.${k}`]: e.target.value }) as Draft)} /></td>
+                ))}
+              </tr>
+            ))}</tbody>
+          </table></div>
+          <p className="note" style={{ margin: 0 }}>Иллинойс — все штаты Среднего Запада (Мичиган, Висконсин, Огайо…). В прайсе Lion Trans их нет, стоит оценка — уточните у логиста. Машины из Флориды логист отправляет через порт Джорджии.</p>
+        </div>
+      </div>
+
+      <div className="two">
+        <div className="panel">
+          <div className="panel-h">Через Клайпеду</div>
+          <div className="box t-grid">
+            {num("klBigExtra", "Надбавка за большой SUV", "$")}
+            {num("fwdKlEur", "Экспедирование", "€")}
+            {num("loadKlEur", "Погрузка на автовоз", "€")}
+            {num("landKlByEur", "Клайпеда → Минск", "€")}
+            {num("landRu", "Клайпеда → Москва", "$")}
+            {num("daysKlaipedaBy", "Срок до РБ", "дней")}
+            {num("daysKlaipedaRu", "Срок до РФ", "дней")}
+          </div>
+        </div>
+        <div className="panel">
+          <div className="panel-h">Через Поти</div>
+          <div className="box t-grid">
+            {num("fwdPoti", "Экспедирование, портовые сборы", "$")}
+            {num("landPotiBy", "Поти → Минск (седан, SUV)", "$")}
+            {num("landPotiByBig", "Поти → Минск (большой SUV)", "$")}
+            {num("landPotiRu", "Поти → Москва", "$")}
+            {num("daysPotiBy", "Срок до РБ", "дней")}
+            {num("daysPotiRu", "Срок до РФ", "дней")}
+          </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-h">Общее для обоих маршрутов</div>
         <div className="box t-grid">
-          {Object.entries(US_STATES).map(([k, v]) => num(`inland.${k}`, `${v.name} → ${v.port}`, "$"))}
-          {num("ocean", "Морской фрахт до Клайпеды", "$")}
-          {num("landBy", "Клайпеда → Минск", "$")}
-          {num("landRu", "Клайпеда → Москва", "$")}
-          {num("oceanPoti", "Морской фрахт до Поти", "$")}
-          {num("landPotiBy", "Поти → Минск", "$")}
-          {num("landPotiRu", "Поти → Москва", "$")}
-          {num("daysKlaipedaBy", "Срок через Клайпеду в РБ", "дней")}
-          {num("daysKlaipedaRu", "Срок через Клайпеду в РФ", "дней")}
-          {num("daysPotiBy", "Срок через Поти в РБ", "дней")}
-          {num("daysPotiRu", "Срок через Поти в РФ", "дней")}
+          {num("logistService", "Услуга логиста", "$")}
+          {num("evLoad", "Погрузка гибрида/электро", "$")}
           {num("brokerBy", "Брокер, СВХ, оформление РБ", "$")}
           {num("brokerRu", "Брокер, СВХ, оформление РФ", "$")}
         </div>

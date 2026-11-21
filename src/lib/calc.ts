@@ -1,4 +1,5 @@
-import type { CalcInput, CalcResult, Country, Route, Tariffs } from "./types";
+import type { CalcInput, CalcResult, Country, Route, Tariffs, VehicleSize } from "./types";
+import { SIZE_NAME, vehicleSize } from "./vehicle-size";
 import { DEFAULT_TARIFFS } from "./tariffs";
 import { stateInfo } from "./geo";
 
@@ -27,12 +28,22 @@ export function calcTurnkey(i: CalcInput, country: Country, T: Tariffs = DEFAULT
   const hp = Math.max(0, Number(i.hp) || 0);
   const fee = pick(T.fees, price);
   const zone = stateInfo(String(i.state)).zone;
-  const inland = T.inland[String(i.state).toUpperCase()] ?? T.inland[zone] ?? 450;
   const poti = route === "poti";
-  const ocean = poti ? T.oceanPoti : T.ocean;
-  const land = poti ? (country === "by" ? T.landPotiBy : T.landPotiRu) : (country === "by" ? T.landBy : T.landRu);
+  const size: VehicleSize = i.size ?? vehicleSize(i.body, i.make, i.model);
+  const ev = i.fuel === "Гибрид" || i.fuel === "Электро";
+  // Доставка со стоянки + море по прайсу логиста (зона штата × класс машины)
+  const seaOf = (z: string) => poti
+    ? T.sea[`poti.${z}.${size}`]
+    : (T.sea[`kl.${z}.${size === "big" ? "sedan" : size}`] ?? NaN) + (size === "big" ? T.klBigExtra : 0);
+  const seaBase = [seaOf(zone), seaOf("NJ")].find((v) => Number.isFinite(v)) ?? 0;
+  const sea = seaBase + (ev ? T.evLoad : 0);
+  // Порт: экспедирование, погрузка, портовые сборы + услуга логиста
+  const port = (poti ? T.fwdPoti : (T.fwdKlEur + T.loadKlEur) * T.eurUsd) + T.logistService;
+  const land = poti
+    ? (country === "by" ? (size === "big" ? T.landPotiByBig : T.landPotiBy) : T.landPotiRu)
+    : (country === "by" ? T.landKlByEur * T.eurUsd : T.landRu);
   const days = poti ? (country === "by" ? T.daysPotiBy : T.daysPotiRu) : (country === "by" ? T.daysKlaipedaBy : T.daysKlaipedaRu);
-  const customsValue = price + fee + inland + ocean;
+  const customsValue = price + fee + sea;
 
   let duty: number;
   let dutyNote: string;
@@ -69,9 +80,9 @@ export function calcTurnkey(i: CalcInput, country: Country, T: Tariffs = DEFAULT
   const lines = [
     { label: "Ставка на аукционе", usd: price, note: i.auction || "Copart / IAAI / Manheim" },
     { label: "Сбор аукциона", usd: fee, note: "по шкале от цены лота" },
-    { label: "Доставка по США", usd: inland, note: `${st.name} → порт ${st.port}` },
-    { label: "Морской фрахт", usd: ocean, note: `контейнер ${ROUTE_PORT[route]}` },
-    { label: `${ROUTE_NAME[route]} → ${country === "by" ? "Минск" : "Москва"}`, usd: land, note: "автовоз" },
+    { label: "Доставка по США и море", usd: sea, note: `${st.name} → ${ROUTE_PORT[route]}, ${SIZE_NAME[size]}${ev ? ", погрузка гибрида/электро" : ""}` },
+    { label: "Порт и экспедирование", usd: port, note: poti ? "экспедирование, портовые сборы, услуга логиста" : "экспедирование, погрузка на автовоз, услуга логиста" },
+    { label: `Автовоз до: ${country === "by" ? "Минск" : "Москва"}`, usd: land, note: `из порта ${ROUTE_NAME[route] === "Поти" ? "Поти" : "Клайпеда"}` },
     { label: "Таможенная пошлина", usd: duty, note: dutyNote },
     { label: "Утилизационный сбор", usd: util, note: utilNote },
     { label: "Брокер, СВХ, оформление", usd: broker, note: country === "by" ? "таможня РБ" : "таможня РФ" },

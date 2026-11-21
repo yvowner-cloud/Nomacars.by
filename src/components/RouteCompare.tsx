@@ -10,7 +10,8 @@ export function RouteCompare({ r, country }: { r: Record<Route, CalcResult>; cou
   const cheaper: Route | null = Math.round(k.total) === Math.round(p.total) ? null : k.total < p.total ? "klaipeda" : "poti";
   const city = country === "by" ? "Минск" : "Москва";
   const label = (i: number, l: string) => (i === 4 ? `Автовоз до: ${city}` : l);
-  const note = (i: number, n: string) => (i === 3 ? "контейнер до порта" : i === 4 ? "из порта" : n);
+  const note = (i: number, n: string) =>
+    i === 2 ? n.replace(/ → до (Клайпеды|Поти) \([^)]*\)/, " → порт") : i === 3 ? "экспедирование, портовые сборы, услуга логиста" : i === 4 ? "из порта" : n;
 
   return (
     <div className="route-compare">

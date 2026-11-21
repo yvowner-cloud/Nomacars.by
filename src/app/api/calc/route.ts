@@ -16,6 +16,7 @@ export const POST = api(async (req) => {
     fuel: String(i.fuel || "Бензин").slice(0, 20),
     cc: Math.min(Math.max(Number(i.cc) || 0, 0), 10_000),
     hp: Math.min(Math.max(Number(i.hp) || 0, 0), 2_000),
+    size: i.size === "suv" || i.size === "big" ? i.size : "sedan",
   };
   const country: Country = b.country === "ru" ? "ru" : "by";
   const T = await getTariffs();

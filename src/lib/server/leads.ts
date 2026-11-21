@@ -55,6 +55,7 @@ export async function createLead(user: User, country: Country, input: NewLead): 
     const ci: CalcInput = {
       price: Math.min(Math.max(Number(i.price) || 0, 0), 1_000_000), auction: clip(i.auction || "Copart", 20), state: clip(i.state || "NJ", 4),
       fuel: clip(i.fuel || "Бензин", 20), cc: Math.min(Math.max(Number(i.cc) || 0, 0), 10_000), hp: Math.min(Math.max(Number(i.hp) || 0, 0), 2_000),
+      size: i.size === "suv" || i.size === "big" ? i.size : "sedan",
     };
     calc = { input: ci, result: calcTurnkey(ci, country, T), poti: calcTurnkey(ci, country, T, "poti") };
   } else if (input.kind !== "pick") {

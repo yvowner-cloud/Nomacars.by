@@ -5,7 +5,7 @@ import { useApp } from "./Providers";
 import { ageAtCustoms, DELIVERY_DAYS } from "@/lib/age";
 import { US_STATES } from "@/lib/geo";
 import { fmt, money } from "@/lib/format";
-import type { CalcResult, Route } from "@/lib/types";
+import type { CalcResult, Route, VehicleSize } from "@/lib/types";
 import { RouteCompare } from "./RouteCompare";
 import { ExactCalcButton } from "./LeadForms";
 
@@ -18,6 +18,7 @@ export function CalcForm() {
   const [fuel, setFuel] = useState("Бензин");
   const [cc, setCc] = useState("2487");
   const [hp, setHp] = useState("203");
+  const [size, setSize] = useState("suv");
   const [date, setDate] = useState("2022-06");
   const [res, setRes] = useState<{ routes: Record<Route, CalcResult>; rates: { byn: number; rub: number; eurUsd: number } } | null>(null);
   const [err, setErr] = useState("");
@@ -34,7 +35,7 @@ export function CalcForm() {
       try {
         const r = await fetch("/api/calc", {
           method: "POST", headers: { "Content-Type": "application/json" }, signal: ctrl.signal,
-          body: JSON.stringify({ input: { price, auction, state, fuel, cc, hp }, country }),
+          body: JSON.stringify({ input: { price, auction, state, fuel, cc, hp, size }, country }),
         });
         const j = await r.json();
         if (!r.ok) throw new Error(j.error || "Не удалось посчитать");
@@ -45,7 +46,7 @@ export function CalcForm() {
       setLoading(false);
     }, 300);
     return () => { clearTimeout(t); ctrl.abort(); };
-  }, [user, price, auction, state, fuel, cc, hp, country]);
+  }, [user, price, auction, state, fuel, cc, hp, size, country]);
 
   const c = res?.routes;
 
@@ -63,6 +64,7 @@ export function CalcForm() {
               ["Ставка на аукционе, $", <input key="p" className="field num" id="c-price" type="number" step={100} value={price} onChange={(e) => setPrice(e.target.value)} />],
               ["Аукцион", <select key="a" className="field" id="c-auction" value={auction} onChange={(e) => setAuction(e.target.value)}><option>Copart</option><option>IAAI</option><option>Manheim</option></select>],
               ["Площадка (штат)", <select key="s" className="field" id="c-state" value={state} onChange={(e) => setState(e.target.value)}>{Object.entries(US_STATES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}</select>],
+              ["Тип кузова", <select key="b" className="field" id="c-size" value={size} onChange={(e) => setSize(e.target.value)}><option value="sedan">Седан, купе, хэтчбек</option><option value="suv">Кроссовер / SUV (как BMW X5)</option><option value="big">Большой SUV (BMW X7, Audi Q7, Explorer)</option></select>],
               ["Топливо", <select key="f" className="field" id="c-fuel" value={fuel} onChange={(e) => setFuel(e.target.value)}><option>Бензин</option><option>Дизель</option><option>Гибрид</option><option>Электро</option></select>],
               ["Объём двигателя, см³", <input key="c" className="field num" id="c-cc" type="number" value={cc} onChange={(e) => setCc(e.target.value)} />],
               ["Мощность, л.с.", <input key="h" className="field num" id="c-hp" type="number" value={hp} onChange={(e) => setHp(e.target.value)} />],
@@ -97,7 +99,7 @@ export function CalcForm() {
               <div style={{ opacity: loading ? 0.6 : 1, transition: "opacity .15s" }}>
                 <RouteCompare r={c} country={country} />
               </div>
-              <ExactCalcButton input={{ price: Number(price), auction, state, fuel, cc: Number(cc), hp: Number(hp) }} />
+              <ExactCalcButton input={{ price: Number(price), auction, state, fuel, cc: Number(cc), hp: Number(hp), size: size as VehicleSize }} />
               {res && <p className="note" style={{ margin: 0 }}>Курс: 1 $ = {res.rates.byn} BYN / {res.rates.rub} ₽, 1 € = {res.rates.eurUsd} $. Ставки демонстрационные.</p>}
             </>
           )}

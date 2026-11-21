@@ -5,15 +5,21 @@ import { DEFAULT_TARIFFS } from "./tariffs";
 export type EditableTariffs = Omit<Tariffs, "rub" | "byn" | "eurUsd">;
 
 export const LAST = Number.MAX_SAFE_INTEGER; // «и выше» в таблицах
+export const SEA_KEY = /^(kl\.[A-Z]{2}\.(sedan|suv)|poti\.[A-Z]{2}\.(sedan|suv|big))$/;
 
 const SCALARS: { key: keyof EditableTariffs; label: string; min: number; max: number }[] = [
   { key: "service", label: "Услуги компании", min: 0, max: 100_000 },
-  { key: "ocean", label: "Морской фрахт", min: 0, max: 50_000 },
-  { key: "landBy", label: "Клайпеда → Минск", min: 0, max: 20_000 },
+  { key: "klBigExtra", label: "Клайпеда: надбавка за большой SUV", min: 0, max: 20_000 },
+  { key: "landKlByEur", label: "Клайпеда → Минск, €", min: 0, max: 20_000 },
+  { key: "loadKlEur", label: "Клайпеда: погрузка на автовоз, €", min: 0, max: 5_000 },
+  { key: "fwdKlEur", label: "Клайпеда: экспедирование, €", min: 0, max: 5_000 },
   { key: "landRu", label: "Клайпеда → Москва", min: 0, max: 20_000 },
-  { key: "oceanPoti", label: "Морской фрахт до Поти", min: 0, max: 50_000 },
-  { key: "landPotiBy", label: "Поти → Минск", min: 0, max: 20_000 },
+  { key: "landPotiBy", label: "Поти → Минск (седан, SUV)", min: 0, max: 20_000 },
+  { key: "landPotiByBig", label: "Поти → Минск (большой SUV)", min: 0, max: 20_000 },
   { key: "landPotiRu", label: "Поти → Москва", min: 0, max: 20_000 },
+  { key: "fwdPoti", label: "Поти: экспедирование и портовые сборы", min: 0, max: 5_000 },
+  { key: "logistService", label: "Услуга логиста", min: 0, max: 5_000 },
+  { key: "evLoad", label: "Погрузка гибрида/электро", min: 0, max: 5_000 },
   { key: "daysKlaipedaBy", label: "Срок через Клайпеду в РБ, дней", min: 10, max: 365 },
   { key: "daysKlaipedaRu", label: "Срок через Клайпеду в РФ, дней", min: 10, max: 365 },
   { key: "daysPotiBy", label: "Срок через Поти в РБ, дней", min: 10, max: 365 },
@@ -56,15 +62,15 @@ export function validateTariffs(input: Partial<EditableTariffs>, current: Editab
     if (!Number.isFinite(n) || n < s.min || n > s.max) errors.push(`${s.label}: введите число от ${s.min} до ${s.max.toLocaleString("ru-RU")}`);
     else (v as unknown as Record<string, number>)[s.key] = s.key === "deliveryDays" ? Math.round(n) : n;
   }
-  if (input.inland !== undefined) {
-    const inl: Record<string, number> = {};
-    for (const [k, raw] of Object.entries(input.inland || {})) {
+  if (input.sea !== undefined) {
+    const sea: Record<string, number> = {};
+    for (const [k, raw] of Object.entries(input.sea || {})) {
       const n = Number(raw);
-      if (!/^[A-Z]{2}$/.test(k)) continue;
-      if (!Number.isFinite(n) || n < 0 || n > 20_000) errors.push(`Доставка по США (${k}): число от 0 до 20 000`);
-      else inl[k] = n;
+      if (!SEA_KEY.test(k)) continue;
+      if (!Number.isFinite(n) || n < 0 || n > 20_000) errors.push(`Доставка и море (${k}): число от 0 до 20 000`);
+      else sea[k] = n;
     }
-    v.inland = { ...current.inland, ...inl };
+    v.sea = { ...current.sea, ...sea };
   }
   if (input.fees !== undefined) v.fees = table("Сбор аукциона", input.fees, 50_000, errors);
   if (input.ccRates !== undefined) v.ccRates = table("Пошлина €/см³", input.ccRates, 100, errors);

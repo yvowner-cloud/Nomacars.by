@@ -65,7 +65,15 @@ export interface CalcInput {
   fuel: Fuel | string;
   cc: number;
   hp: number;
+  /** Размер для тарифа доставки; если не указан — определяется по кузову и модели */
+  size?: VehicleSize;
+  body?: string;
+  make?: string;
+  model?: string;
 }
+
+/** Класс машины в прайсе логиста: седан, SUV (BMW X5), большой SUV (BMW X7, Audi Q7, Ford Explorer). */
+export type VehicleSize = "sedan" | "suv" | "big";
 
 export interface CalcLine {
   label: string;
@@ -88,13 +96,30 @@ export interface CalcResult {
 
 export interface Tariffs {
   service: number;
-  ocean: number;
-  landBy: number;
+  /**
+   * Доставка со стоянки аукциона + море, $ — по прайсу логиста (Lion Trans).
+   * Ключи: "kl.NJ.sedan", "kl.NJ.suv", "poti.NJ.sedan", "poti.NJ.suv", "poti.NJ.big" — для зон NJ, GA, FL, TX, CA, IL.
+   */
+  sea: Record<string, number>;
+  /** Клайпеда: большой SUV = седан + надбавка, $ */
+  klBigExtra: number;
+  /** Клайпеда → Минск, погрузка на автовоз, экспедирование — в евро */
+  landKlByEur: number;
+  loadKlEur: number;
+  fwdKlEur: number;
+  /** Клайпеда → Москва, $ */
   landRu: number;
-  /** Маршрут через Поти (Грузия) */
-  oceanPoti: number;
+  /** Поти → Минск, $ (седан/SUV и большой SUV) */
   landPotiBy: number;
+  landPotiByBig: number;
+  /** Поти → Москва, $ */
   landPotiRu: number;
+  /** Поти: экспедирование и портовые сборы (THC), $ */
+  fwdPoti: number;
+  /** Услуга логиста за машину, $ */
+  logistService: number;
+  /** Погрузка гибрида/электромобиля, $ */
+  evLoad: number;
   /** Срок в пути от торгов до получения, дней — по маршрутам и странам */
   daysKlaipedaBy: number;
   daysKlaipedaRu: number;
@@ -102,7 +127,6 @@ export interface Tariffs {
   daysPotiRu: number;
   brokerBy: number;
   brokerRu: number;
-  inland: Record<string, number>;
   /** [цена лота до, сбор] */
   fees: [number, number][];
   /** [объём до см³, €/см³] — авто 3–5 лет */

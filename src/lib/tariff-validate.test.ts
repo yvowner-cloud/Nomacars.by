@@ -4,12 +4,12 @@ import { DEFAULT_TARIFFS } from "./tariffs";
 
 describe("validateTariffs", () => {
   it("принимает корректные изменения", () => {
-    const r = validateTariffs({ service: 800, ocean: 1400 });
+    const r = validateTariffs({ service: 800, fwdPoti: 250 });
     expect(r.ok).toBe(true);
-    if (r.ok) { expect(r.value.service).toBe(800); expect(r.value.landBy).toBe(DEFAULT_TARIFFS.landBy); }
+    if (r.ok) { expect(r.value.service).toBe(800); expect(r.value.landKlByEur).toBe(DEFAULT_TARIFFS.landKlByEur); }
   });
   it("отклоняет отрицательные и нечисловые значения", () => {
-    const r = validateTariffs({ service: -1, ocean: Number("abc") as number });
+    const r = validateTariffs({ service: -1, fwdPoti: Number("abc") as number });
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.errors).toHaveLength(2);
   });
@@ -28,8 +28,8 @@ describe("validateTariffs", () => {
     expect(r.ok && r.value.deliveryDays).toBe(80);
   });
   it("доставка по штатам дополняет, а не затирает", () => {
-    const r = validateTariffs({ inland: { NJ: 350 } });
-    expect(r.ok && r.value.inland).toEqual({ ...DEFAULT_TARIFFS.inland, NJ: 350 });
+    const r = validateTariffs({ sea: { "kl.NJ.sedan": 800, "bad.key": 5 } });
+    expect(r.ok && r.value.sea).toEqual({ ...DEFAULT_TARIFFS.sea, "kl.NJ.sedan": 800 });
   });
   it("находит изменённые поля", () => {
     const r = validateTariffs({ service: 900 });

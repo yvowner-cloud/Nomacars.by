@@ -44,7 +44,7 @@ export async function editableTariffs(): Promise<EditableTariffs> {
   const { rub, byn, eurUsd, ...defaults } = DEFAULT_TARIFFS;
   if (!dbConfigured()) return defaults;
   const stored = await read<Partial<EditableTariffs>>("tariffs");
-  return { ...defaults, ...(stored || {}), inland: { ...defaults.inland, ...(stored?.inland || {}) } };
+  return { ...defaults, ...(stored || {}), sea: { ...defaults.sea, ...(stored?.sea || {}) } };
 }
 
 export async function fxState(): Promise<FxState> {

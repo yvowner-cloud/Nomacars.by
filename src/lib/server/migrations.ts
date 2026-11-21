@@ -203,6 +203,15 @@ const MIGRATIONS: { version: number; name: string; sql: string }[] = [
       ${MODEL_SEED.map((m) => `(${sqlStr(m.make)}, ${sqlStr(m.model)}, '${m.tier}', ${TIER_TARGET[m.tier]})`).join(",\n      ")};
     `,
   },
+  {
+    version: 8,
+    name: "логистика по прайсу Lion Trans: старые демо-поля доставки убраны из сохранённых тарифов",
+    sql: `
+      update settings
+         set value = value - 'ocean' - 'landBy' - 'inland' - 'oceanPoti' - 'landPotiBy', updated_at = now()
+       where key = 'tariffs';
+    `,
+  },
 ];
 
 export async function migrate(): Promise<void> {
