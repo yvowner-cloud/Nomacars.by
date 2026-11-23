@@ -59,7 +59,7 @@
 @keyframes x-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 .x-live { display: block; background: #fff; color: var(--ink); border-radius: 6px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,.5); text-decoration: none; }
 .x-live:hover { color: var(--ink); }
-.x-live .ph { aspect-ratio: 16 / 9.5; overflow: hidden; }
+.x-live .ph { aspect-ratio: 4 / 3; overflow: hidden; }
 .x-live .ph img { transition: transform .8s cubic-bezier(.2,.7,.2,1); }
 .x-live:hover .ph img { transform: scale(1.05); }
 .x-live-body { padding: 18px 20px; display: grid; gap: 12px; }
@@ -106,7 +106,16 @@
 .grid { gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
 .card { background: #fff; border-radius: 4px; overflow: hidden; transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s, border-color .3s; }
 .card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(0,0,0,.14); border-color: #bdbdbd; background: #fff; }
-.card .ph { overflow: hidden; }
+/* фото аукционов — 4:3; так карточка не обрезает машину сверху и снизу */
+.card .ph { overflow: hidden; aspect-ratio: 4 / 3; }
+/* пока фото грузится — мягко «дышащая» подложка вместо пустого серого прямоугольника */
+.ph, .gal-main, .thumbs button, .lrow .thumb { background-color: var(--yard1); }
+.ph:has(.lot-img:not(.is-loaded)), .gal-main:has(.lot-img:not(.is-loaded)) {
+  background-image: linear-gradient(100deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 70%);
+  background-size: 220% 100%; animation: x-shimmer 1.4s linear infinite;
+}
+@keyframes x-shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+.lot-img { object-position: center 55%; color: transparent; } /* alt-текст не вылезает поверх подложки, пока фото грузится */
 .card .ph img { transition: transform .7s cubic-bezier(.2,.7,.2,1); }
 .card:hover .ph img { transform: scale(1.06); }
 /* появление — через translate, чтобы не мешать transform при наведении */
